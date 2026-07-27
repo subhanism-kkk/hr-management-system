@@ -1,4 +1,4 @@
-package az.ingress.hrms.dto;
+package az.ingress.hrms.dto.personContactInfo;
 
 import lombok.*;
 
@@ -9,11 +9,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PersonAddressInfoResponse {
-
+public class PersonContactInfoResponse {
     private Integer id;
     private Integer personId;
-    private String address;
+    private Integer contactTypeId;
+    private String contactValue;
+    private Boolean isPrimary;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

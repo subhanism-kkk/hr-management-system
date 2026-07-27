@@ -1,0 +1,30 @@
+package az.ingress.hrms.repository;
+
+import az.ingress.hrms.entity.lookup.ContactType;
+import az.ingress.hrms.entity.person.Person;
+import az.ingress.hrms.entity.person.PersonContactInfo;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface PersonContactInfoRepository
+        extends JpaRepository<PersonContactInfo, Integer> {
+
+    List<PersonContactInfo> findByPerson(Person person);
+
+    List<PersonContactInfo> findByPersonId(Integer personId);
+
+    Optional<PersonContactInfo> findByPersonAndIsPrimaryTrue(Person person);
+
+    boolean existsByPersonAndContactTypeAndContactValueIgnoreCase(
+            Person person,
+            ContactType contactType,
+            String contactValue
+    );
+
+    @Query(value = " SELECT * FROM Person_Contact_Info WHERE id = :id", nativeQuery = true)
+    Optional<PersonContactInfo> findByIdWithDeleted(Integer id);
+
+}

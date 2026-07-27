@@ -36,4 +36,12 @@ public class Person extends SoftDeleteEntity {
             fetch = FetchType.LAZY
     )
     private List<PersonAddressInfo> addresses = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "person",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<PersonContactInfo> contacts = new ArrayList<>();
 }

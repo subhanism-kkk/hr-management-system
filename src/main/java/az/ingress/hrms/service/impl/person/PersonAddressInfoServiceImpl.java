@@ -1,8 +1,8 @@
 package az.ingress.hrms.service.impl.person;
 
-import az.ingress.hrms.dto.PersonAddressInfoCreateRequest;
-import az.ingress.hrms.dto.PersonAddressInfoResponse;
-import az.ingress.hrms.dto.PersonAddressInfoUpdateRequest;
+import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
+import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
+import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoUpdateRequest;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonAddressInfo;
 import az.ingress.hrms.exception.DeletedResourceException;
@@ -13,7 +13,6 @@ import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonAddressInfoService;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -1,8 +1,8 @@
 package az.ingress.hrms.service.person;
 
-import az.ingress.hrms.dto.PersonAddressInfoCreateRequest;
-import az.ingress.hrms.dto.PersonAddressInfoResponse;
-import az.ingress.hrms.dto.PersonAddressInfoUpdateRequest;
+import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
+import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
+import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoUpdateRequest;
 
 import java.util.List;
 
