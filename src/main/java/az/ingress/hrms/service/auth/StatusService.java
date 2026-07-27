@@ -1,0 +1,21 @@
+package az.ingress.hrms.service.auth;
+
+import az.ingress.hrms.dto.status.StatusRequest;
+import az.ingress.hrms.dto.status.StatusResponse;
+
+import java.util.List;
+
+public interface StatusService {
+
+    StatusResponse create(StatusRequest request);
+
+    StatusResponse update(Integer id, StatusRequest request);
+
+    StatusResponse getById(Integer id);
+
+    List<StatusResponse> getAll();
+
+    void softDelete(Integer id);
+
+    void restore(Integer id);
+}
