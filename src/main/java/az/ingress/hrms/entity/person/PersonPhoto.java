@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
-@Table(name = "Person_Photo")
+@Table(name = "Person_Photos")
 @Getter
 @Setter
 @NoArgsConstructor

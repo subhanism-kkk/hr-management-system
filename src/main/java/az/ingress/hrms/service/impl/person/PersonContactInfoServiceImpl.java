@@ -2,6 +2,7 @@ package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoCreateRequest;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoResponse;
+import az.ingress.hrms.dto.personContactInfo.PersonContactInfoUpdateRequest;
 import az.ingress.hrms.entity.lookup.ContactType;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonContactInfo;
@@ -13,6 +14,7 @@ import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.repository.PersonContactInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonContactInfoService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PersonContactInfoServiceImpl implements PersonContactInfoService {
 
     private final PersonContactInfoMapper mapper;
@@ -29,6 +32,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     private final ContactTypeRepository contactTypeRepository;
 
     @Override
+    @Transactional
     public PersonContactInfoResponse create(PersonContactInfoCreateRequest request) {
         Person person = personRepository.findById(request.getPersonId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -57,10 +61,11 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
     @Override
+    @Transactional
     public PersonContactInfoResponse update(
-            Integer id, PersonContactInfoCreateRequest request) {
+            Integer id, PersonContactInfoUpdateRequest request) {
 
-        PersonContactInfo entity = fetchPersonContactIInfo(id);
+        PersonContactInfo entity = fetchPersonContactInfo(id);
 
 
         ContactType contactType = contactTypeRepository.findById(
@@ -105,7 +110,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
 
     @Override
     public PersonContactInfoResponse getById(Integer id) {
-        return mapper.toResponse(fetchPersonContactIInfo(id));
+        return mapper.toResponse(fetchPersonContactInfo(id));
     }
 
     @Override
@@ -131,9 +136,10 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
 
-        PersonContactInfo entity = fetchPersonContactIInfo(id);
+        PersonContactInfo entity = fetchPersonContactInfo(id);
 
         entity.setIsDeleted(true);
         entity.setDeletedBy("SYSTEM");
@@ -144,6 +150,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
 
         PersonContactInfo entity = repository.findByIdWithDeleted(id)
@@ -167,7 +174,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
 
-    public PersonContactInfo fetchPersonContactIInfo(Integer id) {
+    public PersonContactInfo fetchPersonContactInfo(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)

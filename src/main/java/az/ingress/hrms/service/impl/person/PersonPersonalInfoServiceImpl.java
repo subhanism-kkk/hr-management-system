@@ -5,6 +5,7 @@ import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoResponse;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoUpdateRequest;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonPersonalInfo;
+import az.ingress.hrms.entity.person.PersonPhoto;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import az.ingress.hrms.mapper.PersonPersonalInfoMapper;
 import az.ingress.hrms.repository.PersonPersonalInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPersonalInfoService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService {
 
     private final PersonPersonalInfoRepository repository;
@@ -27,6 +30,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     private final PersonPersonalInfoMapper mapper;
 
     @Override
+    @Transactional
     public PersonPersonalInfoResponse create(PersonPersonalInfoCreateRequest request) {
         Person person = personRepository.findById(request.getPersonId()).
                 orElseThrow(() -> new ResourceNotFoundException(
@@ -57,20 +61,11 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     }
 
     @Override
+    @Transactional
     public PersonPersonalInfoResponse update(Integer id
             , PersonPersonalInfoUpdateRequest request) {
-        PersonPersonalInfo entity = repository.findById(id)
-                .orElseGet(() -> {
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Personal information is deleted.");
-                            });
 
-
-                    throw new ResourceNotFoundException(
-                            "Personal information not found.");
-                });
+        PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
 
         mapper.updateEntity(entity, request);
 
@@ -81,19 +76,8 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
 
     @Override
     public PersonPersonalInfoResponse getById(Integer id) {
-        PersonPersonalInfo entity = repository.findById(id)
-                .orElseGet(() -> {
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Personal information is deleted."
-                                );
-                            });
+        PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
 
-                    throw new ResourceNotFoundException(
-                            "Personal information not found."
-                    );
-                });
 
         return mapper.toResponse(entity);
     }
@@ -107,33 +91,22 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
 
-        PersonPersonalInfo entity = repository.findById(id)
-                .orElseGet(() -> {
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Personal information is deleted."
-                                );
-                            });
+        PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
 
-                    throw new ResourceNotFoundException(
-                            "Personal information not found."
-                    );
-                });
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
         entity.setDeletedBy("SYSTEM");
 
         repository.save(entity);
-
-
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
-        PersonPersonalInfo entity = repository.findById(id)
+        PersonPersonalInfo entity = repository.findByIdWithDeleted(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Personal information not found."
                 ));
@@ -143,5 +116,19 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         entity.setDeletedBy(null);
 
         repository.save(entity);
+    }
+
+    private PersonPersonalInfo fetchPersonPersonalInfo(Integer id) {
+        return repository.findById(id)
+                .orElseGet(() -> {
+                    repository.findByIdWithDeleted(id)
+                            .ifPresent(s -> {
+                                throw new DeletedResourceException(
+                                        "Person Personal Info is deleted."
+                                );
+                            });
+                    throw new ResourceNotFoundException(
+                            "Person Personal Info not found.");
+                });
     }
 }

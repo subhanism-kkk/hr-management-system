@@ -12,7 +12,7 @@ import az.ingress.hrms.mapper.PersonPhotoMapper;
 import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class PersonPhotoServiceImpl implements PersonPhotoService {
 
     private final PersonRepository personRepository;

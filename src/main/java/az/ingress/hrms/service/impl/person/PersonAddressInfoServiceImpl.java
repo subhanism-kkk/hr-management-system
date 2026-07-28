@@ -12,14 +12,15 @@ import az.ingress.hrms.mapper.PersonAddressInfoMapper;
 import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonAddressInfoService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
 
@@ -29,6 +30,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
 
     @Override
+
     public PersonAddressInfoResponse create(PersonAddressInfoCreateRequest request) {
         Person person = personRepository.findById(request.getPersonId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -54,22 +56,10 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     }
 
     @Override
+    @Transactional
     public PersonAddressInfoResponse update(
             Integer id, PersonAddressInfoUpdateRequest request) {
-        PersonAddressInfo entity = repository.findById(id)
-                .orElseGet(() -> {
-
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Address information is deleted."
-                                );
-                            });
-
-                    throw new ResourceNotFoundException(
-                            "Address information not found."
-                    );
-                });
+        PersonAddressInfo entity = fetchPersonAddressInfo(id);
 
         String address = request.getAddress().trim();
 
@@ -91,23 +81,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
     @Override
     public PersonAddressInfoResponse getById(Integer id) {
-        PersonAddressInfo entity = repository.findById(id)
-                .orElseGet(() -> {
-
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Address information is deleted."
-                                );
-                            });
-
-                    throw new ResourceNotFoundException(
-                            "Address information not found."
-                    );
-                });
-
-        return mapper.toResponse(entity);
-    }
+        return mapper.toResponse(fetchPersonAddressInfo(id)); }
 
     @Override
     public List<PersonAddressInfoResponse> getAll() {
@@ -131,12 +105,9 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
-        PersonAddressInfo entity = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Address information not found."
-                        ));
+        PersonAddressInfo entity = fetchPersonAddressInfo(id);
 
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -146,12 +117,12 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
-        PersonAddressInfo entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Address information not found."
-                        ));
+        PersonAddressInfo entity =fetchPersonAddressInfo(id);
+        if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
+            throw new IllegalStateException("Resource is not deleted.");
+        }
 
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
@@ -159,4 +130,18 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
         repository.save(entity);
     }
+
+
+    private PersonAddressInfo fetchPersonAddressInfo(Integer id) {
+        return repository.findById(id)
+                .orElseGet(() -> {
+                    repository.findByIdWithDeleted(id)
+                            .ifPresent(e -> {
+                                throw new DeletedResourceException("Address information is deleted.");
+                            });
+                    throw new ResourceNotFoundException("Address information not found.");
+                });
+    }
+
+
 }

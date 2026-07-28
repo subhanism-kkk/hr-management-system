@@ -13,12 +13,14 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository repository;
@@ -28,13 +30,19 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional
     public OrderResponse create(OrderRequest request) {
-        OrderType orderType =
-                orderTypeRepository.findById(request.getOrderTypeId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Order type not found."
-                                ));
+        OrderType orderType = orderTypeRepository.findById(request.getOrderTypeId())
+                .orElseGet(() -> {
+                    orderTypeRepository.findByIdWithDeleted(request.getOrderTypeId())
+                            .ifPresent(e -> {
+                                throw new DeletedResourceException(
+                                        "Order is deleted");
+                            });
+
+                    throw new ResourceNotFoundException("Order not found.");
+                });
+
         Order order =
                 Order.builder()
                         .orderType(orderType)
@@ -51,21 +59,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getById(Integer id) {
-        Order order = repository.findById(id)
-                .orElseGet(() -> {
+        Order order = fetchOrder(id);
 
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(o -> {
-                                throw new DeletedResourceException(
-                                        "Order has been deleted."
-                                );
-                            });
-
-                    throw new ResourceNotFoundException(
-                            "Order not found."
-                    );
-
-                });
         return mapper.toResponse(order);
 
     }
@@ -79,24 +74,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
 
-        Order order = repository.findById(id)
-                .orElseGet(() -> {
-
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(o -> {
-                                throw new DeletedResourceException(
-                                        "Order has been deleted."
-                                );
-                            });
-
-                    throw new ResourceNotFoundException(
-                            "Order not found."
-                    );
-
-                });
-
+        Order order = fetchOrder(id);
 
         order.setIsDeleted(true);
         order.setDeletedAt(LocalDateTime.now());
@@ -106,6 +87,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
 
         Order order =
@@ -115,10 +97,28 @@ public class OrderServiceImpl implements OrderService {
                                         "Order not found."
                                 ));
 
+        if (!Boolean.TRUE.equals(order.getIsDeleted())) {
+            throw new IllegalStateException("Order is not deleted.");
+        }
+
         order.setIsDeleted(false);
         order.setDeletedAt(null);
         order.setDeletedBy(null);
 
         repository.save(order);
+    }
+
+
+    private Order fetchOrder(Integer id) {
+        return repository.findById(id)
+                .orElseGet(() -> {
+                    repository.findByIdWithDeleted(id)
+                            .ifPresent(e -> {
+                                throw new DeletedResourceException(
+                                        "Order is deleted");
+                            });
+
+                    throw new ResourceNotFoundException("Order not found.");
+                });
     }
 }

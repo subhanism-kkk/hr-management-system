@@ -23,5 +23,5 @@ public interface PersonPersonalInfoRepository extends JpaRepository<PersonPerson
 
     // for restore method
     @Query(value = "SELECT * FROM Order_Types WHERE id = :id", nativeQuery = true)
-    Optional<OrderType> findByIdWithDeleted(@Param("id") Integer id);
+    Optional<PersonPersonalInfo> findByIdWithDeleted(@Param("id") Integer id);
 }

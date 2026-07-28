@@ -1,12 +1,15 @@
 package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.entity.person.Person;
+import az.ingress.hrms.entity.person.PersonPhoto;
+import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonService;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +18,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class PersonServiceImpl implements PersonService {
     private final PersonRepository repository;
     private final PersonMapper mapper;
 
     @Override
+    @Transactional
     public PersonResponse create(PersonRequest request) {
 
         Person person = mapper.toEntity(request);
@@ -31,12 +36,10 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @Transactional
     public PersonResponse update(Integer id, PersonRequest request) {
 
-        Person person = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Person with id " + id + " was not found."
-                ));
+        Person person = fetchPerson(id);
 
         mapper.updateEntity(person, request);
 
@@ -47,12 +50,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonResponse getById(Integer id) {
-       Person person = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Person with id " + id + " was not found."
-                        ));
-        return mapper.toResponse(person);    }
+        return mapper.toResponse(fetchPerson(id));    }
 
     @Override
     public List<PersonResponse> getAll() {
@@ -62,13 +60,10 @@ public class PersonServiceImpl implements PersonService {
                 .toList();    }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
 
-        Person person = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Person not found."
-                        ));
+        Person person = fetchPerson(id);
 
         person.setIsDeleted(true);
         person.setDeletedAt(LocalDateTime.now());
@@ -79,6 +74,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
 
         Person person = repository.findByIdWithDeleted(id)
@@ -86,10 +82,28 @@ public class PersonServiceImpl implements PersonService {
                         new ResourceNotFoundException(
                                 "Person not found."));
 
+        if (!Boolean.TRUE.equals(person.getIsDeleted())) {
+            throw new IllegalStateException("Resource is not deleted.");
+        }
+
         person.setIsDeleted(false);
         person.setDeletedAt(null);
         person.setDeletedBy(null);
 
         repository.save(person);
+    }
+
+    private Person fetchPerson(Integer id) {
+        return repository.findById(id)
+                .orElseGet(() -> {
+                    repository.findByIdWithDeleted(id)
+                            .ifPresent(s -> {
+                                throw new DeletedResourceException(
+                                        "Person is deleted."
+                                );
+                            });
+                    throw new ResourceNotFoundException(
+                            "Person not found.");
+                });
     }
 }

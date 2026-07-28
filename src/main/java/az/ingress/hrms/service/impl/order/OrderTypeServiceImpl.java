@@ -1,6 +1,8 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.entity.order.OrderType;
+import az.ingress.hrms.entity.organization.Position;
+import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.mapper.OrderTypeMapper;
 import az.ingress.hrms.repository.OrderTypeRepository;
 import az.ingress.hrms.service.order.OrderTypeService;
@@ -10,37 +12,39 @@ import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OrderTypeServiceImpl  implements OrderTypeService {
+@Transactional(readOnly = true)
+public class OrderTypeServiceImpl implements OrderTypeService {
 
     private final OrderTypeRepository repository;
     private final OrderTypeMapper mapper;
 
     @Override
+    @Transactional
     public OrderTypeResponse create(OrderTypeRequest request) {
         if (repository.existsByNameIgnoreCase(request.getName())) {
             throw new ResourceAlreadyExistsException(
                     "Order type with name '" + request.getName() + "' already exists."
             );
         }
-       OrderType orderType = mapper.toEntity(request);
+        OrderType orderType = mapper.toEntity(request);
 
         repository.save(orderType);
 
-        return mapper.toResponse(orderType);    }
+        return mapper.toResponse(orderType);
+    }
 
     @Override
+    @Transactional
     public OrderTypeResponse update(Integer id, OrderTypeRequest request) {
 
-        OrderType orderType = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Order type with id " + id + " was not found."
-                ));
+        OrderType orderType = fetchOrdertype(id);
 
         if (!orderType.getName().equalsIgnoreCase(request.getName())
                 && repository.existsByNameIgnoreCase(request.getName())) {
@@ -59,28 +63,23 @@ public class OrderTypeServiceImpl  implements OrderTypeService {
 
     @Override
     public OrderTypeResponse getById(Integer id) {
-        OrderType orderType = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Order type with id " + id + " was not found."
-                        ));
-        return mapper.toResponse(orderType);    }
+        OrderType orderType = fetchOrdertype(id);
+        return mapper.toResponse(orderType);
+    }
 
     @Override
     public List<OrderTypeResponse> getAll() {
         return repository.findAll()
                 .stream()
                 .map(mapper::toResponse)
-                .toList();    }
+                .toList();
+    }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
 
-        OrderType orderType = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Order type not found."
-                        ));
+        OrderType orderType = fetchOrdertype(id);
 
         orderType.setIsDeleted(true);
         orderType.setDeletedAt(LocalDateTime.now());
@@ -93,6 +92,7 @@ public class OrderTypeServiceImpl  implements OrderTypeService {
 
 
     @Override
+    @Transactional
     public void restore(Integer id) {
 
         OrderType orderType = repository.findByIdWithDeleted(id)
@@ -100,10 +100,28 @@ public class OrderTypeServiceImpl  implements OrderTypeService {
                         new ResourceNotFoundException(
                                 "Order type not found."));
 
+        if (!Boolean.TRUE.equals(orderType.getIsDeleted())) {
+            throw new IllegalStateException("OrderType is not deleted.");
+        }
+
         orderType.setIsDeleted(false);
         orderType.setDeletedAt(null);
         orderType.setDeletedBy(null);
 
         repository.save(orderType);
+    }
+
+
+    private OrderType fetchOrdertype(Integer id) {
+        return repository.findById(id)
+                .orElseGet(() -> {
+                    repository.findByIdWithDeleted(id)
+                            .ifPresent(e -> {
+                                throw new DeletedResourceException(
+                                        "OrderType is deleted");
+                            });
+
+                    throw new ResourceNotFoundException("OrderType not found.");
+                });
     }
 }
