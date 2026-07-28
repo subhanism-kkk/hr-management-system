@@ -105,8 +105,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
 
     @Override
     public PersonContactInfoResponse getById(Integer id) {
-        PersonContactInfo entity = fetchPersonContactIInfo(id);
-        return mapper.toResponse(entity);
+        return mapper.toResponse(fetchPersonContactIInfo(id));
     }
 
     @Override
@@ -168,7 +167,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
 
-    public PersonContactInfo fetchPersonContactIInfo(Integer id){
+    public PersonContactInfo fetchPersonContactIInfo(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
