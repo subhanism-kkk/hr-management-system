@@ -12,6 +12,14 @@ public enum AuditAction {
 
     LOGIN,
 
-    LOGOUT
+    LOGOUT,
+
+    EXPORT,
+
+    IMPORT,
+
+    APPROVE,
+
+    REJECT
 
 }

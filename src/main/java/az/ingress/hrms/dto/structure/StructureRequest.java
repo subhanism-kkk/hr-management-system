@@ -1,4 +1,4 @@
-package az.ingress.hrms.dto;
+package az.ingress.hrms.dto.structure;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

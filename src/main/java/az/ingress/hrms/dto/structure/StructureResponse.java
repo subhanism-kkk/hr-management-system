@@ -1,4 +1,4 @@
-package az.ingress.hrms.dto;
+package az.ingress.hrms.dto.structure;
 
 import lombok.*;
 

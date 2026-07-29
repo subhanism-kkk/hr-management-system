@@ -98,6 +98,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
             }
         }
 
+        mapper.updateEntity(entity, request);
 
         entity.setContactType(contactType);
         entity.setContactValue(request.getContactValue().trim());
@@ -174,7 +175,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
 
-    public PersonContactInfo fetchPersonContactInfo(Integer id) {
+    private PersonContactInfo fetchPersonContactInfo(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)

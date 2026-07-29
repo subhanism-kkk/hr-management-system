@@ -81,6 +81,34 @@ public class AuditServiceImpl implements AuditService {
 
     }
 
+    @Override
+    public List<AuditLogResponse> getByEntity(
+            EntityType entityType
+    ) {
+
+        return repository.findByEntityType(entityType)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+
+    }
+
+    @Override
+    public List<AuditLogResponse> getByAction(AuditAction action) {
+        return repository.findByAction(action)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<AuditLogResponse> getByUser(String username) {
+        return repository.findByUserName(username)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
     private void saveLog(
             AuditAction action,
             EntityType entityType,
@@ -98,8 +126,8 @@ public class AuditServiceImpl implements AuditService {
 
                 .description(description)
 
-                // later replace SYSTEM
-                .userName("SYSTEM")
+
+                .userName(getCurrentUser())
 
                 .build();
 
@@ -134,4 +162,27 @@ public class AuditServiceImpl implements AuditService {
 
     }
 
+
+    private String getCurrentUser() {
+
+        return "SYSTEM";
+
+    }
+
+//    Later, when you add Spring Security, this becomes
+//
+//    private String getCurrentUser() {
+//
+//        Authentication authentication =
+//                SecurityContextHolder
+//                        .getContext()
+//                        .getAuthentication();
+//
+//        if (authentication == null) {
+//            return "SYSTEM";
+//        }
+//
+//        return authentication.getName();
+//
+//    }
 }

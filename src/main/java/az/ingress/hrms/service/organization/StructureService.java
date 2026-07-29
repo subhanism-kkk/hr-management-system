@@ -1,7 +1,7 @@
 package az.ingress.hrms.service.organization;
 
-import az.ingress.hrms.dto.StructureRequest;
-import az.ingress.hrms.dto.StructureResponse;
+import az.ingress.hrms.dto.structure.StructureRequest;
+import az.ingress.hrms.dto.structure.StructureResponse;
 
 import java.util.List;
 

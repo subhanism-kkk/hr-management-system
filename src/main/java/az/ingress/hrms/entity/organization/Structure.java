@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,4 +32,10 @@ public class Structure extends SoftDeleteEntity {
     @Column(name = "is_closed", nullable = false)
     @Builder.Default
     private Boolean isClosed = false;
+
+    @OneToMany(
+            mappedBy = "structure",
+            fetch = FetchType.LAZY
+    )
+    private List<StaffingPlan> staffingPlans = new ArrayList<>();
 }

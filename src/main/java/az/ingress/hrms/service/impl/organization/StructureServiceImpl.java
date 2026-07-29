@@ -1,7 +1,7 @@
 package az.ingress.hrms.service.impl.organization;
 
-import az.ingress.hrms.dto.StructureRequest;
-import az.ingress.hrms.dto.StructureResponse;
+import az.ingress.hrms.dto.structure.StructureRequest;
+import az.ingress.hrms.dto.structure.StructureResponse;
 import az.ingress.hrms.entity.organization.Structure;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;

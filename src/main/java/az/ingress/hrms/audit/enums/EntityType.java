@@ -26,6 +26,6 @@ public enum EntityType {
 
     STATUS,
 
-    CONTACT_TYPES
+    CONTACT_TYPE
 
 }
