@@ -19,4 +19,8 @@ public interface PositionService {
 
     void restore(Integer id);
 
+    PositionResponse activate(Integer id);
+
+    PositionResponse deactivate(Integer id);
+
 }

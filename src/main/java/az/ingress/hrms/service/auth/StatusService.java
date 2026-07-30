@@ -2,6 +2,7 @@ package az.ingress.hrms.service.auth;
 
 import az.ingress.hrms.dto.status.StatusRequest;
 import az.ingress.hrms.dto.status.StatusResponse;
+import az.ingress.hrms.entity.lookup.Status;
 
 import java.util.List;
 

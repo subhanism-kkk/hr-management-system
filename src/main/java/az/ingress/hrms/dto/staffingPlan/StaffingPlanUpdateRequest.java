@@ -1,4 +1,4 @@
-package az.ingress.hrms.dto;
+package az.ingress.hrms.dto.staffingPlan;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StaffingPlanCreateRequest {
+public class StaffingPlanUpdateRequest {
 
     @NotNull(message = "Structure Id cannot be Null.")
     @Positive
@@ -29,4 +29,5 @@ public class StaffingPlanCreateRequest {
     @NotNull(message = "Capacity cannot be Null.")
     @Min(value = 1, message = "Capacity must be at least 1.")
     private Integer capacity;
+
 }

@@ -20,4 +20,7 @@ public interface PersonService {
 
     void restore(Integer id);
 
+    PersonResponse activate(Integer id);
+
+    PersonResponse deactivate(Integer id);
 }

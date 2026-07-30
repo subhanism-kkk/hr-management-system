@@ -1,8 +1,8 @@
 package az.ingress.hrms.mapper;
 
-import az.ingress.hrms.dto.StaffingPlanCreateRequest;
-import az.ingress.hrms.dto.StaffingPlanResponse;
-import az.ingress.hrms.dto.StaffingPlanUpdateRequest;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import org.mapstruct.*;
 

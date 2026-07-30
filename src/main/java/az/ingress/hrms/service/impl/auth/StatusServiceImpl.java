@@ -36,6 +36,12 @@ public class StatusServiceImpl implements StatusService {
             );
         }
 
+        if(repository.existsByCodeIgnoreCase(request.getCode())){
+            throw new ResourceAlreadyExistsException(
+                    "Status already exists."
+            );
+        }
+
         Status status = mapper.toEntity(request);
 
         repository.save(status);
@@ -51,6 +57,14 @@ public class StatusServiceImpl implements StatusService {
 
         if (!status.getName().equalsIgnoreCase(request.getName())
                 && repository.existsByNameIgnoreCase(request.getName())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "Status already exists."
+            );
+        }
+
+        if (!status.getCode().equalsIgnoreCase(request.getCode())
+                && repository.existsByCodeIgnoreCase(request.getCode())) {
 
             throw new ResourceAlreadyExistsException(
                     "Status already exists."

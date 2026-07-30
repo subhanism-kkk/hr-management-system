@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.person;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class PersonPhoto extends SoftDeleteEntity {
+public class PersonPhoto extends WorkflowEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id",

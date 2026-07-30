@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.person;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
 import az.ingress.hrms.enums.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class PersonPersonalInfo extends SoftDeleteEntity {
+public class PersonPersonalInfo extends WorkflowEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(

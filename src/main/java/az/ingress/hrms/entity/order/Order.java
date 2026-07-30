@@ -1,10 +1,14 @@
 package az.ingress.hrms.entity.order;
 
 import az.ingress.hrms.entity.base.SoftDeleteOnlyEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Orders")
@@ -14,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class Order extends SoftDeleteOnlyEntity {
+public class Order extends WorkflowEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -30,4 +34,23 @@ public class Order extends SoftDeleteOnlyEntity {
             length = 50)
     private String orderNumber;
 
+    @OneToMany(
+            mappedBy = "order",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonAppointment> appointments =
+            new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "dismissalOrder",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonAppointment> dismissedAppointments =
+            new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "order",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonPromotion> promotions = new ArrayList<>();
 }

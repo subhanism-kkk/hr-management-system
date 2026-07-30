@@ -1,12 +1,16 @@
 package az.ingress.hrms.entity.organization;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.OrderPersonAppointment;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Staffing_Plan")
@@ -16,7 +20,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class StaffingPlan extends SoftDeleteEntity {
+public class StaffingPlan extends WorkflowEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -45,5 +49,13 @@ public class StaffingPlan extends SoftDeleteEntity {
     @Column(name = "is_closed", nullable = false)
     @Builder.Default
     private Boolean isClosed = false;
+
+
+    @OneToMany(
+            mappedBy = "staffingPlan",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonAppointment> appointments =
+            new ArrayList<>();
 
 }

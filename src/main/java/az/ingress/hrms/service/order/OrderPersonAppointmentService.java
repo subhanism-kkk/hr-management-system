@@ -1,4 +1,41 @@
 package az.ingress.hrms.service.order;
 
-public class OrderPersonAppointmentService {
+import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
+import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
+import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public interface OrderPersonAppointmentService {
+    OrderPersonAppointmentResponse create(
+            OrderPersonAppointmentCreateRequest request
+    );
+
+    OrderPersonAppointmentResponse update(
+            Integer id,
+            OrderPersonAppointmentUpdateRequest request
+    );
+
+    OrderPersonAppointmentResponse getById(Integer id);
+
+    List<OrderPersonAppointmentResponse> getAll();
+
+    List<OrderPersonAppointmentResponse> getByPerson(
+            Integer personId
+    );
+
+    void dismiss(
+            Integer appointmentId,
+            Integer dismissalOrderId,
+            LocalDate dismissalDate
+    );
+
+    void softDelete(Integer id);
+
+    void restore(Integer id);
+
+    OrderPersonAppointmentResponse activate(Integer id);
+
+    OrderPersonAppointmentResponse deactivate(Integer id);
 }

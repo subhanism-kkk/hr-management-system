@@ -17,4 +17,8 @@ public interface OrderService {
 
     void restore(Integer id);
 
+    OrderResponse activate(Integer id);
+
+    OrderResponse deactivate(Integer id);
+
 }

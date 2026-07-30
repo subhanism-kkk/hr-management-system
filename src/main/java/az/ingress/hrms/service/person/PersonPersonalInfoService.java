@@ -22,4 +22,8 @@ public interface PersonPersonalInfoService {
     void softDelete(Integer id);
 
     void restore(Integer id);
+
+    PersonPersonalInfoResponse activate(Integer id);
+
+    PersonPersonalInfoResponse deactivate(Integer id);
 }

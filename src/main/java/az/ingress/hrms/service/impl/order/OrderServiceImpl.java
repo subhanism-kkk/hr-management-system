@@ -1,5 +1,6 @@
 package az.ingress.hrms.service.impl.order;
 
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.OrderMapper;
 import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.OrderTypeRepository;
@@ -27,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper mapper;
     private final OrderNumberGenerator generator;
     private final OrderTypeRepository orderTypeRepository;
+    private final StatusHelper statusHelper;
 
 
     @Override
@@ -106,6 +108,30 @@ public class OrderServiceImpl implements OrderService {
         order.setDeletedBy(null);
 
         repository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse activate(Integer id) {
+        Order entity = fetchOrder(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse deactivate(Integer id) {
+        Order entity = fetchOrder(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
     }
 
 

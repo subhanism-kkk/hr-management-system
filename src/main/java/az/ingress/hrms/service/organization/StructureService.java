@@ -26,4 +26,8 @@ public interface StructureService {
 
     void restore(Integer id);
 
+    StructureResponse activate(Integer id);
+
+    StructureResponse deactivate(Integer id);
+
 }

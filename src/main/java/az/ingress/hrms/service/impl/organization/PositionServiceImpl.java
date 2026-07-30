@@ -2,6 +2,7 @@ package az.ingress.hrms.service.impl.organization;
 
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.PositionMapper;
 import az.ingress.hrms.repository.PositionRepository;
 import az.ingress.hrms.service.organization.PositionService;
@@ -24,6 +25,7 @@ public class PositionServiceImpl  implements PositionService {
 
     private final PositionRepository repository;
     private final PositionMapper mapper;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -106,6 +108,30 @@ public class PositionServiceImpl  implements PositionService {
         position.setDeletedBy(null);
 
         repository.save(position);
+    }
+
+    @Override
+    @Transactional
+    public PositionResponse activate(Integer id) {
+        Position entity = fetchPosition(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
+    }
+
+    @Override
+    @Transactional
+    public PositionResponse deactivate(Integer id) {
+        Position entity = fetchPosition(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
     }
 
     private Position fetchPosition(Integer id){

@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.organization;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -17,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class Structure extends SoftDeleteEntity {
+public class Structure extends WorkflowEntity {
 
     @Column(name = "name", nullable = false, length = 150)
     private String name;

@@ -8,6 +8,7 @@ import az.ingress.hrms.entity.person.PersonAddressInfo;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.PersonAddressInfoMapper;
 import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
@@ -27,6 +28,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     private final PersonAddressInfoRepository repository;
     private final PersonRepository personRepository;
     private final PersonAddressInfoMapper mapper;
+    private final StatusHelper statusHelper;
 
 
     @Override
@@ -130,6 +132,28 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
         repository.save(entity);
     }
+
+    @Override
+    @Transactional
+    public PersonAddressInfoResponse activate(Integer id) {
+        PersonAddressInfo entity = fetchPersonAddressInfo(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);    }
+
+    @Override
+    @Transactional
+    public PersonAddressInfoResponse deactivate(Integer id) {
+        PersonAddressInfo entity = fetchPersonAddressInfo(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);    }
 
 
     private PersonAddressInfo fetchPersonAddressInfo(Integer id) {

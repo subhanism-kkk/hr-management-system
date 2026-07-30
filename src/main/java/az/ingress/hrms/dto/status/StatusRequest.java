@@ -15,4 +15,6 @@ public class StatusRequest {
     @Size(max = 100, message = "Status name cannot exceed 100 characters.")
     private String name;
 
+    @NotBlank
+    private String code;
 }

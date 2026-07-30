@@ -1,6 +1,9 @@
 package az.ingress.hrms.entity.person;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.OrderPersonAppointment;
+import az.ingress.hrms.entity.order.OrderPersonPromotion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,13 +23,17 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class Person extends SoftDeleteEntity {
+public class Person extends WorkflowEntity  {
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 
 
     @OneToMany(
@@ -53,4 +60,17 @@ public class Person extends SoftDeleteEntity {
             fetch = FetchType.LAZY
     )
     private List<PersonPhoto> photos = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "person",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonAppointment> appointments =
+            new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "person",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonPromotion> promotions = new ArrayList<>();
 }

@@ -1,14 +1,15 @@
 package az.ingress.hrms.service.impl.organization;
 
-import az.ingress.hrms.dto.StaffingPlanCreateRequest;
-import az.ingress.hrms.dto.StaffingPlanResponse;
-import az.ingress.hrms.dto.StaffingPlanUpdateRequest;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import az.ingress.hrms.entity.organization.Structure;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.StaffingPlanMapper;
 import az.ingress.hrms.repository.PositionRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
@@ -30,6 +31,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     private final StaffingPlanRepository repository;
     private final PositionRepository positionRepository;
     private final StructureRepository structureRepository;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -46,6 +48,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
 
         entity.setPosition(position);
         entity.setStructure(structure);
+        entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
 
@@ -186,6 +189,30 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
 
         repository.save(entity);
 
+    }
+
+    @Override
+    @Transactional
+    public StaffingPlanResponse activate(Integer id) {
+        StaffingPlan entity = fetchStaffingPlan(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
+    }
+
+    @Override
+    @Transactional
+    public StaffingPlanResponse deactivate(Integer id) {
+        StaffingPlan entity = fetchStaffingPlan(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
     }
 
     private StaffingPlan fetchStaffingPlan(Integer id) {

@@ -5,10 +5,10 @@ import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoResponse;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoUpdateRequest;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonPersonalInfo;
-import az.ingress.hrms.entity.person.PersonPhoto;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.PersonPersonalInfoMapper;
 import az.ingress.hrms.repository.PersonPersonalInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
@@ -28,6 +28,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     private final PersonPersonalInfoRepository repository;
     private final PersonRepository personRepository;
     private final PersonPersonalInfoMapper mapper;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -116,6 +117,32 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         entity.setDeletedBy(null);
 
         repository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public PersonPersonalInfoResponse activate(Integer id) {
+
+        PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
+    }
+
+    @Override
+    @Transactional
+    public PersonPersonalInfoResponse deactivate(Integer id) {
+
+        PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
     }
 
     private PersonPersonalInfo fetchPersonPersonalInfo(Integer id) {

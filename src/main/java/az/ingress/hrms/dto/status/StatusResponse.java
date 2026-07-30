@@ -14,6 +14,8 @@ public class StatusResponse {
 
     private String name;
 
+    private String code;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

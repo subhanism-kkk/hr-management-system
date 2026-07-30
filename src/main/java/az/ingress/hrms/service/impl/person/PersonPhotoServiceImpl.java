@@ -8,6 +8,7 @@ import az.ingress.hrms.entity.person.PersonPhoto;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.PersonPhotoMapper;
 import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
@@ -27,6 +28,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     private final PersonRepository personRepository;
     private final PersonPhotoRepository repository;
     private final PersonPhotoMapper mapper;
+    private final StatusHelper statusHelper;
 
 
     @Override
@@ -202,6 +204,32 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
         repository.save(entity);
 
+    }
+
+    @Override
+    @Transactional
+    public PersonPhotoResponse activate(Integer id) {
+
+        PersonPhoto entity = fetchPersonPhoto(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
+    }
+
+    @Override
+    @Transactional
+    public PersonPhotoResponse deactivate(Integer id) {
+
+        PersonPhoto entity = fetchPersonPhoto(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
     }
 
 

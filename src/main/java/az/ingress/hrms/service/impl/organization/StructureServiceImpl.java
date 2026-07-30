@@ -6,6 +6,7 @@ import az.ingress.hrms.entity.organization.Structure;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.StructureMapper;
 import az.ingress.hrms.repository.StructureRepository;
 import az.ingress.hrms.service.organization.StructureService;
@@ -23,6 +24,7 @@ public class StructureServiceImpl implements StructureService {
 
     private final StructureRepository repository;
     private final StructureMapper mapper;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -34,18 +36,19 @@ public class StructureServiceImpl implements StructureService {
             );
         }
 
-        Structure structure = mapper.toEntity(request);
+        Structure entity = mapper.toEntity(request);
 
         if (request.getParentStructureId() != null) {
 
             Structure parentStructure = fetchStructure(request.getParentStructureId());
 
-            structure.setParentStructure(parentStructure);
+            entity.setParentStructure(parentStructure);
         }
 
-        repository.save(structure);
+        entity.setStatus(statusHelper.getActive());
+        repository.save(entity);
 
-        return mapper.toResponse(structure);
+        return mapper.toResponse(entity);
     }
 
     @Override
@@ -155,6 +158,30 @@ public class StructureServiceImpl implements StructureService {
         structure.setDeletedBy(null);
 
         repository.save(structure);
+    }
+
+    @Override
+    @Transactional
+    public StructureResponse activate(Integer id) {
+        Structure person = fetchStructure(id);
+
+        person.setStatus(statusHelper.getActive());
+
+        repository.save(person);
+
+        return mapper.toResponse(person);
+    }
+
+    @Override
+    @Transactional
+    public StructureResponse deactivate(Integer id) {
+        Structure person = fetchStructure(id);
+
+        person.setStatus(statusHelper.getInactive());
+
+        repository.save(person);
+
+        return mapper.toResponse(person);
     }
 
     private Structure fetchStructure(Integer id) {

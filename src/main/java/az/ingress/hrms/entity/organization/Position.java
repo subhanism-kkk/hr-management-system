@@ -1,6 +1,8 @@
 package az.ingress.hrms.entity.organization;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.OrderPersonPromotion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class Position extends SoftDeleteEntity {
+public class Position extends WorkflowEntity {
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -33,4 +35,16 @@ public class Position extends SoftDeleteEntity {
             fetch = FetchType.LAZY
     )
     private List<StaffingPlan> staffingPlans = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "oldPosition",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonPromotion> oldPromotions = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "newPosition",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonPromotion> newPromotions = new ArrayList<>();
 }

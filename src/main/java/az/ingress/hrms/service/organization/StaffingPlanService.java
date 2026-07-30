@@ -1,8 +1,8 @@
 package az.ingress.hrms.service.organization;
 
-import az.ingress.hrms.dto.StaffingPlanCreateRequest;
-import az.ingress.hrms.dto.StaffingPlanResponse;
-import az.ingress.hrms.dto.StaffingPlanUpdateRequest;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
+import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
 
 import java.util.List;
 
@@ -27,5 +27,9 @@ public interface StaffingPlanService {
     void softDelete(Integer id);
 
     void restore(Integer id);
+
+    StaffingPlanResponse activate(Integer id);
+
+    StaffingPlanResponse deactivate(Integer id);
 
 }

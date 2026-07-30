@@ -27,4 +27,7 @@ public interface PersonPhotoService {
     void restore(Integer id);
 
 
+    PersonPhotoResponse activate(Integer id);
+
+    PersonPhotoResponse deactivate(Integer id);
 }

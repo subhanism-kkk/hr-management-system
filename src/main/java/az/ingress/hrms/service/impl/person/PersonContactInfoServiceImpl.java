@@ -9,6 +9,7 @@ import az.ingress.hrms.entity.person.PersonContactInfo;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.PersonContactInfoMapper;
 import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.repository.PersonContactInfoRepository;
@@ -30,6 +31,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     private final PersonContactInfoRepository repository;
     private final PersonRepository personRepository;
     private final ContactTypeRepository contactTypeRepository;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -172,6 +174,31 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
 
         repository.save(entity);
 
+    }
+
+    @Override
+    @Transactional
+    public PersonContactInfoResponse activate(Integer id) {
+        PersonContactInfo entity = fetchPersonContactInfo(id);
+
+        entity.setStatus(statusHelper.getActive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
+    }
+
+
+    @Override
+    @Transactional
+    public PersonContactInfoResponse deactivate(Integer id) {
+        PersonContactInfo entity = fetchPersonContactInfo(id);
+
+        entity.setStatus(statusHelper.getInactive());
+
+        repository.save(entity);
+
+        return mapper.toResponse(entity);
     }
 
 

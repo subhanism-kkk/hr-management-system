@@ -24,4 +24,7 @@ public interface PersonAddressInfoService {
 
     void restore(Integer id);
 
+    PersonAddressInfoResponse activate(Integer id);
+
+    PersonAddressInfoResponse deactivate(Integer id);
 }

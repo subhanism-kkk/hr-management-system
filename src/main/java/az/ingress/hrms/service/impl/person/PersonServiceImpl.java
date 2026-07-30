@@ -1,10 +1,13 @@
 package az.ingress.hrms.service.impl.person;
 
+import az.ingress.hrms.entity.lookup.Status;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonPhoto;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
+import az.ingress.hrms.repository.StatusRepository;
 import az.ingress.hrms.service.person.PersonService;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
@@ -22,17 +25,20 @@ import java.util.List;
 public class PersonServiceImpl implements PersonService {
     private final PersonRepository repository;
     private final PersonMapper mapper;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
     public PersonResponse create(PersonRequest request) {
 
+
         Person person = mapper.toEntity(request);
+
+        person.setStatus(statusHelper.getActive());
 
         repository.save(person);
 
         return mapper.toResponse(person);
-
     }
 
     @Override
@@ -50,14 +56,16 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonResponse getById(Integer id) {
-        return mapper.toResponse(fetchPerson(id));    }
+        return mapper.toResponse(fetchPerson(id));
+    }
 
     @Override
     public List<PersonResponse> getAll() {
         return repository.findAll()
                 .stream()
                 .map(mapper::toResponse)
-                .toList();    }
+                .toList();
+    }
 
     @Override
     @Transactional
@@ -91,6 +99,32 @@ public class PersonServiceImpl implements PersonService {
         person.setDeletedBy(null);
 
         repository.save(person);
+    }
+
+    @Override
+    @Transactional
+    public PersonResponse activate(Integer id) {
+
+        Person person = fetchPerson(id);
+
+        person.setStatus(statusHelper.getActive());
+
+        repository.save(person);
+
+        return mapper.toResponse(person);
+    }
+
+    @Override
+    @Transactional
+    public PersonResponse deactivate(Integer id) {
+
+        Person person = fetchPerson(id);
+
+        person.setStatus(statusHelper.getInactive());
+
+        repository.save(person);
+
+        return mapper.toResponse(person);
     }
 
     private Person fetchPerson(Integer id) {

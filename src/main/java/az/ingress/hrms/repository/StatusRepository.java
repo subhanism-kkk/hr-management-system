@@ -18,4 +18,8 @@ public interface StatusRepository extends JpaRepository<Status, Integer> {
 
     @Query(value = "SELECT * FROM Status WHERE id = :id", nativeQuery = true)
     Optional<Status> findByIdWithDeleted(@Param("id") Integer id);
+
+    Optional<Status> findByCode(String code);
+
+    boolean existsByCodeIgnoreCase(String code);
 }
