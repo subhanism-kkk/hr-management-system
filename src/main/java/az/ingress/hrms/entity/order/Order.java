@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,4 +54,7 @@ public class Order extends WorkflowEntity {
             fetch = FetchType.LAZY
     )
     private List<OrderPersonPromotion> promotions = new ArrayList<>();
+
+    @Column(name = "order_date", nullable = false)
+    private LocalDate orderDate;
 }

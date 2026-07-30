@@ -46,6 +46,13 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     public OrderPersonAppointmentResponse create(OrderPersonAppointmentCreateRequest request) {
         Person person = fetchPerson(request.getPersonId());
         Order order = fetchOrder(request.getOrderId());
+
+        if (!order.getOrderType().getCode().equals("APT")) {
+            throw new BadRequestException(
+                    "Selected order is not a Appointment order."
+            );
+        }
+
         StaffingPlan staffingPlan = fetchStaffingPlan(request.getStaffingPlanId());
 
         if (repository.existsByPersonIdAndIsClosedFalse(person.getId())) {

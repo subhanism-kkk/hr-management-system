@@ -1,7 +1,8 @@
 package az.ingress.hrms.dto.order;
 
-import az.ingress.hrms.dto.orderType.OrderTypeResponse;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -20,4 +21,5 @@ public class OrderResponse {
 
     private String orderNumber;
 
+    private LocalDate orderDate;
 }

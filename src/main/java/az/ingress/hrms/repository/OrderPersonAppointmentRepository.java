@@ -30,4 +30,9 @@ public interface OrderPersonAppointmentRepository extends JpaRepository<OrderPer
     boolean existsByPersonIdAndIsClosedFalse(Integer id);
 
     long countByStaffingPlanIdAndIsClosedFalse(Integer id);
+
+
+    Optional<OrderPersonAppointment> findByPersonIdAndIsClosedFalse(
+            Integer personId
+    );
 }
