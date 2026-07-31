@@ -210,7 +210,7 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     @Override
     @Transactional
     public void restore(Integer id) {
-        OrderPersonTransfer entity = repository.findDeletedById(id)
+        OrderPersonTransfer entity = repository.findByIdWithDeleted(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Deleted transfer record not found with id: " + id));
@@ -251,7 +251,7 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     private OrderPersonTransfer fetchTransfer(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
-                    repository.findDeletedById(id)
+                    repository.findByIdWithDeleted(id)
                             .ifPresent(e -> {
                                 throw new DeletedResourceException(
                                         "Transfer record is deleted."

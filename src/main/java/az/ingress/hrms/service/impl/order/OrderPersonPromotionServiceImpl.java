@@ -164,7 +164,7 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     @Override
     @Transactional
     public void restore(Integer id) {
-        OrderPersonPromotion entity = repository.findDeletedById(id)
+        OrderPersonPromotion entity = repository.findByIdWithDeleted(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Deleted promotion record not found with id: " + id));
 
         if (!entity.getIsDeleted()) {
@@ -209,7 +209,7 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
 
         return repository.findById(id)
                 .orElseGet(() -> {
-                    repository.findDeletedById(id)
+                    repository.findByIdWithDeleted(id)
                             .ifPresent(e -> {
                                 throw new DeletedResourceException(
                                         "Promotion record is deleted."
