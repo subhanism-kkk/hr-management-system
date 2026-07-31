@@ -1,7 +1,7 @@
-package az.ingress.hrms.entity.order;
+package az.ingress.hrms.entity.order.orderPerson;
 
-import az.ingress.hrms.entity.base.SoftDeleteEntity;
 import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import az.ingress.hrms.entity.person.Person;
 import jakarta.persistence.*;

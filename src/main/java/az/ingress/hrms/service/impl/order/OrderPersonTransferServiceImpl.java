@@ -1,20 +1,22 @@
 package az.ingress.hrms.service.impl.order;
 
-import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionCreateRequest;
-import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionResponse;
-import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionUpdateRequest;
+import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferCreateRequest;
+import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferResponse;
+import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferUpdateRequest;
 import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
-import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonTransfer;
 import az.ingress.hrms.entity.organization.Position;
+import az.ingress.hrms.entity.organization.StaffingPlan;
+import az.ingress.hrms.entity.organization.Structure;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
-import az.ingress.hrms.mapper.OrderPersonPromotionMapper;
+import az.ingress.hrms.mapper.OrderPersonTransferMapper;
 import az.ingress.hrms.repository.*;
-import az.ingress.hrms.service.order.OrderPersonPromotionService;
+import az.ingress.hrms.service.order.OrderPersonTransferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,29 +27,33 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionService {
+public class OrderPersonTransferServiceImpl implements OrderPersonTransferService {
 
-    private final OrderPersonPromotionRepository repository;
+    private final OrderPersonTransferRepository repository;
     private final OrderRepository orderRepository;
     private final PersonRepository personRepository;
+    private final StructureRepository structureRepository;
     private final PositionRepository positionRepository;
     private final OrderPersonAppointmentRepository appointmentRepository;
+    private final StaffingPlanRepository staffingPlanRepository;
 
-    private final OrderPersonPromotionMapper mapper;
+    private final OrderPersonTransferMapper mapper;
     private final StatusHelper statusHelper;
 
     @Override
     @Transactional
-    public OrderPersonPromotionResponse create(OrderPersonPromotionCreateRequest request) {
-        if (request.getOldPositionId().equals(request.getNewPositionId())) {
-            throw new BadRequestException("New position cannot be identical to the current old position.");
+    public OrderPersonTransferResponse create(OrderPersonTransferCreateRequest request) {
+        if (request.getOldStructureId().equals(request.getNewStructureId()) &&
+                request.getOldPositionId().equals(request.getNewPositionId())) {
+            throw new BadRequestException(
+                    "Target structure and position cannot be identical to current structure and position.");
         }
 
         Order order = fetchOrder(request.getOrderId());
 
-        if (!order.getOrderType().getCode().equals("PRO")) {
+        if (!order.getOrderType().getCode().equals("TRF")) {
             throw new BadRequestException(
-                    "Selected order is not a promotion order."
+                    "Selected order is not a transfer order."
             );
         }
 
@@ -58,8 +64,21 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
         }
 
         Person person = fetchPerson(request.getPersonId());
+        Structure oldStructure = fetchStructure(request.getOldStructureId());
+        Structure newStructure = fetchStructure(request.getNewStructureId());
         Position oldPosition = fetchPosition(request.getOldPositionId());
         Position newPosition = fetchPosition(request.getNewPositionId());
+
+        StaffingPlan staffingPlan =
+                staffingPlanRepository
+                        .findByStructureIdAndPositionId(
+                                newStructure.getId(),
+                                newPosition.getId()
+                        )
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "No staffing plan exists for the selected structure and position."
+                                ));
 
         OrderPersonAppointment appointment =
                 appointmentRepository
@@ -68,6 +87,16 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
                                 new BadRequestException(
                                         "Person does not have an active appointment."
                                 ));
+
+        if (!appointment.getStaffingPlan()
+                .getStructure()
+                .getId()
+                .equals(oldStructure.getId())) {
+
+            throw new BadRequestException(
+                    "Old structure does not match employee's current structure."
+            );
+        }
 
         if (!appointment.getStaffingPlan()
                 .getPosition()
@@ -81,34 +110,50 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
 
 
 
-        OrderPersonPromotion entity = mapper.toEntity(request);
+        long activeEmployees =
+                appointmentRepository
+                        .countByStaffingPlanIdAndIsClosedFalse(
+                                staffingPlan.getId()
+                        );
+
+        if (activeEmployees >= staffingPlan.getCapacity()) {
+
+            throw new BadRequestException(
+                    "Target staffing plan is already full."
+            );
+        }
+
+
+        OrderPersonTransfer entity = mapper.toEntity(request);
         entity.setOrder(order);
         entity.setPerson(person);
+        entity.setOldStructure(oldStructure);
+        entity.setNewStructure(newStructure);
         entity.setOldPosition(oldPosition);
         entity.setNewPosition(newPosition);
         entity.setStatus(statusHelper.getActive());
 
-        OrderPersonPromotion savedEntity = repository.save(entity);
+        OrderPersonTransfer savedEntity = repository.save(entity);
         return mapper.toResponse(savedEntity);
     }
 
     @Override
     @Transactional
-    public OrderPersonPromotionResponse update(
+    public OrderPersonTransferResponse update(
             Integer id,
-            OrderPersonPromotionUpdateRequest request
+            OrderPersonTransferUpdateRequest request
     ) {
+        OrderPersonTransfer entity = fetchTransfer(id);
 
-        OrderPersonPromotion entity = fetchPromotion(id);
-
+        Structure newStructure = fetchStructure(request.getNewStructureId());
         Position newPosition = fetchPosition(request.getNewPositionId());
 
-        if (entity.getOldPosition().getId().equals(newPosition.getId())) {
+        if (entity.getOldStructure().getId().equals(newStructure.getId()) &&
+                entity.getOldPosition().getId().equals(newPosition.getId())) {
             throw new BadRequestException(
-                    "New position cannot be identical to the old position."
+                    "New structure and position cannot be identical to the old structure and position."
             );
         }
-
 
         Order order = entity.getOrder();
 
@@ -120,20 +165,21 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
 
         mapper.updateEntity(entity, request);
 
+        entity.setNewStructure(newStructure);
         entity.setNewPosition(newPosition);
 
-        OrderPersonPromotion updatedEntity = repository.save(entity);
+        OrderPersonTransfer updatedEntity = repository.save(entity);
 
         return mapper.toResponse(updatedEntity);
     }
 
     @Override
-    public OrderPersonPromotionResponse getById(Integer id) {
-        return mapper.toResponse(fetchPromotion(id));
+    public OrderPersonTransferResponse getById(Integer id) {
+        return mapper.toResponse(fetchTransfer(id));
     }
 
     @Override
-    public List<OrderPersonPromotionResponse> getAll() {
+    public List<OrderPersonTransferResponse> getAll() {
         return repository.findAll()
                 .stream()
                 .map(mapper::toResponse)
@@ -141,7 +187,7 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     }
 
     @Override
-    public List<OrderPersonPromotionResponse> getByPerson(Integer personId) {
+    public List<OrderPersonTransferResponse> getByPerson(Integer personId) {
         fetchPerson(personId);
         return repository.findByPersonId(personId)
                 .stream()
@@ -152,7 +198,7 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     @Override
     @Transactional
     public void softDelete(Integer id) {
-        OrderPersonPromotion entity = fetchPromotion(id);
+        OrderPersonTransfer entity = fetchTransfer(id);
 
         entity.setDeletedBy("SYSTEM");
         entity.setIsDeleted(true);
@@ -164,12 +210,14 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     @Override
     @Transactional
     public void restore(Integer id) {
-        OrderPersonPromotion entity = repository.findDeletedById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Deleted promotion record not found with id: " + id));
+        OrderPersonTransfer entity = repository.findDeletedById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Deleted transfer record not found with id: " + id));
 
         if (!entity.getIsDeleted()) {
             throw new BadRequestException(
-                    "Promotion is not deleted."
+                    "Transfer is not deleted."
             );
         }
 
@@ -177,46 +225,40 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
 
-
         repository.save(entity);
     }
 
     @Override
     @Transactional
-    public OrderPersonPromotionResponse activate(Integer id) {
-        OrderPersonPromotion entity = fetchPromotion(id);
+    public OrderPersonTransferResponse activate(Integer id) {
+        OrderPersonTransfer entity = fetchTransfer(id);
         entity.setStatus(statusHelper.getActive());
 
-        OrderPersonPromotion saved = repository.save(entity);
+        OrderPersonTransfer saved = repository.save(entity);
         return mapper.toResponse(saved);
     }
 
     @Override
     @Transactional
-    public OrderPersonPromotionResponse deactivate(Integer id) {
-        OrderPersonPromotion entity = fetchPromotion(id);
-        entity.setStatus(statusHelper.getInactive());
+    public OrderPersonTransferResponse deactivate(Integer id) {
+        OrderPersonTransfer entity = fetchTransfer(id);
 
-        OrderPersonPromotion saved = repository.save(entity);
+        OrderPersonTransfer saved = repository.save(entity);
         return mapper.toResponse(saved);
     }
 
-    // =========================================================================
-    // Private Helper Fetch Methods
-    // =========================================================================
 
-    private OrderPersonPromotion fetchPromotion(Integer id) {
-
+    private OrderPersonTransfer fetchTransfer(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findDeletedById(id)
                             .ifPresent(e -> {
                                 throw new DeletedResourceException(
-                                        "Promotion record is deleted."
+                                        "Transfer record is deleted."
                                 );
                             });
                     throw new ResourceNotFoundException(
-                            "Promotion not found."
+                            "Transfer not found."
                     );
                 });
     }
@@ -240,6 +282,17 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
                                 throw new DeletedResourceException("Person is deleted.");
                             });
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
+                });
+    }
+
+    private Structure fetchStructure(Integer structureId) {
+        return structureRepository.findById(structureId)
+                .orElseGet(() -> {
+                    structureRepository.findByIdWithDeleted(structureId)
+                            .ifPresent(e -> {
+                                throw new DeletedResourceException("Structure is deleted.");
+                            });
+                    throw new ResourceNotFoundException("Structure not found with id: " + structureId);
                 });
     }
 

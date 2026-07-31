@@ -5,7 +5,7 @@ import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRe
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
 import az.ingress.hrms.entity.order.Order;
-import az.ingress.hrms.entity.order.OrderPersonAppointment;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.BadRequestException;

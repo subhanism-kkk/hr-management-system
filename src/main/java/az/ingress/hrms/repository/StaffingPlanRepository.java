@@ -22,4 +22,9 @@ public interface StaffingPlanRepository extends JpaRepository<StaffingPlan,Integ
 
     boolean existsByStructureAndPosition(Structure structure, Position position);
 
+    Optional<StaffingPlan> findByStructureIdAndPositionId(
+            Integer structureId,
+            Integer positionId
+    );
+
 }

@@ -1,8 +1,7 @@
 package az.ingress.hrms.entity.organization;
 
-import az.ingress.hrms.entity.base.SoftDeleteEntity;
 import az.ingress.hrms.entity.base.WorkflowEntity;
-import az.ingress.hrms.entity.order.OrderPersonPromotion;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

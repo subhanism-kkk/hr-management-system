@@ -1,6 +1,6 @@
 package az.ingress.hrms.repository;
 
-import az.ingress.hrms.entity.order.OrderPersonPromotion;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

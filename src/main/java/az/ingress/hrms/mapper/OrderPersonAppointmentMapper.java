@@ -3,7 +3,7 @@ package az.ingress.hrms.mapper;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
-import az.ingress.hrms.entity.order.OrderPersonAppointment;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring",

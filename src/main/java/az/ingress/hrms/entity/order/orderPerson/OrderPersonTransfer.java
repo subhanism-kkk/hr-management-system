@@ -1,6 +1,7 @@
-package az.ingress.hrms.entity.order;
+package az.ingress.hrms.entity.order.orderPerson;
 
 import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.entity.organization.Structure;
 import az.ingress.hrms.entity.person.Person;

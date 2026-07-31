@@ -1,7 +1,7 @@
 package az.ingress.hrms.repository;
 
 import az.ingress.hrms.entity.order.Order;
-import az.ingress.hrms.entity.order.OrderPersonAppointment;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import az.ingress.hrms.entity.person.Person;
 import org.springframework.data.jpa.repository.JpaRepository;

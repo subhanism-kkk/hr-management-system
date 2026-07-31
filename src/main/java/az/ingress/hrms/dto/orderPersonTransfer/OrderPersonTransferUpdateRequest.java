@@ -1,4 +1,4 @@
-package az.ingress.hrms.dto.orderPersonPromotion;
+package az.ingress.hrms.dto.orderPersonTransfer;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -12,18 +12,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderPersonPromotionCreateRequest {
-    @NotNull(message = "Order ID cannot be null.")
-    @Positive(message = "Order ID must be positive.")
-    private Integer orderId;
+public class OrderPersonTransferUpdateRequest {
 
-    @NotNull(message = "Person ID cannot be null.")
-    @Positive(message = "Person ID must be positive.")
-    private Integer personId;
-
-    @NotNull(message = "Old position ID cannot be null.")
-    @Positive(message = "Old position ID must be positive.")
-    private Integer oldPositionId;
+    @NotNull(message = "New structure ID cannot be null.")
+    @Positive(message = "New structure ID must be positive.")
+    private Integer newStructureId;
 
     @NotNull(message = "New position ID cannot be null.")
     @Positive(message = "New position ID must be positive.")
