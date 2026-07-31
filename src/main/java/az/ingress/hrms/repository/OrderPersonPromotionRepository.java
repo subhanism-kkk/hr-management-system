@@ -3,7 +3,6 @@ package az.ingress.hrms.repository;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,6 +13,6 @@ public interface OrderPersonPromotionRepository extends JpaRepository<OrderPerso
 
     List<OrderPersonPromotion> findByPersonId(Integer personId);
 
-    @Query(value = "SELECT * FROM order_person_promotion WHERE id = :id AND is_deleted = true", nativeQuery = true)
-    Optional<OrderPersonPromotion> findDeletedById(@Param("id") Integer id);
+    @Query(value = "SELECT * FROM order_person_promotion WHERE id = :id ", nativeQuery = true)
+    Optional<OrderPersonPromotion> findByIdWithDeleted(Integer id);
 }

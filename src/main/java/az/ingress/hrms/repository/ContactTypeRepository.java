@@ -1,6 +1,7 @@
 package az.ingress.hrms.repository;
 
 import az.ingress.hrms.entity.lookup.ContactType;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ public interface ContactTypeRepository extends JpaRepository<ContactType, Intege
 
     boolean existsByNameIgnoreCase(String name);
 
-    @Query(value = "SELECT * FROM Contact_Types WHERE id = :id", nativeQuery = true)
-    Optional<ContactType> findByIdWithDeleted(@Param("id") Integer id);
+    @Query(value = "SELECT * FROM contact_type WHERE id = :id ", nativeQuery = true)
+    Optional<ContactType> findByIdWithDeleted( Integer id);
 
 }
