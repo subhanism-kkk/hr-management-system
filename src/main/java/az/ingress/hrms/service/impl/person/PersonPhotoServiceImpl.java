@@ -9,6 +9,9 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.person.personPhoto.PersonPhotoLogRepository;
+import az.ingress.hrms.log.person.personPhoto.PersonPhotoLogService;
 import az.ingress.hrms.mapper.PersonPhotoMapper;
 import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
@@ -29,6 +32,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     private final PersonPhotoRepository repository;
     private final PersonPhotoMapper mapper;
     private final StatusHelper statusHelper;
+    private final PersonPhotoLogService personPhotoLogService;
 
 
     @Override
@@ -62,6 +66,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
         repository.save(entity);
 
+        personPhotoLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(entity);
     }
 
@@ -87,6 +97,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
                 && repository.existsByPersonAndFilePath(entity.getPerson(), filePath)) {
             throw new DuplicateResourceException("Another photo with this file path already exists.");
         }
+
+        personPhotoLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
         entity.setFilePath(filePath);
@@ -159,6 +175,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
                     }
                 });
 
+        personPhotoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsMain(true);
         repository.save(entity);
 
@@ -173,6 +195,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         if (Boolean.TRUE.equals(entity.getIsMain())) {
             entity.setIsMain(false);
         }
+
+        personPhotoLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
 
         entity.setIsDeleted(true);
         entity.setDeletedBy("SYSTEM");
@@ -197,6 +225,13 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
             );
         }
 
+
+        personPhotoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsMain(false);
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
@@ -212,6 +247,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
         PersonPhoto entity = fetchPersonPhoto(id);
 
+        personPhotoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -224,6 +265,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     public PersonPhotoResponse deactivate(Integer id) {
 
         PersonPhoto entity = fetchPersonPhoto(id);
+
+        personPhotoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 
