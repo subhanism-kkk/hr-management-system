@@ -1,6 +1,5 @@
 package az.ingress.hrms.entity.person;
 
-import az.ingress.hrms.entity.base.SoftDeleteEntity;
 import az.ingress.hrms.entity.base.WorkflowEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

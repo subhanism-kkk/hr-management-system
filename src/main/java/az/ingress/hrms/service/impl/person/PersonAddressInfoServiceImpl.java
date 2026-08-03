@@ -9,6 +9,8 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.person.personAddressInfo.PersonAddressInfoLogService;
 import az.ingress.hrms.mapper.PersonAddressInfoMapper;
 import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
@@ -29,6 +31,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     private final PersonRepository personRepository;
     private final PersonAddressInfoMapper mapper;
     private final StatusHelper statusHelper;
+    private final PersonAddressInfoLogService addressInfoLogService;
 
 
     @Override
@@ -54,6 +57,12 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
         repository.save(entity);
 
+        addressInfoLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(entity);
     }
 
@@ -73,6 +82,13 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
                         "This address already exists for the person.");
             }
         }
+
+        addressInfoLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
+
         mapper.updateEntity(entity, request);
 
         entity.setAddress(address);
@@ -111,6 +127,12 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     public void softDelete(Integer id) {
         PersonAddressInfo entity = fetchPersonAddressInfo(id);
 
+        addressInfoLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
         entity.setDeletedBy("SYSTEM");
@@ -126,6 +148,12 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
             throw new IllegalStateException("Resource is not deleted.");
         }
 
+        addressInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -138,6 +166,12 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     public PersonAddressInfoResponse activate(Integer id) {
         PersonAddressInfo entity = fetchPersonAddressInfo(id);
 
+        addressInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -148,6 +182,12 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     @Transactional
     public PersonAddressInfoResponse deactivate(Integer id) {
         PersonAddressInfo entity = fetchPersonAddressInfo(id);
+
+        addressInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 
