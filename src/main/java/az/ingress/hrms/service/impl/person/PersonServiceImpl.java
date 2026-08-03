@@ -1,13 +1,12 @@
 package az.ingress.hrms.service.impl.person;
 
-import az.ingress.hrms.entity.lookup.Status;
 import az.ingress.hrms.entity.person.Person;
-import az.ingress.hrms.entity.person.PersonPhoto;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.person.person.PersonLogService;
 import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
-import az.ingress.hrms.repository.StatusRepository;
 import az.ingress.hrms.service.person.PersonService;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
@@ -26,6 +25,8 @@ public class PersonServiceImpl implements PersonService {
     private final PersonRepository repository;
     private final PersonMapper mapper;
     private final StatusHelper statusHelper;
+    private final PersonLogService personLogService;
+
 
     @Override
     @Transactional
@@ -38,6 +39,12 @@ public class PersonServiceImpl implements PersonService {
 
         repository.save(person);
 
+        personLogService.log(
+                person,
+                LogAction.POST,
+                "ADMIN"
+        );
+
         return mapper.toResponse(person);
     }
 
@@ -46,6 +53,13 @@ public class PersonServiceImpl implements PersonService {
     public PersonResponse update(Integer id, PersonRequest request) {
 
         Person person = fetchPerson(id);
+
+
+        personLogService.log(
+                person,
+                LogAction.PUT,
+                "ADMIN"
+        );
 
         mapper.updateEntity(person, request);
 
@@ -73,6 +87,12 @@ public class PersonServiceImpl implements PersonService {
 
         Person person = fetchPerson(id);
 
+        personLogService.log(
+                person,
+                LogAction.DELETE,
+                "ADMIN"
+        );
+
         person.setIsDeleted(true);
         person.setDeletedAt(LocalDateTime.now());
         person.setDeletedBy("SYSTEM");
@@ -94,6 +114,12 @@ public class PersonServiceImpl implements PersonService {
             throw new IllegalStateException("Resource is not deleted.");
         }
 
+        personLogService.log(
+                person,
+                LogAction.PATCH,
+                "ADMIN"
+        );
+
         person.setIsDeleted(false);
         person.setDeletedAt(null);
         person.setDeletedBy(null);
@@ -107,6 +133,12 @@ public class PersonServiceImpl implements PersonService {
 
         Person person = fetchPerson(id);
 
+        personLogService.log(
+                person,
+                LogAction.PATCH,
+                "ADMIN"
+        );
+
         person.setStatus(statusHelper.getActive());
 
         repository.save(person);
@@ -119,6 +151,12 @@ public class PersonServiceImpl implements PersonService {
     public PersonResponse deactivate(Integer id) {
 
         Person person = fetchPerson(id);
+
+        personLogService.log(
+                person,
+                LogAction.PATCH,
+                "ADMIN"
+        );
 
         person.setStatus(statusHelper.getInactive());
 
