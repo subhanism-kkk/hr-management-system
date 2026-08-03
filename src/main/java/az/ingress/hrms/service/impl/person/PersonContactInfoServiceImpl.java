@@ -10,6 +10,8 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.person.personContactInfo.PersonContactInfoLogService;
 import az.ingress.hrms.mapper.PersonContactInfoMapper;
 import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.repository.PersonContactInfoRepository;
@@ -32,6 +34,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     private final PersonRepository personRepository;
     private final ContactTypeRepository contactTypeRepository;
     private final StatusHelper statusHelper;
+    private final PersonContactInfoLogService contactInfoLogService;
 
     @Override
     @Transactional
@@ -59,6 +62,13 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         entity.setContactType(contactType);
 
         repository.save(entity);
+
+        contactInfoLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(entity);
     }
 
@@ -99,6 +109,12 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
                 );
             }
         }
+
+        contactInfoLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -144,6 +160,12 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
 
         PersonContactInfo entity = fetchPersonContactInfo(id);
 
+        contactInfoLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setIsDeleted(true);
         entity.setDeletedBy("SYSTEM");
         entity.setDeletedAt(LocalDateTime.now());
@@ -168,6 +190,13 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
             );
         }
 
+
+        contactInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -181,6 +210,12 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     public PersonContactInfoResponse activate(Integer id) {
         PersonContactInfo entity = fetchPersonContactInfo(id);
 
+        contactInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -193,6 +228,12 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     @Transactional
     public PersonContactInfoResponse deactivate(Integer id) {
         PersonContactInfo entity = fetchPersonContactInfo(id);
+
+        contactInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 
