@@ -3,6 +3,8 @@ package az.ingress.hrms.service.impl.organization;
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.organization.position.PositionLogService;
 import az.ingress.hrms.mapper.PositionMapper;
 import az.ingress.hrms.repository.PositionRepository;
 import az.ingress.hrms.service.organization.PositionService;
@@ -26,6 +28,7 @@ public class PositionServiceImpl  implements PositionService {
     private final PositionRepository repository;
     private final PositionMapper mapper;
     private final StatusHelper statusHelper;
+    private final PositionLogService positionLogService;
 
     @Override
     @Transactional
@@ -38,6 +41,12 @@ public class PositionServiceImpl  implements PositionService {
         Position position = mapper.toEntity(request);
 
         repository.save(position);
+
+        positionLogService.log(
+                position,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(position);    }
 
@@ -54,6 +63,12 @@ public class PositionServiceImpl  implements PositionService {
                     "position with name '" + request.getName() + "' already exists."
             );
         }
+
+        positionLogService.log(
+                position,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(position, request);
 
@@ -80,6 +95,13 @@ public class PositionServiceImpl  implements PositionService {
 
         Position position = fetchPosition(id);
 
+        positionLogService.log(
+                position,
+                LogAction.DELETE,
+                "admin"
+        );
+
+
         position.setIsDeleted(true);
         position.setDeletedAt(LocalDateTime.now());
 
@@ -103,6 +125,13 @@ public class PositionServiceImpl  implements PositionService {
             throw new IllegalStateException("Position is not deleted.");
         }
 
+        positionLogService.log(
+                position,
+                LogAction.PATCH,
+                "admin"
+        );
+
+
         position.setIsDeleted(false);
         position.setDeletedAt(null);
         position.setDeletedBy(null);
@@ -115,6 +144,12 @@ public class PositionServiceImpl  implements PositionService {
     public PositionResponse activate(Integer id) {
         Position entity = fetchPosition(id);
 
+        positionLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -126,6 +161,12 @@ public class PositionServiceImpl  implements PositionService {
     @Transactional
     public PositionResponse deactivate(Integer id) {
         Position entity = fetchPosition(id);
+
+        positionLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 

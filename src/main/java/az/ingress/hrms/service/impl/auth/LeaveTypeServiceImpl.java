@@ -1,4 +1,4 @@
-package az.ingress.hrms.service.impl.order;
+package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
@@ -7,6 +7,8 @@ import az.ingress.hrms.entity.lookup.LeaveType;
 import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.lookup.leaveType.LeaveTypeLogService;
 import az.ingress.hrms.mapper.LeaveTypeMapper;
 import az.ingress.hrms.repository.LeaveTypeRepository;
 import az.ingress.hrms.service.order.LeaveTypeService;
@@ -24,6 +26,7 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
 
     private final LeaveTypeRepository repository;
     private final LeaveTypeMapper mapper;
+    private final LeaveTypeLogService leaveTypeLogService;
 
     @Override
     @Transactional
@@ -51,6 +54,12 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
 
         LeaveType savedEntity = repository.save(entity);
 
+        leaveTypeLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(savedEntity);
     }
 
@@ -72,6 +81,12 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
                     "Leave type with name '" + name + "' already exists."
             );
         }
+
+        leaveTypeLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -113,6 +128,12 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
             );
         }
 
+        leaveTypeLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setDeletedBy("SYSTEM");
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -130,6 +151,12 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
             throw new BadRequestException("Leave type is not deleted.");
         }
 
+        leaveTypeLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -137,9 +164,6 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
         repository.save(entity);
     }
 
-    // =========================================================================
-    // Private Helper Fetch Methods
-    // =========================================================================
 
     private LeaveType fetchLeaveType(Integer id) {
         return repository.findById(id)

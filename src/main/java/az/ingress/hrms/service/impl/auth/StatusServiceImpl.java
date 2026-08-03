@@ -1,8 +1,9 @@
 package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.entity.lookup.Status;
-import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.lookup.status.StatusLogService;
 import az.ingress.hrms.mapper.StatusMapper;
 import az.ingress.hrms.repository.StatusRepository;
 import az.ingress.hrms.service.auth.StatusService;
@@ -25,6 +26,7 @@ public class StatusServiceImpl implements StatusService {
 
     private final StatusRepository repository;
     private final StatusMapper mapper;
+    private final StatusLogService statusLogService;
 
     @Override
     @Transactional
@@ -45,6 +47,12 @@ public class StatusServiceImpl implements StatusService {
         Status status = mapper.toEntity(request);
 
         repository.save(status);
+
+        statusLogService.log(
+                status,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(status);
     }
@@ -70,6 +78,12 @@ public class StatusServiceImpl implements StatusService {
                     "Status already exists."
             );
         }
+
+        statusLogService.log(
+                status,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(status, request);
 
@@ -100,6 +114,12 @@ public class StatusServiceImpl implements StatusService {
 
         Status status = fetchStatus(id);
 
+        statusLogService.log(
+                status,
+                LogAction.DELETE,
+                "admin"
+        );
+
         status.setIsDeleted(true);
         status.setDeletedAt(LocalDateTime.now());
 
@@ -119,6 +139,12 @@ public class StatusServiceImpl implements StatusService {
         if (!Boolean.TRUE.equals(status.getIsDeleted())) {
             throw new IllegalStateException("Status is not deleted.");
         }
+
+        statusLogService.log(
+                status,
+                LogAction.PATCH,
+                "admin"
+        );
 
         status.setIsDeleted(false);
         status.setDeletedAt(null);

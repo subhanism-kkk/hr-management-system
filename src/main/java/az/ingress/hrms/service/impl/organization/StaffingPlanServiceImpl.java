@@ -10,6 +10,8 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.organization.staffingPlan.StaffingPlanLogService;
 import az.ingress.hrms.mapper.StaffingPlanMapper;
 import az.ingress.hrms.repository.PositionRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
@@ -32,6 +34,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     private final PositionRepository positionRepository;
     private final StructureRepository structureRepository;
     private final StatusHelper statusHelper;
+    private final StaffingPlanLogService staffingPlanLogService;
 
     @Override
     @Transactional
@@ -51,6 +54,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
+
+        staffingPlanLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(entity);
 
@@ -81,6 +90,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
                 );
             }
         }
+
+        staffingPlanLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -136,6 +151,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
             );
         }
 
+        staffingPlanLogService.log(
+                plan,
+                LogAction.PATCH,
+                "admin"
+        );
+
         plan.setIsClosed(true);
 
         repository.save(plan);
@@ -151,6 +172,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
             );
         }
 
+        staffingPlanLogService.log(
+                plan,
+                LogAction.PATCH,
+                "admin"
+        );
+
         plan.setIsClosed(false);
 
         repository.save(plan);
@@ -160,6 +187,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     public void softDelete(Integer id) {
 
         StaffingPlan entity = fetchStaffingPlan(id);
+
+        staffingPlanLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
 
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -183,6 +216,13 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
             );
         }
 
+        staffingPlanLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -196,6 +236,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     public StaffingPlanResponse activate(Integer id) {
         StaffingPlan entity = fetchStaffingPlan(id);
 
+        staffingPlanLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -207,6 +253,12 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     @Transactional
     public StaffingPlanResponse deactivate(Integer id) {
         StaffingPlan entity = fetchStaffingPlan(id);
+
+        staffingPlanLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 

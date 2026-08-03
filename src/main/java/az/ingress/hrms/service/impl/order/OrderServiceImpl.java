@@ -1,6 +1,8 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.order.OrderLogService;
 import az.ingress.hrms.mapper.OrderMapper;
 import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.OrderTypeRepository;
@@ -29,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderNumberGenerator generator;
     private final OrderTypeRepository orderTypeRepository;
     private final StatusHelper statusHelper;
+    private final OrderLogService orderLogService;
 
 
     @Override
@@ -55,6 +58,11 @@ public class OrderServiceImpl implements OrderService {
 
         repository.save(order);
 
+        orderLogService.log(
+                order,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(order);
     }
@@ -81,6 +89,12 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = fetchOrder(id);
 
+        orderLogService.log(
+                order,
+                LogAction.DELETE,
+                "admin"
+        );
+
         order.setIsDeleted(true);
         order.setDeletedAt(LocalDateTime.now());
         order.setDeletedBy("SYSTEM");
@@ -103,6 +117,12 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Order is not deleted.");
         }
 
+        orderLogService.log(
+                order,
+                LogAction.PATCH,
+                "admin"
+        );
+
         order.setIsDeleted(false);
         order.setDeletedAt(null);
         order.setDeletedBy(null);
@@ -115,6 +135,12 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse activate(Integer id) {
         Order entity = fetchOrder(id);
 
+        orderLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -126,6 +152,12 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse deactivate(Integer id) {
         Order entity = fetchOrder(id);
+
+        orderLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 

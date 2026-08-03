@@ -3,6 +3,8 @@ package az.ingress.hrms.service.impl.auth;
 import az.ingress.hrms.entity.lookup.ContactType;
 import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.lookup.contactType.ContactTypeLogService;
 import az.ingress.hrms.mapper.ContactTypeMapper;
 import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.service.auth.ContactTypeService;
@@ -24,6 +26,7 @@ public class ContactTypeServiceImpl implements ContactTypeService {
 
     private final ContactTypeRepository repository;
     private final ContactTypeMapper mapper;
+    private final ContactTypeLogService contactTypeLogService;
 
     @Override
     @Transactional
@@ -36,6 +39,12 @@ public class ContactTypeServiceImpl implements ContactTypeService {
         ContactType contactType = mapper.toEntity(request);
 
         repository.save(contactType);
+
+        contactTypeLogService.log(
+                contactType,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(contactType);
     }
@@ -53,6 +62,12 @@ public class ContactTypeServiceImpl implements ContactTypeService {
                     "Contact type with name '" + request.getName() + "' already exists."
             );
         }
+
+        contactTypeLogService.log(
+                contactType,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(contactType, request);
 
@@ -85,6 +100,13 @@ public class ContactTypeServiceImpl implements ContactTypeService {
 
         ContactType contactType = fetchContactType(id);
 
+        contactTypeLogService.log(
+                contactType,
+                LogAction.DELETE,
+                "admin"
+        );
+
+
         contactType.setIsDeleted(true);
         contactType.setDeletedAt(LocalDateTime.now());
         contactType.setDeletedBy("SYSTEM");
@@ -97,12 +119,19 @@ public class ContactTypeServiceImpl implements ContactTypeService {
     @Transactional
     public void restore(Integer id) {
 
-         ContactType contactType = repository.findByIdWithDeleted(id)
+        ContactType contactType = repository.findByIdWithDeleted(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contact type not found."));
 
         if (!Boolean.TRUE.equals(contactType.getIsDeleted())) {
             throw new IllegalStateException("contactType is not deleted.");
         }
+
+        contactTypeLogService.log(
+                contactType,
+                LogAction.PATCH,
+                "admin"
+        );
+
 
         contactType.setIsDeleted(false);
         contactType.setDeletedAt(null);

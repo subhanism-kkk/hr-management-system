@@ -3,6 +3,8 @@ package az.ingress.hrms.service.impl.order;
 import az.ingress.hrms.entity.order.OrderType;
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.orderType.OrderTypeLogService;
 import az.ingress.hrms.mapper.OrderTypeMapper;
 import az.ingress.hrms.repository.OrderTypeRepository;
 import az.ingress.hrms.service.order.OrderTypeService;
@@ -24,6 +26,7 @@ public class OrderTypeServiceImpl implements OrderTypeService {
 
     private final OrderTypeRepository repository;
     private final OrderTypeMapper mapper;
+    private final OrderTypeLogService orderTypeLogService;
 
     @Override
     @Transactional
@@ -36,6 +39,12 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         OrderType orderType = mapper.toEntity(request);
 
         repository.save(orderType);
+
+        orderTypeLogService.log(
+                orderType,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(orderType);
     }
@@ -53,6 +62,12 @@ public class OrderTypeServiceImpl implements OrderTypeService {
                     "Order type with name '" + request.getName() + "' already exists."
             );
         }
+
+        orderTypeLogService.log(
+                orderType,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(orderType, request);
 
@@ -81,6 +96,12 @@ public class OrderTypeServiceImpl implements OrderTypeService {
 
         OrderType orderType = fetchOrdertype(id);
 
+        orderTypeLogService.log(
+                orderType,
+                LogAction.DELETE,
+                "admin"
+        );
+
         orderType.setIsDeleted(true);
         orderType.setDeletedAt(LocalDateTime.now());
 
@@ -103,6 +124,12 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         if (!Boolean.TRUE.equals(orderType.getIsDeleted())) {
             throw new IllegalStateException("OrderType is not deleted.");
         }
+
+        orderTypeLogService.log(
+                orderType,
+                LogAction.PATCH,
+                "admin"
+        );
 
         orderType.setIsDeleted(false);
         orderType.setDeletedAt(null);
