@@ -13,6 +13,8 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.orderPerson.appointment.OrderPersonAppointmentLogService;
 import az.ingress.hrms.mapper.OrderPersonAppointmentMapper;
 import az.ingress.hrms.repository.OrderPersonAppointmentRepository;
 import az.ingress.hrms.repository.OrderRepository;
@@ -36,6 +38,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     private final OrderRepository orderRepository;
     private final PersonRepository personRepository;
     private final StaffingPlanRepository staffingPlanRepository;
+    private final OrderPersonAppointmentLogService appointmentLogService;
 
     private final OrderPersonAppointmentMapper mapper;
     private final StatusHelper statusHelper;
@@ -78,6 +81,11 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
 
         OrderPersonAppointment savedEntity = repository.save(entity);
 
+        appointmentLogService.log(
+                savedEntity,
+                LogAction.POST,
+                "admin"
+        );
 
         return mapper.toResponse(savedEntity);
     }
@@ -105,6 +113,12 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
 
             entity.setStaffingPlan(staffingPlan);
         }
+
+        appointmentLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -153,10 +167,16 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
                 .getCode()
                 .equals("DIS")) {
 
-            throw new ResourceNotFoundException(
+            throw new BadRequestException(
                     "Order is not a dismissal order."
             );
         }
+
+        appointmentLogService.log(
+                appointment,
+                LogAction.PUT,
+                "admin"
+        );
 
         appointment.setDismissalOrder(dismissalOrder);
         appointment.setEndDate(dismissalDate);
@@ -173,6 +193,12 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     public void softDelete(Integer id) {
         OrderPersonAppointment entity = fetchAppointment(id);
 
+        appointmentLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
         entity.setDeletedBy("SYSTEM");
@@ -187,6 +213,16 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         OrderPersonAppointment entity = repository.findByIdWithDeleted(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Deleted appointment not found with id: " + id));
 
+        if (!entity.getIsDeleted()) {
+            throw new IllegalStateException("Appointment is not deleted.");
+        }
+
+        appointmentLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -199,6 +235,13 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     @Transactional
     public OrderPersonAppointmentResponse activate(Integer id) {
         OrderPersonAppointment entity = fetchAppointment(id);
+
+        appointmentLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         OrderPersonAppointment saved = repository.save(entity);
@@ -211,6 +254,13 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     @Transactional
     public OrderPersonAppointmentResponse deactivate(Integer id) {
         OrderPersonAppointment entity = fetchAppointment(id);
+
+        appointmentLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getInactive());
 
         OrderPersonAppointment saved = repository.save(entity);
@@ -247,21 +297,23 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
 
                     throw new ResourceNotFoundException(
                             "person not found.");
-                });}
+                });
+    }
 
     private Order fetchOrder(Integer orderId) {
         return orderRepository.findById(orderId)
                 .orElseGet(() -> {
-            orderRepository.findByIdWithDeleted(orderId)
-                    .ifPresent(e -> {
+                    orderRepository.findByIdWithDeleted(orderId)
+                            .ifPresent(e -> {
 
-                        throw new DeletedResourceException(
-                                "order is deleted.");
-                    });
+                                throw new DeletedResourceException(
+                                        "order is deleted.");
+                            });
 
-            throw new ResourceNotFoundException(
-                    "order not found.");
-        }); }
+                    throw new ResourceNotFoundException(
+                            "order not found.");
+                });
+    }
 
     private StaffingPlan fetchStaffingPlan(Integer staffingPlanId) {
         return staffingPlanRepository.findById(staffingPlanId)
@@ -275,6 +327,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
 
                     throw new ResourceNotFoundException(
                             "StaffingPlan not found.");
-                });}
+                });
+    }
 
 }

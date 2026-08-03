@@ -14,6 +14,8 @@ import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.orderPerson.OrderPersonTransferLogService;
 import az.ingress.hrms.mapper.OrderPersonTransferMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonTransferService;
@@ -36,6 +38,7 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     private final PositionRepository positionRepository;
     private final OrderPersonAppointmentRepository appointmentRepository;
     private final StaffingPlanRepository staffingPlanRepository;
+    private final OrderPersonTransferLogService transferLogService;
 
     private final OrderPersonTransferMapper mapper;
     private final StatusHelper statusHelper;
@@ -134,6 +137,13 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
         entity.setStatus(statusHelper.getActive());
 
         OrderPersonTransfer savedEntity = repository.save(entity);
+
+        transferLogService.log(
+                savedEntity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(savedEntity);
     }
 
@@ -162,6 +172,12 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
                     "Effective date cannot be before the order date."
             );
         }
+
+        transferLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -200,6 +216,12 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     public void softDelete(Integer id) {
         OrderPersonTransfer entity = fetchTransfer(id);
 
+        transferLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setDeletedBy("SYSTEM");
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -221,6 +243,12 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
             );
         }
 
+        transferLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -232,6 +260,13 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     @Transactional
     public OrderPersonTransferResponse activate(Integer id) {
         OrderPersonTransfer entity = fetchTransfer(id);
+
+        transferLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         OrderPersonTransfer saved = repository.save(entity);
@@ -242,6 +277,14 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     @Transactional
     public OrderPersonTransferResponse deactivate(Integer id) {
         OrderPersonTransfer entity = fetchTransfer(id);
+
+        transferLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
+        entity.setStatus(statusHelper.getInactive());
 
         OrderPersonTransfer saved = repository.save(entity);
         return mapper.toResponse(saved);

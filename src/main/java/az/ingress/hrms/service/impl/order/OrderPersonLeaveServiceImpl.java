@@ -12,6 +12,8 @@ import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.orderPerson.leave.OrderPersonLeaveLogService;
 import az.ingress.hrms.mapper.OrderPersonLeaveMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonLeaveService;
@@ -33,6 +35,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     private final PersonRepository personRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final OrderPersonAppointmentRepository appointmentRepository;
+    private final OrderPersonLeaveLogService leaveLogService;
 
     private final OrderPersonLeaveMapper mapper;
     private final StatusHelper statusHelper;
@@ -82,6 +85,13 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         entity.setStatus(statusHelper.getActive());
 
         OrderPersonLeave savedEntity = repository.save(entity);
+
+        leaveLogService.log(
+                savedEntity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(savedEntity);
     }
 
@@ -121,6 +131,12 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
 
         LeaveType newLeaveType = fetchLeaveType(request.getLeaveTypeId());
 
+        leaveLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
+
         mapper.updateEntity(entity, request);
         entity.setLeaveType(newLeaveType);
 
@@ -155,6 +171,12 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     public void softDelete(Integer id) {
         OrderPersonLeave entity = fetchLeave(id);
 
+        leaveLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setDeletedBy("SYSTEM");
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -172,6 +194,12 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
             throw new BadRequestException("Leave record is not deleted.");
         }
 
+        leaveLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -188,6 +216,11 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
             throw new BadRequestException("Cannot activate an expired leave record.");
         }
 
+        leaveLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
         entity.setStatus(statusHelper.getActive());
         OrderPersonLeave saved = repository.save(entity);
         return mapper.toResponse(saved);
@@ -197,6 +230,13 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     @Transactional
     public OrderPersonLeaveResponse deactivate(Integer id) {
         OrderPersonLeave entity = fetchLeave(id);
+
+        leaveLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getInactive());
 
         OrderPersonLeave saved = repository.save(entity);

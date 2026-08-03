@@ -12,6 +12,8 @@ import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.orderPerson.promotion.OrderPersonPromotionLogService;
 import az.ingress.hrms.mapper.OrderPersonPromotionMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonPromotionService;
@@ -32,6 +34,7 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     private final PersonRepository personRepository;
     private final PositionRepository positionRepository;
     private final OrderPersonAppointmentRepository appointmentRepository;
+    private final OrderPersonPromotionLogService orderPersonPromotionLogService;
 
     private final OrderPersonPromotionMapper mapper;
     private final StatusHelper statusHelper;
@@ -80,7 +83,6 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
         }
 
 
-
         OrderPersonPromotion entity = mapper.toEntity(request);
         entity.setOrder(order);
         entity.setPerson(person);
@@ -89,6 +91,13 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
         entity.setStatus(statusHelper.getActive());
 
         OrderPersonPromotion savedEntity = repository.save(entity);
+
+        orderPersonPromotionLogService.log(
+                savedEntity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(savedEntity);
     }
 
@@ -117,6 +126,12 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
                     "Effective date cannot be before the order date."
             );
         }
+
+        orderPersonPromotionLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -154,6 +169,12 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     public void softDelete(Integer id) {
         OrderPersonPromotion entity = fetchPromotion(id);
 
+        orderPersonPromotionLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setDeletedBy("SYSTEM");
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -173,6 +194,12 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
             );
         }
 
+        orderPersonPromotionLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -185,6 +212,13 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     @Transactional
     public OrderPersonPromotionResponse activate(Integer id) {
         OrderPersonPromotion entity = fetchPromotion(id);
+
+        orderPersonPromotionLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         OrderPersonPromotion saved = repository.save(entity);
@@ -195,15 +229,19 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     @Transactional
     public OrderPersonPromotionResponse deactivate(Integer id) {
         OrderPersonPromotion entity = fetchPromotion(id);
+
+        orderPersonPromotionLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getInactive());
 
         OrderPersonPromotion saved = repository.save(entity);
         return mapper.toResponse(saved);
     }
 
-    // =========================================================================
-    // Private Helper Fetch Methods
-    // =========================================================================
 
     private OrderPersonPromotion fetchPromotion(Integer id) {
 

@@ -11,6 +11,8 @@ import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.order.orderPerson.dismissal.OrderPersonDismissalLogService;
 import az.ingress.hrms.mapper.OrderPersonDismissalMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonDismissalService;
@@ -30,6 +32,7 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
     private final OrderRepository orderRepository;
     private final PersonRepository personRepository;
     private final OrderPersonAppointmentRepository appointmentRepository;
+    private final OrderPersonDismissalLogService dismissalLogService;
 
     private final OrderPersonDismissalMapper mapper;
     private final StatusHelper statusHelper;
@@ -76,6 +79,12 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
 
         appointmentRepository.save(appointment);
 
+        dismissalLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(savedEntity);
     }
 
@@ -99,6 +108,12 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
         if (request.getDismissalDate().isBefore(appointment.getStartDate())) {
             throw new BadRequestException("Dismissal date cannot be before the appointment start date.");
         }
+
+        dismissalLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -140,6 +155,12 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
     public void softDelete(Integer id) {
         OrderPersonDismissal entity = fetchDismissal(id);
 
+        dismissalLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setDeletedBy("SYSTEM");
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
@@ -157,6 +178,12 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
             throw new BadRequestException("Dismissal record is not deleted.");
         }
 
+        dismissalLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -169,6 +196,12 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
 //    public OrderPersonDismissalResponse activate(Integer id) {
 //        OrderPersonDismissal entity = fetchDismissal(id);
 //
+//    dismissalLogService.log(
+//    entity,
+//    LogAction.PATCH,
+//            "admin"
+//            );
+//
 //        entity.setStatus(statusHelper.getActive());
 //        OrderPersonDismissal saved = repository.save(entity);
 //        return mapper.toResponse(saved);
@@ -178,6 +211,13 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
 //    @Transactional
 //    public OrderPersonDismissalResponse deactivate(Integer id) {
 //        OrderPersonDismissal entity = fetchDismissal(id);
+//
+//    dismissalLogService.log(
+//    entity,
+//    LogAction.PATCH,
+//            "admin"
+//            );
+//
 //        entity.setStatus(statusHelper.getInactive());
 //
 //        OrderPersonDismissal saved = repository.save(entity);
