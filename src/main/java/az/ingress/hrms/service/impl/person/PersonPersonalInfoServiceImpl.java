@@ -9,6 +9,8 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
+import az.ingress.hrms.log.LogAction;
+import az.ingress.hrms.log.person.personPersonalInfo.PersonPersonalInfoLogService;
 import az.ingress.hrms.mapper.PersonPersonalInfoMapper;
 import az.ingress.hrms.repository.PersonPersonalInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
@@ -29,6 +31,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     private final PersonRepository personRepository;
     private final PersonPersonalInfoMapper mapper;
     private final StatusHelper statusHelper;
+    private final PersonPersonalInfoLogService personalInfoLogService;
 
     @Override
     @Transactional
@@ -57,6 +60,13 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         entity.setFinCode(finCode);
 
         repository.save(entity);
+
+        personalInfoLogService.log(
+                entity,
+                LogAction.POST,
+                "admin"
+        );
+
         return mapper.toResponse(entity);
 
     }
@@ -67,6 +77,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
             , PersonPersonalInfoUpdateRequest request) {
 
         PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
+
+        personalInfoLogService.log(
+                entity,
+                LogAction.PUT,
+                "admin"
+        );
 
         mapper.updateEntity(entity, request);
 
@@ -97,6 +113,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
 
         PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
 
+        personalInfoLogService.log(
+                entity,
+                LogAction.DELETE,
+                "admin"
+        );
+
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
         entity.setDeletedBy("SYSTEM");
@@ -112,6 +134,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
                         "Personal information not found."
                 ));
 
+        personalInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
         entity.setDeletedBy(null);
@@ -125,6 +153,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
 
         PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
 
+        personalInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
+
         entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
@@ -137,6 +171,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     public PersonPersonalInfoResponse deactivate(Integer id) {
 
         PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
+
+        personalInfoLogService.log(
+                entity,
+                LogAction.PATCH,
+                "admin"
+        );
 
         entity.setStatus(statusHelper.getInactive());
 
