@@ -1,4 +1,4 @@
-package az.ingress.hrms.log.order.orderPerson;
+package az.ingress.hrms.log.order.orderPerson.transfer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

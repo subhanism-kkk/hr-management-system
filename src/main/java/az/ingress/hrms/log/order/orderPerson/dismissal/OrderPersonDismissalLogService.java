@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.order.orderPerson.dismissal;
 
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonDismissal;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,17 @@ import java.time.LocalDateTime;
 public class OrderPersonDismissalLogService {
 
     private final OrderPersonDismissalLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
+
 
     @Transactional
     public void log(
             OrderPersonDismissal dismissal,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
+
 
         OrderPersonDismissalLog log = OrderPersonDismissalLog.builder()
                 .mainId(dismissal.getId())
@@ -46,6 +51,7 @@ public class OrderPersonDismissalLogService {
                 .deletedAt(dismissal.getDeletedAt())
                 .deletedBy(dismissal.getDeletedBy())
                 .actionType(action.name())
+                .ipAddress(ipAddress)
                 .performedBy(performedBy)
                 .loggedAt(LocalDateTime.now())
                 .build();

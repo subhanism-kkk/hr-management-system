@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.lookup.leaveType;
 
 import az.ingress.hrms.entity.lookup.LeaveType;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,17 @@ import java.time.LocalDateTime;
 public class LeaveTypeLogService {
 
     private final LeaveTypeLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
+
 
     @Transactional
     public void log(
             LeaveType leaveType,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         LeaveTypeLog log = LeaveTypeLog.builder()
                 .mainId(leaveType.getId())
@@ -38,6 +43,7 @@ public class LeaveTypeLogService {
                 .deletedBy(leaveType.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

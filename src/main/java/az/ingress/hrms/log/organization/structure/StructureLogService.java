@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.organization.structure;
 
 import az.ingress.hrms.entity.organization.Structure;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,15 @@ import java.time.LocalDateTime;
 public class StructureLogService {
 
     private final StructureLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             Structure structure,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         StructureLog log = StructureLog.builder()
                 .mainId(structure.getId())
@@ -42,6 +45,7 @@ public class StructureLogService {
                 .deletedBy(structure.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

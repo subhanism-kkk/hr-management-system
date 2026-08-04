@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.order.orderPerson.leave;
 
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonLeave;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,16 @@ import java.time.LocalDateTime;
 public class OrderPersonLeaveLogService {
 
     private final OrderPersonLeaveLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
+
 
     @Transactional
     public void log(
             OrderPersonLeave leave,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         OrderPersonLeaveLog log = OrderPersonLeaveLog.builder()
                 .mainId(leave.getId())
@@ -54,6 +58,7 @@ public class OrderPersonLeaveLogService {
                 .actionType(action.name())
                 .performedBy(performedBy)
                 .loggedAt(LocalDateTime.now())
+                .ipAddress(ipAddress)
                 .build();
 
         repository.save(log);

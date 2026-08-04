@@ -1,18 +1,20 @@
-package az.ingress.hrms.log.lookup.leaveType;
+package az.ingress.hrms.log.order.orderPerson.salary;
 
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Leave_Type_Log", schema = "log")
+@Table(name = "Order_Person_Salary_Log", schema = "log")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LeaveTypeLog {
+public class OrderPersonSalaryLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,14 +23,20 @@ public class LeaveTypeLog {
     @Column(name = "main_id", nullable = false)
     private Integer mainId;
 
-    @Column(name = "code")
-    private String code;
+    @Column(name = "order_id")
+    private Integer orderId;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "staffing_plan_id")
+    private Integer staffingPlanId;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "old_salary", precision = 12, scale = 2)
+    private BigDecimal oldSalary;
+
+    @Column(name = "new_salary", precision = 12, scale = 2)
+    private BigDecimal newSalary;
+
+    @Column(name = "effective_date")
+    private LocalDate effectiveDate;
 
     @Column(name = "status_id")
     private Integer statusId;
@@ -59,5 +67,4 @@ public class LeaveTypeLog {
 
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
-
 }

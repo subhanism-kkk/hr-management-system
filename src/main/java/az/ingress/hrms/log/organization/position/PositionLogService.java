@@ -2,6 +2,7 @@ package az.ingress.hrms.log.organization.position;
 
 
 import az.ingress.hrms.entity.organization.Position;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,13 +15,15 @@ import java.time.LocalDateTime;
 public class PositionLogService {
 
     private final PositionLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             Position position,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         PositionLog log = PositionLog.builder()
                 .mainId(position.getId())
@@ -33,6 +36,7 @@ public class PositionLogService {
                 .deletedBy(position.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

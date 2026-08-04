@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.person.personPhoto;
 
 import az.ingress.hrms.entity.person.PersonPhoto;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,15 @@ import java.time.LocalDateTime;
 public class PersonPhotoLogService {
 
     private final PersonPhotoLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             PersonPhoto personPhoto,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         PersonPhotoLog log = PersonPhotoLog.builder()
                 .mainId(personPhoto.getId())
@@ -37,6 +40,7 @@ public class PersonPhotoLogService {
                 .deletedBy(personPhoto.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

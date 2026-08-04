@@ -15,7 +15,7 @@ import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
-import az.ingress.hrms.log.order.orderPerson.OrderPersonTransferLogService;
+import az.ingress.hrms.log.order.orderPerson.transfer.OrderPersonTransferLogService;
 import az.ingress.hrms.mapper.OrderPersonTransferMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonTransferService;

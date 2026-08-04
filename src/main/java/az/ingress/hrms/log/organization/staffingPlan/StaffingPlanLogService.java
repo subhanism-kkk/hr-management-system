@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.organization.staffingPlan;
 
 import az.ingress.hrms.entity.organization.StaffingPlan;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,17 @@ import java.time.LocalDateTime;
 public class StaffingPlanLogService {
 
     private final StaffingPlanLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
+
 
     @Transactional
     public void log(
             StaffingPlan staffingPlan,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
+
 
         StaffingPlanLog log = StaffingPlanLog.builder()
                 .mainId(staffingPlan.getId())
@@ -48,6 +53,7 @@ public class StaffingPlanLogService {
                 .deletedBy(staffingPlan.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

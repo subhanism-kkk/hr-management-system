@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.order.orderPerson.promotion;
 
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,17 @@ import java.time.LocalDateTime;
 public class OrderPersonPromotionLogService {
 
     private final OrderPersonPromotionLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
+
 
     @Transactional
     public void log(
             OrderPersonPromotion promotion,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
+
 
         OrderPersonPromotionLog log = OrderPersonPromotionLog.builder()
                 .mainId(promotion.getId())
@@ -56,6 +61,7 @@ public class OrderPersonPromotionLogService {
                 .deletedBy(promotion.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

@@ -1,4 +1,4 @@
-package az.ingress.hrms.log.order.orderPerson;
+package az.ingress.hrms.log.order.orderPerson.transfer;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -69,4 +69,7 @@ public class OrderPersonTransferLog {
 
     @Column(name = "logged_at", nullable = false)
     private LocalDateTime loggedAt;
+
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
 }

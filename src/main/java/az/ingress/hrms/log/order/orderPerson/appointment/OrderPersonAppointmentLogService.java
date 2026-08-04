@@ -2,6 +2,7 @@ package az.ingress.hrms.log.order.orderPerson.appointment;
 
 
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,13 +15,15 @@ import java.time.LocalDateTime;
 public class OrderPersonAppointmentLogService {
 
     private final OrderPersonAppointmentLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             OrderPersonAppointment appointment,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         OrderPersonAppointmentLog log = OrderPersonAppointmentLog.builder()
                 .mainId(appointment.getId())
@@ -59,6 +62,7 @@ public class OrderPersonAppointmentLogService {
                 .deletedBy(appointment.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

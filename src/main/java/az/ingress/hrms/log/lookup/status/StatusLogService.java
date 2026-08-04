@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.lookup.status;
 
 import az.ingress.hrms.entity.lookup.Status;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,16 @@ import java.time.LocalDateTime;
 public class StatusLogService {
 
     private final StatusLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             Status status,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
+
 
         StatusLog log = StatusLog.builder()
                 .mainId(status.getId())
@@ -33,6 +37,7 @@ public class StatusLogService {
                 .actionType(action.name())
                 .performedBy(performedBy)
                 .loggedAt(LocalDateTime.now())
+                .ipAddress(ipAddress)
                 .build();
 
         repository.save(log);

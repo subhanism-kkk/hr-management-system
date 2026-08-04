@@ -56,4 +56,8 @@ public class PersonContactInfoLog {
 
     @Column(name = "logged_at", nullable = false)
     private LocalDateTime loggedAt;
+
+
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
 }

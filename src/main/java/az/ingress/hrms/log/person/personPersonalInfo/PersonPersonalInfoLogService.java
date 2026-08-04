@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.person.personPersonalInfo;
 
 import az.ingress.hrms.entity.person.PersonPersonalInfo;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,15 @@ import java.time.LocalDateTime;
 public class PersonPersonalInfoLogService {
 
     private final PersonPersonalInfoLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             PersonPersonalInfo personalInfo,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         PersonPersonalInfoLog log = PersonPersonalInfoLog.builder()
                 .mainId(personalInfo.getId())
@@ -43,6 +46,7 @@ public class PersonPersonalInfoLogService {
                 .deletedBy(personalInfo.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.order.orderType;
 
 import az.ingress.hrms.entity.order.OrderType;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,16 @@ import java.time.LocalDateTime;
 public class OrderTypeLogService {
 
     private final OrderTypeLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             OrderType orderType,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
+
 
         OrderTypeLog log = OrderTypeLog.builder()
                 .mainId(orderType.getId())
@@ -33,6 +37,7 @@ public class OrderTypeLogService {
                 .deletedBy(orderType.getDeletedBy())
                 .actionType(action.name())
                 .performedBy(performedBy)
+                .ipAddress(ipAddress)
                 .loggedAt(LocalDateTime.now())
                 .build();
 

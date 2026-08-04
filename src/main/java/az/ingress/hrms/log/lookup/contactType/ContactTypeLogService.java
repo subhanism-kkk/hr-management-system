@@ -1,6 +1,7 @@
 package az.ingress.hrms.log.lookup.contactType;
 
 import az.ingress.hrms.entity.lookup.ContactType;
+import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,15 @@ import java.time.LocalDateTime;
 public class ContactTypeLogService {
 
     private final ContactTypeLogRepository repository;
+    private final CurrentRequestProvider currentRequestProvider;
 
     @Transactional
     public void log(
             ContactType contactType,
             LogAction action,
-            String performedBy
-    ) {
+            String performedBy) {
+
+        String ipAddress = currentRequestProvider.getIpAddress();
 
         ContactTypeLog log = ContactTypeLog.builder()
                 .mainId(contactType.getId())
@@ -33,6 +36,7 @@ public class ContactTypeLogService {
                 .actionType(action.name())
                 .performedBy(performedBy)
                 .loggedAt(LocalDateTime.now())
+                .ipAddress(ipAddress)
                 .build();
 
         repository.save(log);
