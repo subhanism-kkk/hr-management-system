@@ -1,4 +1,4 @@
-package az.ingress.hrms.service.order;
+package az.ingress.hrms.service.auth;
 
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;

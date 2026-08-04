@@ -1,4 +1,4 @@
-package az.ingress.hrms.controller;
+package az.ingress.hrms.controller.person;
 
 import az.ingress.hrms.service.person.PersonService;
 import az.ingress.hrms.dto.person.PersonRequest;

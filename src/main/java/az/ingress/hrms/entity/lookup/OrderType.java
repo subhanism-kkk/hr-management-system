@@ -1,4 +1,4 @@
-package az.ingress.hrms.entity.order;
+package az.ingress.hrms.entity.lookup;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
 import jakarta.persistence.Column;

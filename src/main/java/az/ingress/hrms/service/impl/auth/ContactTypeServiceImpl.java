@@ -1,7 +1,6 @@
 package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.entity.lookup.ContactType;
-import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.contactType.ContactTypeLogService;

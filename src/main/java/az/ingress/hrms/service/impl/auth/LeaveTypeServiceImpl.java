@@ -11,7 +11,7 @@ import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.leaveType.LeaveTypeLogService;
 import az.ingress.hrms.mapper.LeaveTypeMapper;
 import az.ingress.hrms.repository.LeaveTypeRepository;
-import az.ingress.hrms.service.order.LeaveTypeService;
+import az.ingress.hrms.service.auth.LeaveTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

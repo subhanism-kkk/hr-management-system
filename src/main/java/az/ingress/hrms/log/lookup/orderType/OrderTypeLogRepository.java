@@ -1,4 +1,4 @@
-package az.ingress.hrms.log.order.orderType;
+package az.ingress.hrms.log.lookup.orderType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

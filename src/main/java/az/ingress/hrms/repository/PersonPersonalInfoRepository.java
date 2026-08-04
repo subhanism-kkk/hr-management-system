@@ -1,6 +1,5 @@
 package az.ingress.hrms.repository;
 
-import az.ingress.hrms.entity.order.OrderType;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonPersonalInfo;
 import org.springframework.data.jpa.repository.JpaRepository;

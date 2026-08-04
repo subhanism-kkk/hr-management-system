@@ -1,6 +1,6 @@
 package az.ingress.hrms.service.generator;
 
-import az.ingress.hrms.entity.order.OrderType;
+import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

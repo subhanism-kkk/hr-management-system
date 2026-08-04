@@ -1,6 +1,6 @@
 package az.ingress.hrms.repository;
 
-import az.ingress.hrms.entity.order.OrderType;
+import az.ingress.hrms.entity.lookup.OrderType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

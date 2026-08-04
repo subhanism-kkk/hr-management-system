@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.order;
 
 import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
 import jakarta.persistence.*;

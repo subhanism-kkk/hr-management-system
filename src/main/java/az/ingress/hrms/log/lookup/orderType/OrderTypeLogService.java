@@ -1,6 +1,6 @@
-package az.ingress.hrms.log.order.orderType;
+package az.ingress.hrms.log.lookup.orderType;
 
-import az.ingress.hrms.entity.order.OrderType;
+import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.log.CurrentRequestProvider;
 import az.ingress.hrms.log.LogAction;
 import lombok.RequiredArgsConstructor;

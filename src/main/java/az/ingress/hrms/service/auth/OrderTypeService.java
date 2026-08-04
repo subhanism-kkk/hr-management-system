@@ -1,4 +1,4 @@
-package az.ingress.hrms.service.order;
+package az.ingress.hrms.service.auth;
 
 import az.ingress.hrms.dto.orderType.OrderTypeRequest;
 import az.ingress.hrms.dto.orderType.OrderTypeResponse;

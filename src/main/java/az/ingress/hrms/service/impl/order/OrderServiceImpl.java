@@ -11,7 +11,7 @@ import az.ingress.hrms.service.order.OrderService;
 import az.ingress.hrms.dto.order.OrderRequest;
 import az.ingress.hrms.dto.order.OrderResponse;
 import az.ingress.hrms.entity.order.Order;
-import az.ingress.hrms.entity.order.OrderType;
+import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +42,10 @@ public class OrderServiceImpl implements OrderService {
                     orderTypeRepository.findByIdWithDeleted(request.getOrderTypeId())
                             .ifPresent(e -> {
                                 throw new DeletedResourceException(
-                                        "Order is deleted");
+                                        "Order type is deleted");
                             });
 
-                    throw new ResourceNotFoundException("Order not found.");
+                    throw new ResourceNotFoundException("Order type not found.");
                 });
 
         Order order =
