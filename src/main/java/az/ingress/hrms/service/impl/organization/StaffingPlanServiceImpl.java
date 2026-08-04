@@ -141,6 +141,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
+    @Transactional
     public void close(Integer id) {
 
         StaffingPlan plan = fetchStaffingPlan(id);
@@ -163,10 +164,11 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
+    @Transactional
     public void reopen(Integer id) {
         StaffingPlan plan = fetchStaffingPlan(id);
 
-        if (plan.getIsClosed()) {
+        if (!plan.getIsClosed()) {
             throw new IllegalStateException(
                     "Staffing plan is already open."
             );
@@ -184,6 +186,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
+    @Transactional
     public void softDelete(Integer id) {
 
         StaffingPlan entity = fetchStaffingPlan(id);
@@ -202,6 +205,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
 
         StaffingPlan entity = repository.findByIdWithDeleted(id)
