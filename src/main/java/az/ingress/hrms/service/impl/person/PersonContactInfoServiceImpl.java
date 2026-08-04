@@ -17,9 +17,9 @@ import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.repository.PersonContactInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonContactInfoService;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,6 +60,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         entity.setPerson(person);
         entity.setContactValue(contactValue);
         entity.setContactType(contactType);
+        entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
 
@@ -79,34 +80,24 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
 
         PersonContactInfo entity = fetchPersonContactInfo(id);
 
-
-        ContactType contactType = contactTypeRepository.findById(
-                        request.getContactTypeId())
+        ContactType contactType = contactTypeRepository.findById(request.getContactTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Contact Type not found with ID: "
-                                + request.getContactTypeId())
-                );
+                        "Contact Type not found with ID: " + request.getContactTypeId()
+                ));
 
+        String trimmedValue = request.getContactValue().trim();
 
-        if (
-                !entity.getContactValue()
-                        .equalsIgnoreCase(request.getContactValue())
-                        ||
-                        !entity.getContactType().getId()
-                                .equals(request.getContactTypeId())
-        ) {
+        if (!entity.getContactValue().equalsIgnoreCase(trimmedValue)
+                || !entity.getContactType().getId().equals(request.getContactTypeId())) {
 
-            boolean exists =
-                    repository.existsByPersonAndContactTypeAndContactValueIgnoreCase(
-                            entity.getPerson(),
-                            contactType,
-                            request.getContactValue().trim()
-                    );
+            boolean exists = repository.existsByPersonAndContactTypeAndContactValueIgnoreCase(
+                    entity.getPerson(),
+                    contactType,
+                    trimmedValue
+            );
 
             if (exists) {
-                throw new DuplicateResourceException(
-                        "Contact already exists."
-                );
+                throw new DuplicateResourceException("Contact already exists.");
             }
         }
 
@@ -119,12 +110,11 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         mapper.updateEntity(entity, request);
 
         entity.setContactType(contactType);
-        entity.setContactValue(request.getContactValue().trim());
+        entity.setContactValue(trimmedValue);
 
         repository.save(entity);
 
         return mapper.toResponse(entity);
-
     }
 
     @Override
@@ -144,20 +134,19 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     public List<PersonContactInfoResponse> getAllByPerson(Integer personId) {
         if (!personRepository.existsById(personId)) {
             throw new ResourceNotFoundException(
-                    "Person with " + personId + " does not exits.");
+                    "Person with ID " + personId + " does not exist." // FIXED: Typo "exits" -> "exist"
+            );
         }
 
         return repository.findByPersonId(personId)
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
-
     }
 
     @Override
     @Transactional
     public void softDelete(Integer id) {
-
         PersonContactInfo entity = fetchPersonContactInfo(id);
 
         contactInfoLogService.log(
@@ -171,25 +160,19 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         entity.setDeletedAt(LocalDateTime.now());
 
         repository.save(entity);
-
     }
 
     @Override
     @Transactional
     public void restore(Integer id) {
-
         PersonContactInfo entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Contact info not found."
-                        ));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Contact info not found."
+                ));
 
-        if (!entity.getIsDeleted()) {
-            throw new IllegalStateException(
-                    "Contact info is not deleted."
-            );
+        if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
+            throw new IllegalStateException("Contact info is not deleted.");
         }
-
 
         contactInfoLogService.log(
                 entity,
@@ -202,7 +185,6 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         entity.setDeletedBy(null);
 
         repository.save(entity);
-
     }
 
     @Override
@@ -223,7 +205,6 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         return mapper.toResponse(entity);
     }
 
-
     @Override
     @Transactional
     public PersonContactInfoResponse deactivate(Integer id) {
@@ -242,18 +223,17 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         return mapper.toResponse(entity);
     }
 
-
     private PersonContactInfo fetchPersonContactInfo(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
                             .ifPresent(e -> {
                                 throw new DeletedResourceException(
-                                        "Person Contact info is deleted");
+                                        "Person Contact info is deleted"
+                                );
                             });
 
                     throw new ResourceNotFoundException("Person contact information not found.");
                 });
-
     }
 }

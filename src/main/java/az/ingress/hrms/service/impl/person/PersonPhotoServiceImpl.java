@@ -10,21 +10,20 @@ import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
-import az.ingress.hrms.log.person.personPhoto.PersonPhotoLogRepository;
 import az.ingress.hrms.log.person.personPhoto.PersonPhotoLogService;
 import az.ingress.hrms.mapper.PersonPhotoMapper;
 import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PersonPhotoServiceImpl implements PersonPhotoService {
 
@@ -33,7 +32,6 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     private final PersonPhotoMapper mapper;
     private final StatusHelper statusHelper;
     private final PersonPhotoLogService personPhotoLogService;
-
 
     @Override
     @Transactional
@@ -46,12 +44,10 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         String filePath = request.getFilePath().trim();
 
         if (repository.existsByPersonAndFilePath(person, filePath)) {
-            throw new DuplicateResourceException(
-                    "Person with this photo already exists.");
+            throw new DuplicateResourceException("Person with this photo already exists.");
         }
 
         if (Boolean.TRUE.equals(request.getIsMain())) {
-
             repository.findByPersonAndIsMainTrue(person)
                     .ifPresent(oldMainPhoto -> {
                         oldMainPhoto.setIsMain(false);
@@ -63,6 +59,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
         entity.setPerson(person);
         entity.setFilePath(filePath);
+        entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
 
@@ -81,7 +78,6 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         PersonPhoto entity = fetchPersonPhoto(id);
 
         if (Boolean.TRUE.equals(request.getIsMain())) {
-
             repository.findByPersonAndIsMainTrue(entity.getPerson())
                     .ifPresent(oldMainPhoto -> {
                         if (!oldMainPhoto.getId().equals(entity.getId())) {
@@ -112,7 +108,6 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         return mapper.toResponse(entity);
     }
 
-
     @Override
     public PersonPhotoResponse getById(Integer id) {
         return mapper.toResponse(fetchPersonPhoto(id));
@@ -120,8 +115,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
     @Override
     public List<PersonPhotoResponse> getAll() {
-        return repository
-                .findAll()
+        return repository.findAll()
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
@@ -129,7 +123,6 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
     @Override
     public List<PersonPhotoResponse> getAllByPerson(Integer personId) {
-
         if (!personRepository.existsById(personId)) {
             throw new ResourceNotFoundException("Person not found with id: " + personId);
         }
@@ -143,7 +136,6 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     @Override
     @Transactional
     public PersonPhotoResponse getMainPhoto(Integer personId) {
-
         Person person = personRepository.findById(personId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Person not found with id: " + personId
@@ -158,13 +150,14 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     }
 
     @Override
+    @Transactional
     public void setMainPhoto(Integer photoId) {
-
         PersonPhoto entity = fetchPersonPhoto(photoId);
 
         if (Boolean.TRUE.equals(entity.getIsMain())) {
             return;
         }
+
         Person person = entity.getPerson();
 
         repository.findByPersonAndIsMainTrue(person)
@@ -183,13 +176,11 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
 
         entity.setIsMain(true);
         repository.save(entity);
-
     }
 
     @Override
     @Transactional
     public void softDelete(Integer id) {
-
         PersonPhoto entity = fetchPersonPhoto(id);
 
         if (Boolean.TRUE.equals(entity.getIsMain())) {
@@ -207,24 +198,17 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         entity.setDeletedAt(LocalDateTime.now());
 
         repository.save(entity);
-
     }
 
     @Override
+    @Transactional
     public void restore(Integer id) {
-
         PersonPhoto entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Person Photo not found."
-                        ));
+                .orElseThrow(() -> new ResourceNotFoundException("Person Photo not found."));
 
-        if (!entity.getIsDeleted()) {
-            throw new IllegalStateException(
-                    "Person Photo is not deleted."
-            );
+        if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
+            throw new IllegalStateException("Person Photo is not deleted.");
         }
-
 
         personPhotoLogService.log(
                 entity,
@@ -238,13 +222,11 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         entity.setDeletedBy(null);
 
         repository.save(entity);
-
     }
 
     @Override
     @Transactional
     public PersonPhotoResponse activate(Integer id) {
-
         PersonPhoto entity = fetchPersonPhoto(id);
 
         personPhotoLogService.log(
@@ -263,7 +245,6 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     @Override
     @Transactional
     public PersonPhotoResponse deactivate(Integer id) {
-
         PersonPhoto entity = fetchPersonPhoto(id);
 
         personPhotoLogService.log(
@@ -279,19 +260,14 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         return mapper.toResponse(entity);
     }
 
-
     private PersonPhoto fetchPersonPhoto(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
                             .ifPresent(s -> {
-                                throw new DeletedResourceException(
-                                        "Photo is deleted."
-                                );
+                                throw new DeletedResourceException("Photo is deleted.");
                             });
-                    throw new ResourceNotFoundException(
-                            "Person Photo not found.");
+                    throw new ResourceNotFoundException("Person Photo not found.");
                 });
     }
-
 }

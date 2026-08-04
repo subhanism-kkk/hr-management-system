@@ -1,40 +1,37 @@
 package az.ingress.hrms.service.impl.person;
 
+import az.ingress.hrms.dto.person.PersonRequest;
+import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.person.person.PersonLogService;
 import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonService;
-import az.ingress.hrms.dto.person.PersonRequest;
-import az.ingress.hrms.dto.person.PersonResponse;
-import az.ingress.hrms.exception.ResourceNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PersonServiceImpl implements PersonService {
+
     private final PersonRepository repository;
     private final PersonMapper mapper;
     private final StatusHelper statusHelper;
     private final PersonLogService personLogService;
 
-
     @Override
     @Transactional
     public PersonResponse create(PersonRequest request) {
-
-
         Person person = mapper.toEntity(request);
-
         person.setStatus(statusHelper.getActive());
 
         repository.save(person);
@@ -51,9 +48,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public PersonResponse update(Integer id, PersonRequest request) {
-
         Person person = fetchPerson(id);
-
 
         personLogService.log(
                 person,
@@ -84,7 +79,6 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public void softDelete(Integer id) {
-
         Person person = fetchPerson(id);
 
         personLogService.log(
@@ -98,17 +92,13 @@ public class PersonServiceImpl implements PersonService {
         person.setDeletedBy("SYSTEM");
 
         repository.save(person);
-
     }
 
     @Override
     @Transactional
     public void restore(Integer id) {
-
         Person person = repository.findByIdWithDeleted(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Person not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found."));
 
         if (!Boolean.TRUE.equals(person.getIsDeleted())) {
             throw new IllegalStateException("Resource is not deleted.");
@@ -130,7 +120,6 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public PersonResponse activate(Integer id) {
-
         Person person = fetchPerson(id);
 
         personLogService.log(
@@ -149,7 +138,6 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public PersonResponse deactivate(Integer id) {
-
         Person person = fetchPerson(id);
 
         personLogService.log(
@@ -170,12 +158,9 @@ public class PersonServiceImpl implements PersonService {
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
                             .ifPresent(s -> {
-                                throw new DeletedResourceException(
-                                        "Person is deleted."
-                                );
+                                throw new DeletedResourceException("Person is deleted.");
                             });
-                    throw new ResourceNotFoundException(
-                            "Person not found.");
+                    throw new ResourceNotFoundException("Person not found.");
                 });
     }
 }

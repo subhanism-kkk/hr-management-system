@@ -15,15 +15,15 @@ import az.ingress.hrms.mapper.PersonPersonalInfoMapper;
 import az.ingress.hrms.repository.PersonPersonalInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPersonalInfoService;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService {
 
@@ -36,28 +36,24 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     @Override
     @Transactional
     public PersonPersonalInfoResponse create(PersonPersonalInfoCreateRequest request) {
-        Person person = personRepository.findById(request.getPersonId()).
-                orElseThrow(() -> new ResourceNotFoundException(
-                        "Person not found"));
+        Person person = personRepository.findById(request.getPersonId())
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found"));
 
         if (repository.existsByPerson(person)) {
-            throw new DuplicateResourceException(
-                    " This person already has personal information.");
+            throw new DuplicateResourceException("This person already has personal information.");
         }
 
         String finCode = request.getFinCode().trim().toUpperCase();
 
         if (repository.existsByFinCode(finCode)) {
-            throw new DuplicateResourceException(
-                    "FIN code already exists."
-            );
+            throw new DuplicateResourceException("FIN code already exists.");
         }
 
         PersonPersonalInfo entity = mapper.toEntity(request);
 
         entity.setPerson(person);
-
         entity.setFinCode(finCode);
+        entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
 
@@ -68,15 +64,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         );
 
         return mapper.toResponse(entity);
-
     }
 
     @Override
     @Transactional
-    public PersonPersonalInfoResponse update(Integer id
-            , PersonPersonalInfoUpdateRequest request) {
-
-        PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
+    public PersonPersonalInfoResponse update(Integer id, PersonPersonalInfoUpdateRequest request) {
+        PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
 
         personalInfoLogService.log(
                 entity,
@@ -93,9 +86,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
 
     @Override
     public PersonPersonalInfoResponse getById(Integer id) {
-        PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
-
-
+        PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
         return mapper.toResponse(entity);
     }
 
@@ -110,8 +101,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     @Override
     @Transactional
     public void softDelete(Integer id) {
-
-        PersonPersonalInfo entity =fetchPersonPersonalInfo(id);
+        PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
 
         personalInfoLogService.log(
                 entity,
@@ -130,9 +120,11 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     @Transactional
     public void restore(Integer id) {
         PersonPersonalInfo entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Personal information not found."
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Personal information not found."));
+
+        if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
+            throw new IllegalStateException("Personal information is not deleted.");
+        }
 
         personalInfoLogService.log(
                 entity,
@@ -150,7 +142,6 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     @Override
     @Transactional
     public PersonPersonalInfoResponse activate(Integer id) {
-
         PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
 
         personalInfoLogService.log(
@@ -169,7 +160,6 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     @Override
     @Transactional
     public PersonPersonalInfoResponse deactivate(Integer id) {
-
         PersonPersonalInfo entity = fetchPersonPersonalInfo(id);
 
         personalInfoLogService.log(
@@ -190,12 +180,9 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
                             .ifPresent(s -> {
-                                throw new DeletedResourceException(
-                                        "Person Personal Info is deleted."
-                                );
+                                throw new DeletedResourceException("Person Personal Info is deleted.");
                             });
-                    throw new ResourceNotFoundException(
-                            "Person Personal Info not found.");
+                    throw new ResourceNotFoundException("Person Personal Info not found.");
                 });
     }
 }

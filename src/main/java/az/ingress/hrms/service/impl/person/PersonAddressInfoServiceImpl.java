@@ -15,17 +15,17 @@ import az.ingress.hrms.mapper.PersonAddressInfoMapper;
 import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonAddressInfoService;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
-
 
     private final PersonAddressInfoRepository repository;
     private final PersonRepository personRepository;
@@ -33,9 +33,8 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     private final StatusHelper statusHelper;
     private final PersonAddressInfoLogService addressInfoLogService;
 
-
     @Override
-
+    @Transactional
     public PersonAddressInfoResponse create(PersonAddressInfoCreateRequest request) {
         Person person = personRepository.findById(request.getPersonId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -54,6 +53,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
         entity.setPerson(person);
         entity.setAddress(address);
+        entity.setStatus(statusHelper.getActive());
 
         repository.save(entity);
 
@@ -75,7 +75,6 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         String address = request.getAddress().trim();
 
         if (!entity.getAddress().equalsIgnoreCase(address)) {
-
             if (repository.existsByPersonAndAddressIgnoreCase(
                     entity.getPerson(), address)) {
                 throw new DuplicateResourceException(
@@ -99,7 +98,8 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
     @Override
     public PersonAddressInfoResponse getById(Integer id) {
-        return mapper.toResponse(fetchPersonAddressInfo(id)); }
+        return mapper.toResponse(fetchPersonAddressInfo(id));
+    }
 
     @Override
     public List<PersonAddressInfoResponse> getAll() {
@@ -143,7 +143,11 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     @Override
     @Transactional
     public void restore(Integer id) {
-        PersonAddressInfo entity =fetchPersonAddressInfo(id);
+        PersonAddressInfo entity = repository.findByIdWithDeleted(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Address information not found."
+                ));
+
         if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
             throw new IllegalStateException("Resource is not deleted.");
         }
@@ -176,7 +180,8 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
         repository.save(entity);
 
-        return mapper.toResponse(entity);    }
+        return mapper.toResponse(entity);
+    }
 
     @Override
     @Transactional
@@ -193,8 +198,8 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
 
         repository.save(entity);
 
-        return mapper.toResponse(entity);    }
-
+        return mapper.toResponse(entity);
+    }
 
     private PersonAddressInfo fetchPersonAddressInfo(Integer id) {
         return repository.findById(id)
@@ -206,6 +211,4 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
                     throw new ResourceNotFoundException("Address information not found.");
                 });
     }
-
-
 }
