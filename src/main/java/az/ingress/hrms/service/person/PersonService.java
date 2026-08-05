@@ -2,6 +2,7 @@ package az.ingress.hrms.service.person;
 
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
+import org.springframework.data.domain.Page;
 
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface PersonService {
 
     PersonResponse getById(Integer id);
 
-    List<PersonResponse> getAll();
+    Page<PersonResponse> getAll(int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

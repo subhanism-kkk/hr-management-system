@@ -8,8 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -97,8 +100,17 @@ public class StructureController {
             responseCode = "200",
             description = "Structures retrieved successfully"
     )
-    public ResponseEntity<List<StructureResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<Page<StructureResponse>> getAll(
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
+    ) {
+        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
     }
 
     @GetMapping("/roots")
@@ -110,8 +122,17 @@ public class StructureController {
             responseCode = "200",
             description = "Root structures retrieved successfully"
     )
-    public ResponseEntity<List<StructureResponse>> getRootStructures() {
-        return ResponseEntity.ok(service.getRootStructures());
+    public ResponseEntity<Page<StructureResponse>> getRootStructures(
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
+    ) {
+        return ResponseEntity.ok(service.getRootStructures(pageNo, pageSize));
     }
 
     @GetMapping("/{parentId}/children")
@@ -124,12 +145,20 @@ public class StructureController {
             @ApiResponse(responseCode = "404", description = "Parent structure not found"),
             @ApiResponse(responseCode = "410", description = "Parent structure is deleted")
     })
-    public ResponseEntity<List<StructureResponse>> getChildren(
+    public ResponseEntity<Page<StructureResponse>> getChildren(
             @PathVariable
             @Positive(message = "Parent ID must be a positive number")
-            Integer parentId
+            Integer parentId,
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
     ) {
-        return ResponseEntity.ok(service.getChildren(parentId));
+        return ResponseEntity.ok(service.getChildren(parentId, pageNo, pageSize));
     }
 
     @PatchMapping("/{id}/activate")

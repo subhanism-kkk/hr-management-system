@@ -9,8 +9,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -97,8 +100,16 @@ public class StaffingPlanController {
             responseCode = "200",
             description = "Staffing plans retrieved successfully"
     )
-    public ResponseEntity<List<StaffingPlanResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<Page<StaffingPlanResponse>> getAll(
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize) {
+        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
     }
 
     @GetMapping("/structure/{structureId}")
@@ -110,12 +121,21 @@ public class StaffingPlanController {
             @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Structure not found")
     })
-    public ResponseEntity<List<StaffingPlanResponse>> getByStructure(
+    public ResponseEntity<Page<StaffingPlanResponse>> getByStructure(
             @PathVariable
             @Positive(message = "Structure ID must be a positive number")
-            Integer structureId
+            Integer structureId,
+
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
     ) {
-        return ResponseEntity.ok(service.getByStructure(structureId));
+        return ResponseEntity.ok(service.getByStructure(structureId, pageNo, pageSize));
     }
 
     @GetMapping("/position/{positionId}")
@@ -127,12 +147,21 @@ public class StaffingPlanController {
             @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Position not found")
     })
-    public ResponseEntity<List<StaffingPlanResponse>> getByPosition(
+    public ResponseEntity<Page<StaffingPlanResponse>> getByPosition(
             @PathVariable
             @Positive(message = "Position ID must be a positive number")
-            Integer positionId
+            Integer positionId,
+
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
     ) {
-        return ResponseEntity.ok(service.getByPosition(positionId));
+        return ResponseEntity.ok(service.getByPosition(positionId, pageNo, pageSize));
     }
 
     @PatchMapping("/{id}/close")

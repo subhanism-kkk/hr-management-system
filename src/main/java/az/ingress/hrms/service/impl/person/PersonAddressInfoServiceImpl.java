@@ -16,6 +16,10 @@ import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonAddressInfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,24 +106,22 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     }
 
     @Override
-    public List<PersonAddressInfoResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<PersonAddressInfoResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<PersonAddressInfoResponse> getAllByPerson(Integer personId) {
+    public Page<PersonAddressInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
         Person person = personRepository.findById(personId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Person not found"
                 ));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
 
-        return repository.findByPerson(person)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        return repository.findByPerson(person, pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

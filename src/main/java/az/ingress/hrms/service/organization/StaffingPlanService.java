@@ -3,6 +3,7 @@ package az.ingress.hrms.service.organization;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,11 +15,11 @@ public interface StaffingPlanService {
 
     StaffingPlanResponse getById(Integer id);
 
-    List<StaffingPlanResponse> getAll();
+    Page<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize);
 
-    List<StaffingPlanResponse> getByStructure(Integer structureId);
+    Page<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize);
 
-    List<StaffingPlanResponse> getByPosition(Integer positionId);
+    Page<StaffingPlanResponse> getAll(int pageNo, int pageSize);
 
     void close(Integer id);
 

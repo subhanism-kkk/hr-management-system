@@ -13,6 +13,10 @@
     import az.ingress.hrms.repository.StructureRepository;
     import az.ingress.hrms.service.organization.StructureService;
     import lombok.RequiredArgsConstructor;
+    import org.springframework.data.domain.Page;
+    import org.springframework.data.domain.PageRequest;
+    import org.springframework.data.domain.Pageable;
+    import org.springframework.data.domain.Sort;
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
 
@@ -128,31 +132,24 @@
         }
 
         @Override
-        public List<StructureResponse> getAll() {
+        public Page<StructureResponse> getAll(int pageNo, int pageSize) {
+            Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
             return repository
-                    .findAll()
-                    .stream()
-                    .map(mapper::toResponse)
-                    .toList();
+                    .findAll(pageable).map(mapper::toResponse);
         }
 
         @Override
-        public List<StructureResponse> getRootStructures() {
-            return repository.findByParentStructureIsNull()
-                    .stream()
-                    .map(mapper::toResponse)
-                    .toList();
+        public Page<StructureResponse> getRootStructures(int pageNo, int pageSize) {
+            Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+            return repository.findByParentStructureIsNull(pageable).map(mapper::toResponse);
         }
 
         @Override
-        public List<StructureResponse> getChildren(Integer parentId) {
-
+        public Page<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize) {
             Structure structure = fetchStructure(parentId);
+            Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+            return repository.findByParentStructure(structure,pageable).map(mapper::toResponse);
 
-            return repository.findByParentStructure(structure)
-                    .stream()
-                    .map(mapper::toResponse)
-                    .toList();
         }
 
         @Override

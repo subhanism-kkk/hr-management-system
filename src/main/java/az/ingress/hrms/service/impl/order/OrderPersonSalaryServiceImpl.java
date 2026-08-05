@@ -18,6 +18,10 @@ import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonSalaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -159,27 +163,24 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
 
 
     @Override
-    public List<OrderPersonSalaryResponse> getAll() {
-
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<OrderPersonSalaryResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
 
     @Override
-    public List<OrderPersonSalaryResponse> getByStaffingPlan(
-            Integer staffingPlanId
+    public Page<OrderPersonSalaryResponse> getByStaffingPlan(
+            Integer staffingPlanId,
+            int pageNo, int pageSize
     ) {
 
         fetchStaffingPlan(staffingPlanId);
-
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
         return repository
-                .findByStaffingPlanId(staffingPlanId)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+                .findByStaffingPlanId(staffingPlanId, pageable)
+                .map(mapper::toResponse);
     }
 
 

@@ -14,6 +14,10 @@ import az.ingress.hrms.dto.position.PositionResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,11 +87,10 @@ public class PositionServiceImpl  implements PositionService {
         return mapper.toResponse(position);    }
 
     @Override
-    public List<PositionResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();    }
+    public Page<PositionResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);}
 
     @Override
     @Transactional

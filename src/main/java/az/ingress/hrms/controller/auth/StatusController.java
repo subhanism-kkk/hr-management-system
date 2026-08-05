@@ -8,8 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -90,14 +93,23 @@ public class StatusController {
     @GetMapping
     @Operation(
             summary = "Get all statuses",
-            description = "Returns all active statuses."
+            description = "Returns a paginated list of active statuses."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Statuses retrieved successfully"
     )
-    public ResponseEntity<List<StatusResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<Page<StatusResponse>> getAll(
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
+    ) {
+        return ResponseEntity.ok(service.getAll(pageNo,pageSize));
     }
 
     @DeleteMapping("/{id}")

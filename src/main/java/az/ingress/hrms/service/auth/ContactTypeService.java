@@ -2,6 +2,7 @@ package az.ingress.hrms.service.auth;
 
 import az.ingress.hrms.dto.contactType.ContactTypeRequest;
 import az.ingress.hrms.dto.contactType.ContactTypeResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface ContactTypeService {
 
     ContactTypeResponse getById(Integer id);
 
-    List<ContactTypeResponse> getAll();
+    Page<ContactTypeResponse> getAll(int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

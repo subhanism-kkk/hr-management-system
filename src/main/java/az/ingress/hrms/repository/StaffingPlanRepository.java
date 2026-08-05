@@ -3,6 +3,8 @@ package az.ingress.hrms.repository;
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import az.ingress.hrms.entity.organization.Structure;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,9 +18,9 @@ public interface StaffingPlanRepository extends JpaRepository<StaffingPlan,Integ
     @Query(value = " SELECT * FROM Staffing_Plan WHERE id = :id", nativeQuery = true)
     Optional<StaffingPlan> findByIdWithDeleted(Integer id);
 
-    List<StaffingPlan> findByStructure(Structure structure);
+    Page<StaffingPlan> findByStructure(Structure structure, Pageable pageable);
 
-    List<StaffingPlan> findByPosition(Position position);
+    Page<StaffingPlan> findByPosition(Position position, Pageable pageable);
 
     boolean existsByStructureAndPosition(Structure structure, Position position);
 

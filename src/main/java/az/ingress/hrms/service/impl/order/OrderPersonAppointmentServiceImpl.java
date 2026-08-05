@@ -22,6 +22,10 @@ import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonAppointmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,19 +136,18 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     }
 
     @Override
-    public List<OrderPersonAppointmentResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<OrderPersonAppointmentResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<OrderPersonAppointmentResponse> getByPerson(Integer personId) {
-        return repository.findByPerson(fetchPerson(personId))
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<OrderPersonAppointmentResponse> getByPerson(Integer personId,
+                                                int pageNo,int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize,Sort.by("id").ascending());
+        return repository.findByPerson(fetchPerson(personId), pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

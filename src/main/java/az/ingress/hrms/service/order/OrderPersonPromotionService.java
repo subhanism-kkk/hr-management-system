@@ -3,6 +3,7 @@ package az.ingress.hrms.service.order;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionCreateRequest;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionResponse;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionUpdateRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,9 +15,9 @@ public interface OrderPersonPromotionService {
 
     OrderPersonPromotionResponse getById(Integer id);
 
-    List<OrderPersonPromotionResponse> getAll();
+    Page<OrderPersonPromotionResponse> getAll(int pageNo, int pageSize);
 
-    List<OrderPersonPromotionResponse> getByPerson(Integer personId);
+    Page<OrderPersonPromotionResponse> getByPerson(Integer personId, int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

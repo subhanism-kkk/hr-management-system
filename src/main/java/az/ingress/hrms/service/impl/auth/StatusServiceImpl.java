@@ -12,6 +12,10 @@ import az.ingress.hrms.dto.status.StatusResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +42,7 @@ public class StatusServiceImpl implements StatusService {
             );
         }
 
-        if(repository.existsByCodeIgnoreCase(request.getCode())){
+        if (repository.existsByCodeIgnoreCase(request.getCode())) {
             throw new ResourceAlreadyExistsException(
                     "Status already exists."
             );
@@ -100,12 +104,12 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public List<StatusResponse> getAll() {
+    public Page<StatusResponse> getAll(int pageNo, int pageSize) {
 
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
@@ -153,8 +157,8 @@ public class StatusServiceImpl implements StatusService {
         repository.save(status);
     }
 
-    private Status fetchStatus(Integer id){
-        return  repository.findById(id)
+    private Status fetchStatus(Integer id) {
+        return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
                             .ifPresent(e -> {

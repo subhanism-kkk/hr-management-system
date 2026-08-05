@@ -20,6 +20,11 @@ import az.ingress.hrms.mapper.OrderPersonTransferMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonTransferService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,7 +117,6 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
         }
 
 
-
         long activeEmployees =
                 appointmentRepository
                         .countByStaffingPlanIdAndIsClosedFalse(
@@ -195,20 +199,18 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     }
 
     @Override
-    public List<OrderPersonTransferResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<OrderPersonTransferResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<OrderPersonTransferResponse> getByPerson(Integer personId) {
+    public Page<OrderPersonTransferResponse> getByPerson(Integer personId, int pageNo, int pageSize) {
         fetchPerson(personId);
-        return repository.findByPersonId(personId)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findByPersonId(personId, pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

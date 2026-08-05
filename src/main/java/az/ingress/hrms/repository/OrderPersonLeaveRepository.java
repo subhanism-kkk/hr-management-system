@@ -2,6 +2,8 @@ package az.ingress.hrms.repository;
 
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonLeave;
 import az.ingress.hrms.entity.person.Person;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface OrderPersonLeaveRepository extends JpaRepository<OrderPersonLeave, Integer> {
 
-    List<OrderPersonLeave> findByPerson(Person person);
+    Page<OrderPersonLeave> findByPerson(Person person, Pageable pageable);
 
     @Query(value = "SELECT * FROM order_person_leave WHERE id = :id", nativeQuery = true)
     Optional<OrderPersonLeave> findByIdWithDeleted(@Param("id") Integer id);

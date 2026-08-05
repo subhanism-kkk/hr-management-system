@@ -3,6 +3,7 @@ package az.ingress.hrms.service.person;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoUpdateRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -16,9 +17,9 @@ public interface PersonAddressInfoService {
 
     PersonAddressInfoResponse getById(Integer id);
 
-    List<PersonAddressInfoResponse> getAll();
+    Page<PersonAddressInfoResponse> getAll(int pageNo, int pageSize);
 
-    List<PersonAddressInfoResponse> getAllByPerson(Integer personId);
+    Page<PersonAddressInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

@@ -3,6 +3,7 @@ package az.ingress.hrms.service.person;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoCreateRequest;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoUpdateRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,9 +15,9 @@ public interface PersonPhotoService {
 
     PersonPhotoResponse getById(Integer id);
 
-    List<PersonPhotoResponse> getAll();
+    Page<PersonPhotoResponse> getAll(int pageNo, int pageSize);
 
-    List<PersonPhotoResponse> getAllByPerson(Integer personId);
+    Page<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
 
     PersonPhotoResponse getMainPhoto(Integer personId);
 

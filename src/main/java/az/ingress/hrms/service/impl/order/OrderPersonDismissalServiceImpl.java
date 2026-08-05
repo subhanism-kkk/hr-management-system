@@ -17,6 +17,11 @@ import az.ingress.hrms.mapper.OrderPersonDismissalMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonDismissalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,20 +139,18 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
     }
 
     @Override
-    public List<OrderPersonDismissalResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<OrderPersonDismissalResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<OrderPersonDismissalResponse> getByPerson(Integer personId) {
+    public Page<OrderPersonDismissalResponse> getByPerson(Integer personId, int pageNo, int pageSize) {
         Person person = fetchPerson(personId);
-        return repository.findByPerson(person)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+        return repository.findByPerson(person, pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

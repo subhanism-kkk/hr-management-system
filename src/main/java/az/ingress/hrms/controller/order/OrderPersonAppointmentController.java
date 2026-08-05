@@ -9,9 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,14 +97,23 @@ public class OrderPersonAppointmentController {
     @GetMapping
     @Operation(
             summary = "Get all order person appointments",
-            description = "Returns all appointment records."
+            description = "Returns a paginated list of active appointment records."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Appointments retrieved successfully"
     )
-    public ResponseEntity<List<OrderPersonAppointmentResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<Page<OrderPersonAppointmentResponse>> getAll(
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
+    ) {
+        return ResponseEntity.ok(service.getAll(pageNo,pageSize));
     }
 
     @GetMapping("/person/{personId}")
@@ -114,12 +126,20 @@ public class OrderPersonAppointmentController {
             @ApiResponse(responseCode = "404", description = "Person not found"),
             @ApiResponse(responseCode = "410", description = "Person is deleted")
     })
-    public ResponseEntity<List<OrderPersonAppointmentResponse>> getByPerson(
+    public ResponseEntity<Page<OrderPersonAppointmentResponse>> getByPerson(
             @PathVariable
             @Positive(message = "Person ID must be a positive number")
-            Integer personId
+            Integer personId,
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "pageNo cannot be negative")
+            int pageNo,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "pageSize must be at least 1")
+            @Max(value = 100, message = "pageSize cannot exceed 100")
+            int pageSize
     ) {
-        return ResponseEntity.ok(service.getByPerson(personId));
+        return ResponseEntity.ok(service.getByPerson(personId,pageNo,pageSize));
     }
 
     @PostMapping("/{id}/dismiss")
