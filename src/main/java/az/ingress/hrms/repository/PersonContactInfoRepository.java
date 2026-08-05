@@ -3,6 +3,8 @@ package az.ingress.hrms.repository;
 import az.ingress.hrms.entity.lookup.ContactType;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonContactInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,7 +16,7 @@ public interface PersonContactInfoRepository
 
     List<PersonContactInfo> findByPerson(Person person);
 
-    List<PersonContactInfo> findByPersonId(Integer personId);
+    Page<PersonContactInfo> findByPersonId(Integer personId, Pageable pageable);
 
     Optional<PersonContactInfo> findByPersonAndIsPrimaryTrue(Person person);
 

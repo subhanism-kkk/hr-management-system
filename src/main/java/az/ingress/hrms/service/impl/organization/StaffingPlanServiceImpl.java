@@ -18,6 +18,10 @@ import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.repository.StructureRepository;
 import az.ingress.hrms.service.organization.StaffingPlanService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,30 +118,27 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
-    public List<StaffingPlanResponse> getAll() {
+    public Page<StaffingPlanResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
         return repository
-                .findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+                .findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<StaffingPlanResponse> getByStructure(Integer structureId) {
+    public Page<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
         return repository.
-                findByStructure(fetchStructure(structureId))
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+                findByStructure(fetchStructure(structureId), pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<StaffingPlanResponse> getByPosition(Integer positionId) {
+    public Page<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
         return repository.
-                findByPosition(fetchPosition(positionId))
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+                findByPosition(fetchPosition(positionId), pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

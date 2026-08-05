@@ -18,6 +18,10 @@ import az.ingress.hrms.mapper.OrderPersonPromotionMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonPromotionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,20 +152,18 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     }
 
     @Override
-    public List<OrderPersonPromotionResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<OrderPersonPromotionResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<OrderPersonPromotionResponse> getByPerson(Integer personId) {
+    public Page<OrderPersonPromotionResponse> getByPerson(Integer personId, int pageNo, int pageSize) {
         fetchPerson(personId);
-        return repository.findByPersonId(personId)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findByPersonId(personId, pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

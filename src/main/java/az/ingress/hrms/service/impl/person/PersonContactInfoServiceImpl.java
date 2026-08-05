@@ -18,6 +18,10 @@ import az.ingress.hrms.repository.PersonContactInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonContactInfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,25 +127,23 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
     @Override
-    public List<PersonContactInfoResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<PersonContactInfoResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<PersonContactInfoResponse> getAllByPerson(Integer personId) {
+    public Page<PersonContactInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
         if (!personRepository.existsById(personId)) {
             throw new ResourceNotFoundException(
-                    "Person with ID " + personId + " does not exist." // FIXED: Typo "exits" -> "exist"
+                    "Person with ID " + personId + " does not exist."
             );
         }
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
 
-        return repository.findByPersonId(personId)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        return repository.findByPersonId(personId, pageable)
+                .map(mapper::toResponse);
     }
 
     @Override

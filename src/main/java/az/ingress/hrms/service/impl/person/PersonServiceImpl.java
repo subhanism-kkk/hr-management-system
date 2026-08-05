@@ -12,6 +12,10 @@ import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,11 +73,10 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public List<PersonResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<PersonResponse> getAll(int pageNo, int pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override

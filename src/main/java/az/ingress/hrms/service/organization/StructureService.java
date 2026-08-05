@@ -2,6 +2,7 @@ package az.ingress.hrms.service.organization;
 
 import az.ingress.hrms.dto.structure.StructureRequest;
 import az.ingress.hrms.dto.structure.StructureResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -16,11 +17,11 @@ public interface StructureService {
 
     StructureResponse getById(Integer id);
 
-    List<StructureResponse> getAll();
+    Page<StructureResponse> getAll(int pageNo, int pageSize);
 
-    List<StructureResponse> getRootStructures();
+    Page<StructureResponse> getRootStructures(int pageNo, int pageSize);
 
-    List<StructureResponse> getChildren(Integer parentId);
+    Page<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

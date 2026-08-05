@@ -16,6 +16,10 @@ import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,23 +118,18 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     }
 
     @Override
-    public List<PersonPhotoResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+    public Page<PersonPhotoResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
-    public List<PersonPhotoResponse> getAllByPerson(Integer personId) {
+    public Page<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
         if (!personRepository.existsById(personId)) {
             throw new ResourceNotFoundException("Person not found with id: " + personId);
         }
-
-        return repository.findByPersonId(personId)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        return repository.findByPersonId(personId, pageable).map(mapper::toResponse);
     }
 
     @Override

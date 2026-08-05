@@ -2,6 +2,7 @@ package az.ingress.hrms.service.auth;
 
 import az.ingress.hrms.dto.orderType.OrderTypeRequest;
 import az.ingress.hrms.dto.orderType.OrderTypeResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface OrderTypeService {
 
     OrderTypeResponse getById(Integer id);
 
-    List<OrderTypeResponse> getAll();
+    Page<OrderTypeResponse> getAll(int pageNo, int pageSize);
 
     void softDelete(Integer id);
 
