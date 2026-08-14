@@ -1,5 +1,6 @@
 package az.ingress.hrms.service.impl.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.entity.person.Person;
@@ -73,10 +74,32 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Page<PersonResponse> getAll(int pageNo, int pageSize) {
+    public PageResponse<PersonResponse> getAll(int pageNo, int pageSize) {
 
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable).map(mapper::toResponse);
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<Person> personPage =
+                repository.findAll(pageable);
+
+        List<PersonResponse> content =
+                personPage
+                        .map(mapper::toResponse)
+                        .getContent();
+
+        return new PageResponse<>(
+                content,
+                personPage.getNumber(),
+                personPage.getSize(),
+                personPage.getTotalElements(),
+                personPage.getTotalPages(),
+                personPage.isFirst(),
+                personPage.isLast()
+        );
     }
 
     @Override

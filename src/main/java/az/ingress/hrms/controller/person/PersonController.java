@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.service.person.PersonService;
@@ -96,7 +97,7 @@ public class PersonController {
             responseCode = "200",
             description = "Person records retrieved successfully"
     )
-    public ResponseEntity<Page<PersonResponse>> getAll(
+    public ResponseEntity<PageResponse<PersonResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
