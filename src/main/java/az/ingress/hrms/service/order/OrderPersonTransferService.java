@@ -1,11 +1,10 @@
 package az.ingress.hrms.service.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferCreateRequest;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferResponse;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferUpdateRequest;
-import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 public interface OrderPersonTransferService {
 
@@ -15,9 +14,9 @@ public interface OrderPersonTransferService {
 
     OrderPersonTransferResponse getById(Integer id);
 
-    Page<OrderPersonTransferResponse> getAll(int pageNo, int pageSize);
+    PageResponse<OrderPersonTransferResponse> getAll(int pageNo, int pageSize);
 
-    Page<OrderPersonTransferResponse> getByPerson(Integer personId, int pageNo, int pageSize);
+    PageResponse<OrderPersonTransferResponse> getByPerson(Integer personId, int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

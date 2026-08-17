@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoCreateRequest;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoUpdateRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/person-contact-info")
+@RequestMapping("/api/v1/person-contacts")
 @RequiredArgsConstructor
 @Validated
 @Tag(
@@ -100,7 +101,7 @@ public class PersonContactInfoController {
             responseCode = "200",
             description = "Contact records retrieved successfully"
     )
-    public ResponseEntity<Page<PersonContactInfoResponse>> getAll(
+    public ResponseEntity<PageResponse<PersonContactInfoResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -122,7 +123,7 @@ public class PersonContactInfoController {
             @ApiResponse(responseCode = "200", description = "Contact records retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Person not found")
     })
-    public ResponseEntity<Page<PersonContactInfoResponse>> getAllByPerson(
+    public ResponseEntity<PageResponse<PersonContactInfoResponse>> getAllByPerson(
             @PathVariable
             @Positive(message = "Person ID must be a positive number")
             Integer personId,

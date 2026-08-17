@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeUpdateRequest;
@@ -13,13 +14,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/leave-types")
@@ -114,7 +113,7 @@ public class LeaveTypeController {
             responseCode = "200",
             description = "Leave types retrieved successfully"
     )
-    public ResponseEntity<Page<LeaveTypeResponse>> getAll(
+    public ResponseEntity<PageResponse<LeaveTypeResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,

@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoUpdateRequest;
@@ -100,7 +101,7 @@ public class PersonAddressInfoController {
             responseCode = "200",
             description = "Address records retrieved successfully"
     )
-    public ResponseEntity<Page<PersonAddressInfoResponse>> getAll(
+    public ResponseEntity<PageResponse<PersonAddressInfoResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -122,7 +123,7 @@ public class PersonAddressInfoController {
             @ApiResponse(responseCode = "200", description = "Person address records retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Person not found")
     })
-    public ResponseEntity<Page<PersonAddressInfoResponse>> getAllByPerson(
+    public ResponseEntity<PageResponse<PersonAddressInfoResponse>> getAllByPerson(
             @PathVariable
             @Positive(message = "Person ID must be a positive number")
             Integer personId,

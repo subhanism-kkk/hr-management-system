@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.order;
 
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
@@ -21,6 +22,7 @@ import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonAppointmentService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -136,18 +138,40 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
     }
 
     @Override
-    public Page<OrderPersonAppointmentResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+    public PageResponse<OrderPersonAppointmentResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<OrderPersonAppointment> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override
-    public Page<OrderPersonAppointmentResponse> getByPerson(Integer personId,
+    public PageResponse<OrderPersonAppointmentResponse> getByPerson(Integer personId,
                                                 int pageNo,int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize,Sort.by("id").ascending());
-        return repository.findByPerson(fetchPerson(personId), pageable)
-                .map(mapper::toResponse);
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<OrderPersonAppointment> page =
+                repository.findByPerson(fetchPerson(personId), pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override

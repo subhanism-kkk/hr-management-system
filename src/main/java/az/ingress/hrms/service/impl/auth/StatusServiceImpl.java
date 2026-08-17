@@ -1,6 +1,8 @@
 package az.ingress.hrms.service.impl.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.entity.lookup.Status;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.status.StatusLogService;
@@ -11,6 +13,7 @@ import az.ingress.hrms.dto.status.StatusRequest;
 import az.ingress.hrms.dto.status.StatusResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -103,12 +106,22 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public Page<StatusResponse> getAll(int pageNo, int pageSize) {
+    public PageResponse<StatusResponse> getAll(int pageNo, int pageSize) {
 
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
 
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+        Page<Status> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override

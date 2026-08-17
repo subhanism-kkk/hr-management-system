@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoCreateRequest;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoUpdateRequest;
@@ -100,7 +101,7 @@ public class PersonPhotoController {
             responseCode = "200",
             description = "Photo records retrieved successfully"
     )
-    public ResponseEntity<Page<PersonPhotoResponse>> getAll(
+    public ResponseEntity<PageResponse<PersonPhotoResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -122,7 +123,7 @@ public class PersonPhotoController {
             @ApiResponse(responseCode = "200", description = "Photo records retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Person not found")
     })
-    public ResponseEntity<Page<PersonPhotoResponse>> getAllByPerson(
+    public ResponseEntity<PageResponse<PersonPhotoResponse>> getAllByPerson(
             @PathVariable
             @Positive(message = "Person ID must be a positive number")
             Integer personId,

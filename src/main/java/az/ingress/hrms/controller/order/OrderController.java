@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.order.OrderRequest;
 import az.ingress.hrms.dto.order.OrderResponse;
 import az.ingress.hrms.service.order.OrderService;
@@ -12,13 +13,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -80,7 +79,7 @@ public class OrderController {
             responseCode = "200",
             description = "Orders retrieved successfully"
     )
-    public ResponseEntity<Page<OrderResponse>> getAll(
+    public ResponseEntity<PageResponse<OrderResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,

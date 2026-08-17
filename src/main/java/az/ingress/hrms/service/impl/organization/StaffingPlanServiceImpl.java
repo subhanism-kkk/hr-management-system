@@ -1,11 +1,13 @@
 package az.ingress.hrms.service.impl.organization;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
 import az.ingress.hrms.entity.organization.Position;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import az.ingress.hrms.entity.organization.Structure;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.DuplicateResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
@@ -17,6 +19,7 @@ import az.ingress.hrms.repository.PositionRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.repository.StructureRepository;
 import az.ingress.hrms.service.organization.StaffingPlanService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -118,27 +121,57 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
-    public Page<StaffingPlanResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository
-                .findAll(pageable)
-                .map(mapper::toResponse);
+    public PageResponse<StaffingPlanResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<StaffingPlan> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override
-    public Page<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository.
-                findByStructure(fetchStructure(structureId), pageable)
-                .map(mapper::toResponse);
+    public PageResponse<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<StaffingPlan> page =
+                repository.findByStructure(fetchStructure(structureId),pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override
-    public Page<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository.
-                findByPosition(fetchPosition(positionId), pageable)
-                .map(mapper::toResponse);
+    public PageResponse<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<StaffingPlan> page =
+                repository.findByPosition(fetchPosition(positionId),pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override

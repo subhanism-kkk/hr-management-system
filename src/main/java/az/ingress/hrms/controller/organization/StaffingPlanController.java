@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.organization;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
@@ -100,7 +101,7 @@ public class StaffingPlanController {
             responseCode = "200",
             description = "Staffing plans retrieved successfully"
     )
-    public ResponseEntity<Page<StaffingPlanResponse>> getAll(
+    public ResponseEntity<PageResponse<StaffingPlanResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -121,7 +122,7 @@ public class StaffingPlanController {
             @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Structure not found")
     })
-    public ResponseEntity<Page<StaffingPlanResponse>> getByStructure(
+    public ResponseEntity<PageResponse<StaffingPlanResponse>> getByStructure(
             @PathVariable
             @Positive(message = "Structure ID must be a positive number")
             Integer structureId,
@@ -147,7 +148,7 @@ public class StaffingPlanController {
             @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Position not found")
     })
-    public ResponseEntity<Page<StaffingPlanResponse>> getByPosition(
+    public ResponseEntity<PageResponse<StaffingPlanResponse>> getByPosition(
             @PathVariable
             @Positive(message = "Position ID must be a positive number")
             Integer positionId,

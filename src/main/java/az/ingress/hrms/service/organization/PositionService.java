@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.organization;
 
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.position.PositionRequest;
 import az.ingress.hrms.dto.position.PositionResponse;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ public interface PositionService {
 
     PositionResponse getById(Integer id);
 
-    Page<PositionResponse> getAll(int pageNo, int pageSize);
+    PageResponse<PositionResponse> getAll(int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

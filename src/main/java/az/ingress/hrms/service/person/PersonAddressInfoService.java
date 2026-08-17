@@ -1,5 +1,6 @@
 package az.ingress.hrms.service.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoUpdateRequest;
@@ -17,9 +18,9 @@ public interface PersonAddressInfoService {
 
     PersonAddressInfoResponse getById(Integer id);
 
-    Page<PersonAddressInfoResponse> getAll(int pageNo, int pageSize);
+    PageResponse<PersonAddressInfoResponse> getAll(int pageNo, int pageSize);
 
-    Page<PersonAddressInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
+    PageResponse<PersonAddressInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

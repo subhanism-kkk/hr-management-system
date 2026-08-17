@@ -1,5 +1,6 @@
 package az.ingress.hrms.service.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.status.StatusRequest;
 import az.ingress.hrms.dto.status.StatusResponse;
 import az.ingress.hrms.entity.lookup.Status;
@@ -15,7 +16,7 @@ public interface StatusService {
 
     StatusResponse getById(Integer id);
 
-    Page<StatusResponse> getAll(int pageNo, int pageSize);
+    PageResponse<StatusResponse> getAll(int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

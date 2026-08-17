@@ -1,5 +1,7 @@
 package az.ingress.hrms.service.impl.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoCreateRequest;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoUpdateRequest;
@@ -17,6 +19,7 @@ import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.repository.PersonContactInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonContactInfoService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -127,23 +130,44 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
     }
 
     @Override
-    public Page<PersonContactInfoResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+    public PageResponse<PersonContactInfoResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<PersonContactInfo> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override
-    public Page<PersonContactInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
+    public PageResponse<PersonContactInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
         if (!personRepository.existsById(personId)) {
             throw new ResourceNotFoundException(
                     "Person with ID " + personId + " does not exist."
             );
         }
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
 
-        return repository.findByPersonId(personId, pageable)
-                .map(mapper::toResponse);
+        Page<PersonContactInfo> page =
+                repository.findByPersonId(personId, pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override

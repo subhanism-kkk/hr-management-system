@@ -1,9 +1,11 @@
 package az.ingress.hrms.service.impl.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeUpdateRequest;
 import az.ingress.hrms.entity.lookup.LeaveType;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
@@ -12,6 +14,7 @@ import az.ingress.hrms.log.lookup.leaveType.LeaveTypeLogService;
 import az.ingress.hrms.mapper.LeaveTypeMapper;
 import az.ingress.hrms.repository.LeaveTypeRepository;
 import az.ingress.hrms.service.auth.LeaveTypeService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -114,10 +117,21 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
     }
 
     @Override
-    public Page<LeaveTypeResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+    public PageResponse<LeaveTypeResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<LeaveType> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override

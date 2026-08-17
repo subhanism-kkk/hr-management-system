@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.contactType.ContactTypeRequest;
 import az.ingress.hrms.dto.contactType.ContactTypeResponse;
 import az.ingress.hrms.service.auth.ContactTypeService;
@@ -12,7 +13,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -98,7 +98,7 @@ public class ContactTypeController {
             responseCode = "200",
             description = "Contact types retrieved successfully"
     )
-    public ResponseEntity<Page<ContactTypeResponse>> getAll(
+    public ResponseEntity<PageResponse<ContactTypeResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,

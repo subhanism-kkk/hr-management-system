@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderType.OrderTypeRequest;
 import az.ingress.hrms.dto.orderType.OrderTypeResponse;
 import az.ingress.hrms.service.auth.OrderTypeService;
@@ -99,7 +100,7 @@ public class OrderTypeController {
             responseCode = "200",
             description = "Order types retrieved successfully"
     )
-    public ResponseEntity<Page<OrderTypeResponse>> getAll(
+    public ResponseEntity<PageResponse<OrderTypeResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,

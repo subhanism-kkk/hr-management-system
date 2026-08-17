@@ -1,5 +1,6 @@
 package az.ingress.hrms.service.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoCreateRequest;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoUpdateRequest;
@@ -15,9 +16,9 @@ public interface PersonPhotoService {
 
     PersonPhotoResponse getById(Integer id);
 
-    Page<PersonPhotoResponse> getAll(int pageNo, int pageSize);
+    PageResponse<PersonPhotoResponse> getAll(int pageNo, int pageSize);
 
-    Page<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
+    PageResponse<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
 
     PersonPhotoResponse getMainPhoto(Integer personId);
 

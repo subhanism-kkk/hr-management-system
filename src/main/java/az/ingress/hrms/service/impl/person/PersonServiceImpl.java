@@ -12,6 +12,7 @@ import az.ingress.hrms.log.person.person.PersonLogService;
 import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -83,22 +83,12 @@ public class PersonServiceImpl implements PersonService {
                         Sort.by("id").ascending()
                 );
 
-        Page<Person> personPage =
+        Page<Person> page =
                 repository.findAll(pageable);
 
-        List<PersonResponse> content =
-                personPage
-                        .map(mapper::toResponse)
-                        .getContent();
-
-        return new PageResponse<>(
-                content,
-                personPage.getNumber(),
-                personPage.getSize(),
-                personPage.getTotalElements(),
-                personPage.getTotalPages(),
-                personPage.isFirst(),
-                personPage.isLast()
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
         );
     }
 

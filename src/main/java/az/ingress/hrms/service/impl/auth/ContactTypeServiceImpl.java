@@ -1,6 +1,8 @@
 package az.ingress.hrms.service.impl.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.entity.lookup.ContactType;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.contactType.ContactTypeLogService;
@@ -11,6 +13,7 @@ import az.ingress.hrms.dto.contactType.ContactTypeRequest;
 import az.ingress.hrms.dto.contactType.ContactTypeResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -89,10 +92,23 @@ public class ContactTypeServiceImpl implements ContactTypeService {
     }
 
     @Override
-    public Page<ContactTypeResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+    public PageResponse<ContactTypeResponse> getAll(int pageNo, int pageSize) {
+
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<ContactType> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
+
     }
 
     @Override
