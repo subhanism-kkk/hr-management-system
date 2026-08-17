@@ -20,6 +20,7 @@ import az.ingress.hrms.repository.PersonContactInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonContactInfoService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -74,8 +75,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         contactInfoLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         return mapper.toResponse(entity);
     }
@@ -111,8 +111,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         contactInfoLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         mapper.updateEntity(entity, request);
 
@@ -178,11 +177,10 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         contactInfoLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         entity.setIsDeleted(true);
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
         entity.setDeletedAt(LocalDateTime.now());
 
         repository.save(entity);
@@ -203,8 +201,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         contactInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
@@ -221,8 +218,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         contactInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         entity.setStatus(statusHelper.getActive());
 
@@ -239,8 +235,7 @@ public class PersonContactInfoServiceImpl implements PersonContactInfoService {
         contactInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         entity.setStatus(statusHelper.getInactive());
 

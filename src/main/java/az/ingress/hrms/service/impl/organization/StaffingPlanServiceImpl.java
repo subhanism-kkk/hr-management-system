@@ -20,6 +20,7 @@ import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.repository.StructureRepository;
 import az.ingress.hrms.service.organization.StaffingPlanService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -65,8 +66,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         return mapper.toResponse(entity);
 
@@ -101,8 +101,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         mapper.updateEntity(entity, request);
 
@@ -148,7 +147,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
                 );
 
         Page<StaffingPlan> page =
-                repository.findByStructure(fetchStructure(structureId),pageable);
+                repository.findByStructure(fetchStructure(structureId), pageable);
 
         return PaginationUtils.toPageResponse(
                 page,
@@ -166,7 +165,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
                 );
 
         Page<StaffingPlan> page =
-                repository.findByPosition(fetchPosition(positionId),pageable);
+                repository.findByPosition(fetchPosition(positionId), pageable);
 
         return PaginationUtils.toPageResponse(
                 page,
@@ -189,7 +188,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 plan,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         plan.setIsClosed(true);
@@ -211,8 +210,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 plan,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         plan.setIsClosed(false);
 
@@ -228,12 +226,11 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(entity);
     }
@@ -257,7 +254,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
 
@@ -277,8 +274,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setStatus(statusHelper.getActive());
 
@@ -295,8 +291,7 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
         staffingPlanLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setStatus(statusHelper.getInactive());
 

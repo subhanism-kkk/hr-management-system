@@ -18,6 +18,7 @@ import az.ingress.hrms.mapper.OrderPersonDismissalMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonDismissalService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -87,8 +88,7 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
         dismissalLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         return mapper.toResponse(savedEntity);
     }
@@ -117,8 +117,7 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
         dismissalLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         mapper.updateEntity(entity, request);
 
@@ -186,10 +185,9 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
         dismissalLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
 
@@ -209,7 +207,7 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
         dismissalLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsDeleted(false);

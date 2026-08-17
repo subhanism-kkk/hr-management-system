@@ -23,6 +23,7 @@ import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonAppointmentService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -90,7 +90,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 savedEntity,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(savedEntity);
@@ -123,7 +123,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(entity, request);
@@ -157,7 +157,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
 
     @Override
     public PageResponse<OrderPersonAppointmentResponse> getByPerson(Integer personId,
-                                                int pageNo,int pageSize) {
+                                                                    int pageNo, int pageSize) {
         Pageable pageable =
                 PageRequest.of(
                         pageNo,
@@ -202,7 +202,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 appointment,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         appointment.setDismissalOrder(dismissalOrder);
@@ -223,12 +223,11 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(entity);
 
@@ -247,7 +246,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsDeleted(false);
@@ -266,7 +265,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getActive());
@@ -285,7 +284,7 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         appointmentLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getInactive());

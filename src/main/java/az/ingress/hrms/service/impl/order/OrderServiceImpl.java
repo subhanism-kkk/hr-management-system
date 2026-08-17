@@ -17,6 +17,7 @@ import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
         orderLogService.log(
                 order,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(order);
@@ -111,12 +112,11 @@ public class OrderServiceImpl implements OrderService {
         orderLogService.log(
                 order,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         order.setIsDeleted(true);
         order.setDeletedAt(LocalDateTime.now());
-        order.setDeletedBy("SYSTEM");
+        order.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(order);
     }
@@ -139,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
         orderLogService.log(
                 order,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         order.setIsDeleted(false);
@@ -157,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
         orderLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getActive());
@@ -175,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
         orderLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getInactive());

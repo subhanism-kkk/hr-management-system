@@ -14,6 +14,7 @@ import az.ingress.hrms.dto.orderType.OrderTypeResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +50,7 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         orderTypeLogService.log(
                 orderType,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(orderType);
@@ -72,7 +73,7 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         orderTypeLogService.log(
                 orderType,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(orderType, request);
@@ -116,13 +117,13 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         orderTypeLogService.log(
                 orderType,
                 LogAction.DELETE,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         orderType.setIsDeleted(true);
         orderType.setDeletedAt(LocalDateTime.now());
 
-        orderType.setDeletedBy("SYSTEM");
+        orderType.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(orderType);
 
@@ -145,7 +146,7 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         orderTypeLogService.log(
                 orderType,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         orderType.setIsDeleted(false);

@@ -19,6 +19,7 @@ import az.ingress.hrms.mapper.OrderPersonLeaveMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonLeaveService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -95,7 +96,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 savedEntity,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(savedEntity);
@@ -140,8 +141,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         mapper.updateEntity(entity, request);
         entity.setLeaveType(newLeaveType);
@@ -199,10 +199,9 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
 
@@ -222,8 +221,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
@@ -244,7 +242,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
         entity.setStatus(statusHelper.getActive());
         OrderPersonLeave saved = repository.save(entity);
@@ -259,8 +257,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setStatus(statusHelper.getInactive());
 

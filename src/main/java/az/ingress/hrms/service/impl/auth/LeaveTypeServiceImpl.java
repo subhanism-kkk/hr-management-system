@@ -15,6 +15,7 @@ import az.ingress.hrms.mapper.LeaveTypeMapper;
 import az.ingress.hrms.repository.LeaveTypeRepository;
 import az.ingress.hrms.service.auth.LeaveTypeService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,8 +65,7 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
         leaveTypeLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         return mapper.toResponse(savedEntity);
     }
@@ -92,7 +92,7 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
         leaveTypeLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(entity, request);
@@ -148,10 +148,10 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
         leaveTypeLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
 
@@ -171,8 +171,7 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
         leaveTypeLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);

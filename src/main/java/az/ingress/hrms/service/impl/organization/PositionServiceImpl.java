@@ -16,6 +16,7 @@ import az.ingress.hrms.dto.position.PositionResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,7 +53,7 @@ public class PositionServiceImpl  implements PositionService {
         positionLogService.log(
                 position,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(position);    }
@@ -74,7 +75,7 @@ public class PositionServiceImpl  implements PositionService {
         positionLogService.log(
                 position,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(position, request);
@@ -118,14 +119,14 @@ public class PositionServiceImpl  implements PositionService {
         positionLogService.log(
                 position,
                 LogAction.DELETE,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
 
         position.setIsDeleted(true);
         position.setDeletedAt(LocalDateTime.now());
 
-        position.setDeletedBy("SYSTEM");
+        position.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(position);
 
@@ -148,7 +149,7 @@ public class PositionServiceImpl  implements PositionService {
         positionLogService.log(
                 position,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
 
@@ -167,7 +168,7 @@ public class PositionServiceImpl  implements PositionService {
         positionLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getActive());
@@ -185,7 +186,7 @@ public class PositionServiceImpl  implements PositionService {
         positionLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getInactive());

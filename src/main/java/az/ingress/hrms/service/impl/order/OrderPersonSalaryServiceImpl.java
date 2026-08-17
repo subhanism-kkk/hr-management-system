@@ -20,6 +20,7 @@ import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonSalaryService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -98,7 +99,7 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
         salaryLogService.log(
                 savedEntity,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(savedEntity);
@@ -138,7 +139,7 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
         salaryLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setOldSalary(currentSalary);
@@ -216,10 +217,10 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
         salaryLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
 
@@ -248,7 +249,7 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
         salaryLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsDeleted(false);
@@ -268,7 +269,7 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
         salaryLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(
@@ -291,7 +292,7 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
         salaryLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(

@@ -18,6 +18,7 @@ import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,7 +74,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(entity);
@@ -104,7 +105,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(entity, request);
@@ -197,7 +198,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsMain(true);
@@ -216,11 +217,11 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsDeleted(true);
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
         entity.setDeletedAt(LocalDateTime.now());
 
         repository.save(entity);
@@ -239,7 +240,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsMain(false);
@@ -258,7 +259,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getActive());
@@ -276,7 +277,7 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
         personPhotoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getInactive());

@@ -18,6 +18,7 @@ import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonAddressInfoService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,8 +68,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         addressInfoLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         return mapper.toResponse(entity);
     }
@@ -92,7 +92,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         addressInfoLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(entity, request);
@@ -140,7 +140,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
                 );
 
         Page<PersonAddressInfo> page =
-                repository.findByPerson(person,pageable);
+                repository.findByPerson(person, pageable);
 
         return PaginationUtils.toPageResponse(
                 page,
@@ -156,12 +156,11 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         addressInfoLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(entity);
     }
@@ -181,8 +180,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         addressInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setIsDeleted(false);
         entity.setDeletedAt(null);
@@ -199,8 +197,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         addressInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setStatus(statusHelper.getActive());
 
@@ -217,8 +214,7 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
         addressInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setStatus(statusHelper.getInactive());
 

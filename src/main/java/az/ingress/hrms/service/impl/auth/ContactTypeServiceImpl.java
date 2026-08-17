@@ -14,6 +14,7 @@ import az.ingress.hrms.dto.contactType.ContactTypeResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,8 +50,7 @@ public class ContactTypeServiceImpl implements ContactTypeService {
         contactTypeLogService.log(
                 contactType,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         return mapper.toResponse(contactType);
     }
@@ -72,7 +72,7 @@ public class ContactTypeServiceImpl implements ContactTypeService {
         contactTypeLogService.log(
                 contactType,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(contactType, request);
@@ -120,13 +120,12 @@ public class ContactTypeServiceImpl implements ContactTypeService {
         contactTypeLogService.log(
                 contactType,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
 
         contactType.setIsDeleted(true);
         contactType.setDeletedAt(LocalDateTime.now());
-        contactType.setDeletedBy("SYSTEM");
+        contactType.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(contactType);
 
@@ -146,8 +145,7 @@ public class ContactTypeServiceImpl implements ContactTypeService {
         contactTypeLogService.log(
                 contactType,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
 
         contactType.setIsDeleted(false);

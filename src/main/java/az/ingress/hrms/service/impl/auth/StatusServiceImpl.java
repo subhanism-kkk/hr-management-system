@@ -14,6 +14,7 @@ import az.ingress.hrms.dto.status.StatusResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,8 +58,7 @@ public class StatusServiceImpl implements StatusService {
         statusLogService.log(
                 status,
                 LogAction.POST,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         return mapper.toResponse(status);
     }
@@ -88,8 +88,7 @@ public class StatusServiceImpl implements StatusService {
         statusLogService.log(
                 status,
                 LogAction.PUT,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         mapper.updateEntity(status, request);
 
@@ -133,13 +132,12 @@ public class StatusServiceImpl implements StatusService {
         statusLogService.log(
                 status,
                 LogAction.DELETE,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername());
 
         status.setIsDeleted(true);
         status.setDeletedAt(LocalDateTime.now());
 
-        status.setDeletedBy("SYSTEM");
+        status.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(status);
 
@@ -159,7 +157,7 @@ public class StatusServiceImpl implements StatusService {
         statusLogService.log(
                 status,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         status.setIsDeleted(false);

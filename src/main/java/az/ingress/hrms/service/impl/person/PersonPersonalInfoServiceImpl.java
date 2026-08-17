@@ -18,6 +18,7 @@ import az.ingress.hrms.repository.PersonPersonalInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPersonalInfoService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,7 +68,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.POST,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(entity);
@@ -81,7 +82,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.PUT,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         mapper.updateEntity(entity, request);
@@ -123,12 +124,12 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.DELETE,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsDeleted(true);
         entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy("SYSTEM");
+        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(entity);
     }
@@ -146,7 +147,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setIsDeleted(false);
@@ -164,7 +165,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
+                SecurityUtils.getCurrentUsername()
         );
 
         entity.setStatus(statusHelper.getActive());
@@ -182,8 +183,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                "admin"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         entity.setStatus(statusHelper.getInactive());
 

@@ -13,6 +13,7 @@ import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonService;
 import az.ingress.hrms.util.PaginationUtils;
+import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +45,7 @@ public class PersonServiceImpl implements PersonService {
         personLogService.log(
                 person,
                 LogAction.POST,
-                "ADMIN"
+                SecurityUtils.getCurrentUsername()
         );
 
         return mapper.toResponse(person);
@@ -58,8 +59,7 @@ public class PersonServiceImpl implements PersonService {
         personLogService.log(
                 person,
                 LogAction.PUT,
-                "ADMIN"
-        );
+                SecurityUtils.getCurrentUsername()        );
 
         mapper.updateEntity(person, request);
 
@@ -105,7 +105,7 @@ public class PersonServiceImpl implements PersonService {
 
         person.setIsDeleted(true);
         person.setDeletedAt(LocalDateTime.now());
-        person.setDeletedBy("SYSTEM");
+        person.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(person);
     }
@@ -123,7 +123,7 @@ public class PersonServiceImpl implements PersonService {
         personLogService.log(
                 person,
                 LogAction.PATCH,
-                "ADMIN"
+                SecurityUtils.getCurrentUsername()
         );
 
         person.setIsDeleted(false);
@@ -141,7 +141,7 @@ public class PersonServiceImpl implements PersonService {
         personLogService.log(
                 person,
                 LogAction.PATCH,
-                "ADMIN"
+                SecurityUtils.getCurrentUsername()
         );
 
         person.setStatus(statusHelper.getActive());
@@ -159,7 +159,7 @@ public class PersonServiceImpl implements PersonService {
         personLogService.log(
                 person,
                 LogAction.PATCH,
-                "ADMIN"
+                SecurityUtils.getCurrentUsername()
         );
 
         person.setStatus(statusHelper.getInactive());
