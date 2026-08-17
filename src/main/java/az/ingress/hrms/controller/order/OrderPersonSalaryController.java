@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryCreateRequest;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryUpdateRequest;
@@ -13,16 +14,14 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/order-person-salaries")
+@RequestMapping("/api/v1/order-salaries")
 @RequiredArgsConstructor
 @Validated
 @Tag(
@@ -99,7 +98,7 @@ public class OrderPersonSalaryController {
             responseCode = "200",
             description = "Salary records retrieved successfully"
     )
-    public ResponseEntity<Page<OrderPersonSalaryResponse>> getAll(
+    public ResponseEntity<PageResponse<OrderPersonSalaryResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -121,7 +120,7 @@ public class OrderPersonSalaryController {
             @ApiResponse(responseCode = "404", description = "Staffing plan not found"),
             @ApiResponse(responseCode = "410", description = "Staffing plan is deleted")
     })
-    public ResponseEntity<Page<OrderPersonSalaryResponse>> getByStaffingPlan(
+    public ResponseEntity<PageResponse<OrderPersonSalaryResponse>> getByStaffingPlan(
             @PathVariable
             @Positive(message = "Staffing Plan ID must be a positive number")
             Integer staffingPlanId,

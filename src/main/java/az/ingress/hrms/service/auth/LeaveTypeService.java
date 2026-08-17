@@ -1,5 +1,6 @@
 package az.ingress.hrms.service.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeUpdateRequest;
@@ -17,7 +18,7 @@ public interface LeaveTypeService {
 
     LeaveTypeResponse getByCode(String code);
 
-    Page<LeaveTypeResponse> getAll(int pageNo, int pageSize);
+    PageResponse<LeaveTypeResponse> getAll(int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

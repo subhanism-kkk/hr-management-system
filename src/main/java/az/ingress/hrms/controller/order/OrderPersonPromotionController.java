@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionCreateRequest;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionResponse;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionUpdateRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/order-person-promotions")
+@RequestMapping("/api/v1/order-promotions")
 @RequiredArgsConstructor
 @Validated
 @Tag(
@@ -99,7 +100,7 @@ public class OrderPersonPromotionController {
             responseCode = "200",
             description = "Promotion records retrieved successfully"
     )
-    public ResponseEntity<Page<OrderPersonPromotionResponse>> getAll(
+    public ResponseEntity<PageResponse<OrderPersonPromotionResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -121,7 +122,7 @@ public class OrderPersonPromotionController {
             @ApiResponse(responseCode = "404", description = "Person not found"),
             @ApiResponse(responseCode = "410", description = "Person is deleted")
     })
-    public ResponseEntity<Page<OrderPersonPromotionResponse>> getByPerson(
+    public ResponseEntity<PageResponse<OrderPersonPromotionResponse>> getByPerson(
             @PathVariable
             @Positive(message = "Person ID must be a positive number")
             Integer personId,

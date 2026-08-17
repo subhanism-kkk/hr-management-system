@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.auth;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.status.StatusRequest;
 import az.ingress.hrms.dto.status.StatusResponse;
 import az.ingress.hrms.service.auth.StatusService;
@@ -99,7 +100,7 @@ public class StatusController {
             responseCode = "200",
             description = "Statuses retrieved successfully"
     )
-    public ResponseEntity<Page<StatusResponse>> getAll(
+    public ResponseEntity<PageResponse<StatusResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,

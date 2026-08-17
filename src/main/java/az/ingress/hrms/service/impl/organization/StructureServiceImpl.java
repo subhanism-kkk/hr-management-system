@@ -1,8 +1,10 @@
     package az.ingress.hrms.service.impl.organization;
 
+    import az.ingress.hrms.dto.common.PageResponse;
     import az.ingress.hrms.dto.structure.StructureRequest;
     import az.ingress.hrms.dto.structure.StructureResponse;
     import az.ingress.hrms.entity.organization.Structure;
+    import az.ingress.hrms.entity.person.Person;
     import az.ingress.hrms.exception.DeletedResourceException;
     import az.ingress.hrms.exception.ResourceAlreadyExistsException;
     import az.ingress.hrms.exception.ResourceNotFoundException;
@@ -12,6 +14,7 @@
     import az.ingress.hrms.mapper.StructureMapper;
     import az.ingress.hrms.repository.StructureRepository;
     import az.ingress.hrms.service.organization.StructureService;
+    import az.ingress.hrms.util.PaginationUtils;
     import lombok.RequiredArgsConstructor;
     import org.springframework.data.domain.Page;
     import org.springframework.data.domain.PageRequest;
@@ -132,24 +135,58 @@
         }
 
         @Override
-        public Page<StructureResponse> getAll(int pageNo, int pageSize) {
-            Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-            return repository
-                    .findAll(pageable).map(mapper::toResponse);
+        public PageResponse<StructureResponse> getAll(int pageNo, int pageSize) {
+            Pageable pageable =
+                    PageRequest.of(
+                            pageNo,
+                            pageSize,
+                            Sort.by("id").ascending()
+                    );
+
+            Page<Structure> page =
+                    repository.findAll(pageable);
+
+            return PaginationUtils.toPageResponse(
+                    page,
+                    mapper::toResponse
+            );
         }
 
         @Override
-        public Page<StructureResponse> getRootStructures(int pageNo, int pageSize) {
-            Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-            return repository.findByParentStructureIsNull(pageable).map(mapper::toResponse);
+        public PageResponse<StructureResponse> getRootStructures(int pageNo, int pageSize) {
+            Pageable pageable =
+                    PageRequest.of(
+                            pageNo,
+                            pageSize,
+                            Sort.by("id").ascending()
+                    );
+
+            Page<Structure> page =
+                    repository.findByParentStructureIsNull(pageable);
+
+            return PaginationUtils.toPageResponse(
+                    page,
+                    mapper::toResponse
+            );
         }
 
         @Override
-        public Page<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize) {
+        public PageResponse<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize) {
             Structure structure = fetchStructure(parentId);
-            Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-            return repository.findByParentStructure(structure,pageable).map(mapper::toResponse);
+            Pageable pageable =
+                    PageRequest.of(
+                            pageNo,
+                            pageSize,
+                            Sort.by("id").ascending()
+                    );
 
+            Page<Structure> page =
+                    repository.findByParentStructure(structure, pageable);
+
+            return PaginationUtils.toPageResponse(
+                    page,
+                    mapper::toResponse
+            );
         }
 
         @Override

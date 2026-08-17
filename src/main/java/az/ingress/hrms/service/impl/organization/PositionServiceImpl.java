@@ -1,6 +1,8 @@
 package az.ingress.hrms.service.impl.organization;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.entity.organization.Position;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
@@ -13,6 +15,7 @@ import az.ingress.hrms.dto.position.PositionResponse;
 
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -87,10 +90,24 @@ public class PositionServiceImpl  implements PositionService {
         return mapper.toResponse(position);    }
 
     @Override
-    public Page<PositionResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);}
+    public PageResponse<PositionResponse> getAll(int pageNo, int pageSize) {
+
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<Position> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
+
+    }
 
     @Override
     @Transactional

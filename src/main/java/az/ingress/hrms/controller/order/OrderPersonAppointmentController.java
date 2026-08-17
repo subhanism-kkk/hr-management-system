@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
@@ -25,7 +26,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/order-person-appointments")
+@RequestMapping("/api/v1/order-appointments")
 @RequiredArgsConstructor
 @Validated
 @Tag(
@@ -103,7 +104,7 @@ public class OrderPersonAppointmentController {
             responseCode = "200",
             description = "Appointments retrieved successfully"
     )
-    public ResponseEntity<Page<OrderPersonAppointmentResponse>> getAll(
+    public ResponseEntity<PageResponse<OrderPersonAppointmentResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -126,7 +127,7 @@ public class OrderPersonAppointmentController {
             @ApiResponse(responseCode = "404", description = "Person not found"),
             @ApiResponse(responseCode = "410", description = "Person is deleted")
     })
-    public ResponseEntity<Page<OrderPersonAppointmentResponse>> getByPerson(
+    public ResponseEntity<PageResponse<OrderPersonAppointmentResponse>> getByPerson(
             @PathVariable
             @Positive(message = "Person ID must be a positive number")
             Integer personId,

@@ -1,11 +1,13 @@
 package az.ingress.hrms.service.impl.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryCreateRequest;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryUpdateRequest;
 import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonSalary;
 import az.ingress.hrms.entity.organization.StaffingPlan;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
@@ -17,6 +19,7 @@ import az.ingress.hrms.repository.OrderPersonSalaryRepository;
 import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonSalaryService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -163,24 +166,44 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
 
 
     @Override
-    public Page<OrderPersonSalaryResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+    public PageResponse<OrderPersonSalaryResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<OrderPersonSalary> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
 
     @Override
-    public Page<OrderPersonSalaryResponse> getByStaffingPlan(
+    public PageResponse<OrderPersonSalaryResponse> getByStaffingPlan(
             Integer staffingPlanId,
             int pageNo, int pageSize
     ) {
-
         fetchStaffingPlan(staffingPlanId);
-        Pageable pageable = PageRequest.of(pageNo,pageSize, Sort.by("id").ascending());
-        return repository
-                .findByStaffingPlanId(staffingPlanId, pageable)
-                .map(mapper::toResponse);
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<OrderPersonSalary> page =
+                repository.findByStaffingPlanId(staffingPlanId, pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
 

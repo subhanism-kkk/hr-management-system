@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.organization;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.structure.StructureRequest;
 import az.ingress.hrms.dto.structure.StructureResponse;
 import az.ingress.hrms.service.organization.StructureService;
@@ -100,7 +101,7 @@ public class StructureController {
             responseCode = "200",
             description = "Structures retrieved successfully"
     )
-    public ResponseEntity<Page<StructureResponse>> getAll(
+    public ResponseEntity<PageResponse<StructureResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -122,7 +123,7 @@ public class StructureController {
             responseCode = "200",
             description = "Root structures retrieved successfully"
     )
-    public ResponseEntity<Page<StructureResponse>> getRootStructures(
+    public ResponseEntity<PageResponse<StructureResponse>> getRootStructures(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -145,7 +146,7 @@ public class StructureController {
             @ApiResponse(responseCode = "404", description = "Parent structure not found"),
             @ApiResponse(responseCode = "410", description = "Parent structure is deleted")
     })
-    public ResponseEntity<Page<StructureResponse>> getChildren(
+    public ResponseEntity<PageResponse<StructureResponse>> getChildren(
             @PathVariable
             @Positive(message = "Parent ID must be a positive number")
             Integer parentId,

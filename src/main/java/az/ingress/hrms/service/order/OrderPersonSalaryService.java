@@ -1,11 +1,10 @@
 package az.ingress.hrms.service.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryCreateRequest;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryUpdateRequest;
-import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 public interface OrderPersonSalaryService {
 
@@ -20,9 +19,9 @@ public interface OrderPersonSalaryService {
 
     OrderPersonSalaryResponse getById(Integer id);
 
-    Page<OrderPersonSalaryResponse> getAll(int pageNo, int pageSize);
+    PageResponse<OrderPersonSalaryResponse> getAll(int pageNo, int pageSize);
 
-    Page<OrderPersonSalaryResponse> getByStaffingPlan(
+    PageResponse<OrderPersonSalaryResponse> getByStaffingPlan(
             Integer staffingPlanId
             , int pageNo, int pageSize
     );

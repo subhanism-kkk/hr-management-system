@@ -1,5 +1,7 @@
 package az.ingress.hrms.service.impl.person;
 
+import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoCreateRequest;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoUpdateRequest;
@@ -15,6 +17,7 @@ import az.ingress.hrms.mapper.PersonPhotoMapper;
 import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
+import az.ingress.hrms.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -118,18 +121,42 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     }
 
     @Override
-    public Page<PersonPhotoResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public PageResponse<PersonPhotoResponse> getAll(int pageNo, int pageSize) {
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<PersonPhoto> page =
+                repository.findAll(pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override
-    public Page<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
+    public PageResponse<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
         if (!personRepository.existsById(personId)) {
             throw new ResourceNotFoundException("Person not found with id: " + personId);
         }
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
-        return repository.findByPersonId(personId, pageable).map(mapper::toResponse);
+        Pageable pageable =
+                PageRequest.of(
+                        pageNo,
+                        pageSize,
+                        Sort.by("id").ascending()
+                );
+
+        Page<PersonPhoto> page =
+                repository.findByPersonId(personId, pageable);
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
     }
 
     @Override

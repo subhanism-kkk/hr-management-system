@@ -1,5 +1,6 @@
 package az.ingress.hrms.controller.organization;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.position.PositionRequest;
 import az.ingress.hrms.dto.position.PositionResponse;
 import az.ingress.hrms.service.organization.PositionService;
@@ -98,7 +99,7 @@ public class PositionController {
             responseCode = "200",
             description = "Positions retrieved successfully"
     )
-    public ResponseEntity<Page<PositionResponse>> getAll(
+    public ResponseEntity<PageResponse<PositionResponse>> getAll(
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,

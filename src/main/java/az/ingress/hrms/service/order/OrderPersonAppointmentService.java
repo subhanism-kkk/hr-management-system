@@ -1,12 +1,11 @@
 package az.ingress.hrms.service.order;
 
+import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface OrderPersonAppointmentService {
     OrderPersonAppointmentResponse create(
@@ -20,9 +19,9 @@ public interface OrderPersonAppointmentService {
 
     OrderPersonAppointmentResponse getById(Integer id);
 
-    Page<OrderPersonAppointmentResponse> getAll(int pageNo, int pageSize);
+    PageResponse<OrderPersonAppointmentResponse> getAll(int pageNo, int pageSize);
 
-    Page<OrderPersonAppointmentResponse> getByPerson(
+    PageResponse<OrderPersonAppointmentResponse> getByPerson(
             Integer personId, int pageNo, int pageSize
     );
 
