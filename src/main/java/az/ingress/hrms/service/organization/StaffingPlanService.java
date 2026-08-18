@@ -4,9 +4,8 @@ import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
-import org.springframework.data.domain.Page;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 public interface StaffingPlanService {
 
@@ -16,12 +15,23 @@ public interface StaffingPlanService {
 
     StaffingPlanResponse getById(Integer id);
 
-    PageResponse<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize);
+//    PageResponse<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize);
+//
+//    PageResponse<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize);
 
-    PageResponse<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize);
-
-    PageResponse<StaffingPlanResponse> getAll(int pageNo, int pageSize);
-
+    PageResponse<StaffingPlanResponse> getAll(
+            String search,
+            Integer structureId,
+            Integer positionId,
+            Boolean isClosed,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir
+    );
     void close(Integer id);
 
     void reopen(Integer id);

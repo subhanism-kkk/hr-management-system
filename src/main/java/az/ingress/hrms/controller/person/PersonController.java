@@ -11,14 +11,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -91,23 +94,85 @@ public class PersonController {
     @GetMapping
     @Operation(
             summary = "Get all persons",
-            description = "Retrieves a list of all active person records."
+            description =
+                    "Retrieves a list of active person records, "
+                            + "with optional search, status filtering, "
+                            + "date-range filtering, sorting, and pagination."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Person records retrieved successfully"
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description =
+                            "Person records retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description =
+                            "Invalid query parameter"
+            )
+    })
     public ResponseEntity<PageResponse<PersonResponse>> getAll(
+
             @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
+            @Min(
+                    value = 0,
+                    message = "pageNo cannot be negative"
+            )
             int pageNo,
 
             @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            @Min(
+                    value = 1,
+                    message = "pageSize must be at least 1"
+            )
+            @Max(
+                    value = 100,
+                    message = "pageSize cannot exceed 100"
+            )
+            int pageSize,
+
+            @RequestParam(defaultValue = "id")
+            String sortBy,
+
+            @RequestParam(defaultValue = "asc")
+            @Pattern(
+                    regexp = "asc|desc|ASC|DESC",
+                    message =
+                            "sortDir must be 'asc' or 'desc'"
+            )
+            String sortDir,
+
+            @RequestParam(required = false)
+            String search,
+
+            @RequestParam(required = false)
+            String status,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE_TIME
+            )
+            LocalDateTime createdFrom,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE_TIME
+            )
+            LocalDateTime createdTo
     ) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
+
+        return ResponseEntity.ok(
+                service.getAll(
+                        pageNo,
+                        pageSize,
+                        sortBy,
+                        sortDir,
+                        search,
+                        status,
+                        createdFrom,
+                        createdTo
+                )
+        );
     }
 
     @PatchMapping("/{id}/activate")

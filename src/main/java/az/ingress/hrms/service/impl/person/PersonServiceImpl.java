@@ -12,17 +12,21 @@ import az.ingress.hrms.log.person.person.PersonLogService;
 import az.ingress.hrms.mapper.PersonMapper;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonService;
+import az.ingress.hrms.specification.PersonSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
+import az.ingress.hrms.util.SortUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +63,7 @@ public class PersonServiceImpl implements PersonService {
         personLogService.log(
                 person,
                 LogAction.PUT,
-                SecurityUtils.getCurrentUsername()        );
+                SecurityUtils.getCurrentUsername());
 
         mapper.updateEntity(person, request);
 
@@ -73,18 +77,54 @@ public class PersonServiceImpl implements PersonService {
         return mapper.toResponse(fetchPerson(id));
     }
 
+    private static final Set<String> SORTABLE_FIELDS =
+            Set.of(
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "createdAt",
+                    "updatedAt"
+            );
+
     @Override
-    public PageResponse<PersonResponse> getAll(int pageNo, int pageSize) {
+    public PageResponse<PersonResponse> getAll(
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir,
+            String search,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo
+    ) {
+
+        Sort sort =
+                SortUtils.buildSort(
+                        sortBy,
+                        sortDir,
+                        SORTABLE_FIELDS,
+                        "id"
+                );
 
         Pageable pageable =
                 PageRequest.of(
                         pageNo,
                         pageSize,
-                        Sort.by("id").ascending()
+                        sort
                 );
 
+        Specification<Person> specification =
+                Specification
+                        .where(PersonSpecification.search(search))
+                        .and(PersonSpecification.hasStatusCode(status))
+                        .and(PersonSpecification.createdFrom(createdFrom))
+                        .and(PersonSpecification.createdTo(createdTo));
+
         Page<Person> page =
-                repository.findAll(pageable);
+                repository.findAll(
+                        specification,
+                        pageable
+                );
 
         return PaginationUtils.toPageResponse(
                 page,

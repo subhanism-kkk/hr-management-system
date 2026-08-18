@@ -15,11 +15,13 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -94,76 +96,97 @@ public class StaffingPlanController {
 
     @GetMapping
     @Operation(
-            summary = "Get all staffing plans",
-            description = "Returns a list of all staffing plans."
+            summary = "Get all staffing plans with dynamic filters",
+            description = "Retrieves a paginated list of staffing plans filtered by structure, position, status, closed flag, date range, or search text."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Staffing plans retrieved successfully"
     )
     public ResponseEntity<PageResponse<StaffingPlanResponse>> getAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer structureId,
+            @RequestParam(required = false) Integer positionId,
+            @RequestParam(required = false) Boolean isClosed,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdFrom,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdTo,
             @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
+            @Min(value = 0, message = "pageNo cannot be negative") int pageNo,
             @RequestParam(defaultValue = "10")
             @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
-    }
-
-    @GetMapping("/structure/{structureId}")
-    @Operation(
-            summary = "Get staffing plans by Structure ID",
-            description = "Returns all staffing plans linked to a specific organizational structure."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Structure not found")
-    })
-    public ResponseEntity<PageResponse<StaffingPlanResponse>> getByStructure(
-            @PathVariable
-            @Positive(message = "Structure ID must be a positive number")
-            Integer structureId,
-
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            @Max(value = 100, message = "pageSize cannot exceed 100") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return ResponseEntity.ok(service.getByStructure(structureId, pageNo, pageSize));
+        return ResponseEntity.ok(service.getAll(
+                search,
+                structureId,
+                positionId,
+                isClosed,
+                status,
+                createdFrom,
+                createdTo,
+                pageNo,
+                pageSize,
+                sortBy,
+                sortDir
+        ));
     }
 
-    @GetMapping("/position/{positionId}")
-    @Operation(
-            summary = "Get staffing plans by Position ID",
-            description = "Returns all staffing plans linked to a specific job position."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Position not found")
-    })
-    public ResponseEntity<PageResponse<StaffingPlanResponse>> getByPosition(
-            @PathVariable
-            @Positive(message = "Position ID must be a positive number")
-            Integer positionId,
-
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
-    ) {
-        return ResponseEntity.ok(service.getByPosition(positionId, pageNo, pageSize));
-    }
+//    @GetMapping("/structure/{structureId}")
+//    @Operation(
+//            summary = "Get staffing plans by Structure ID",
+//            description = "Returns all staffing plans linked to a specific organizational structure."
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
+//            @ApiResponse(responseCode = "404", description = "Structure not found")
+//    })
+//    public ResponseEntity<PageResponse<StaffingPlanResponse>> getByStructure(
+//            @PathVariable
+//            @Positive(message = "Structure ID must be a positive number")
+//            Integer structureId,
+//
+//            @RequestParam(defaultValue = "0")
+//            @Min(value = 0, message = "pageNo cannot be negative")
+//            int pageNo,
+//
+//            @RequestParam(defaultValue = "10")
+//            @Min(value = 1, message = "pageSize must be at least 1")
+//            @Max(value = 100, message = "pageSize cannot exceed 100")
+//            int pageSize
+//    ) {
+//        return ResponseEntity.ok(service.getByStructure(structureId, pageNo, pageSize));
+//    }
+//
+//    @GetMapping("/position/{positionId}")
+//    @Operation(
+//            summary = "Get staffing plans by Position ID",
+//            description = "Returns all staffing plans linked to a specific job position."
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Staffing plans retrieved successfully"),
+//            @ApiResponse(responseCode = "404", description = "Position not found")
+//    })
+//    public ResponseEntity<PageResponse<StaffingPlanResponse>> getByPosition(
+//            @PathVariable
+//            @Positive(message = "Position ID must be a positive number")
+//            Integer positionId,
+//
+//            @RequestParam(defaultValue = "0")
+//            @Min(value = 0, message = "pageNo cannot be negative")
+//            int pageNo,
+//
+//            @RequestParam(defaultValue = "10")
+//            @Min(value = 1, message = "pageSize must be at least 1")
+//            @Max(value = 100, message = "pageSize cannot exceed 100")
+//            int pageSize
+//    ) {
+//        return ResponseEntity.ok(service.getByPosition(positionId, pageNo, pageSize));
+//    }
 
     @PatchMapping("/{id}/close")
     @Operation(

@@ -17,7 +17,9 @@ public interface StaffingPlanMapper {
     StaffingPlan toEntity(StaffingPlanCreateRequest request);
 
     @Mapping(source = "structure.id", target = "structureId")
+    @Mapping(source = "structure.name", target = "structureName")
     @Mapping(source = "position.id", target = "positionId")
+    @Mapping(source = "position.name", target = "positionName")
     StaffingPlanResponse toResponse(StaffingPlan entity);
 
     @BeanMapping(

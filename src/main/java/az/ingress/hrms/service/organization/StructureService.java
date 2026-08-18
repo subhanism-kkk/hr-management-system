@@ -4,6 +4,8 @@ import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.structure.StructureRequest;
 import az.ingress.hrms.dto.structure.StructureResponse;
 
+import java.time.LocalDateTime;
+
 
 public interface StructureService {
 
@@ -16,11 +18,23 @@ public interface StructureService {
 
     StructureResponse getById(Integer id);
 
-    PageResponse<StructureResponse> getAll(int pageNo, int pageSize);
+    PageResponse<StructureResponse> getAll(
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir,
+            String search,
+            Integer parentId,
+            Boolean isClosed,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
+            Boolean isRoot
+    );
 
-    PageResponse<StructureResponse> getRootStructures(int pageNo, int pageSize);
-
-    PageResponse<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize);
+//    PageResponse<StructureResponse> getRootStructures(int pageNo, int pageSize);
+//
+//    PageResponse<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize);
 
     void softDelete(Integer id);
 

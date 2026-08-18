@@ -14,18 +14,22 @@ import az.ingress.hrms.log.organization.structure.StructureLogService;
 import az.ingress.hrms.mapper.StructureMapper;
 import az.ingress.hrms.repository.StructureRepository;
 import az.ingress.hrms.service.organization.StructureService;
+import az.ingress.hrms.specification.StructureSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
+import az.ingress.hrms.util.SortUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -133,17 +137,56 @@ public class StructureServiceImpl implements StructureService {
         return mapper.toResponse(fetchStructure(id));
     }
 
-    @Override
-    public PageResponse<StructureResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    private static final Set<String> SORTABLE_FIELDS =
+            Set.of(
+                    "id",
+                    "name",
+                    "isClosed",
+                    "createdAt",
+                    "updatedAt"
+            );
 
-        Page<Structure> page =
-                repository.findAll(pageable);
+    @Override
+    public PageResponse<StructureResponse> getAll(
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir,
+            String search,
+            Integer parentId,
+            Boolean isClosed,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
+            Boolean isRoot
+    ) {
+
+        Sort sort = SortUtils.buildSort(
+                sortBy,
+                sortDir,
+                SORTABLE_FIELDS,
+                "id"
+        );
+
+        Pageable pageable = PageRequest.of(
+                pageNo,
+                pageSize,
+                sort
+        );
+
+        Specification<Structure> specification = Specification
+                .where(StructureSpecification.search(search))
+                .and(StructureSpecification.hasParentId(parentId))
+                .and(StructureSpecification.isClosed(isClosed))
+                .and(StructureSpecification.hasStatusCode(status))
+                .and(StructureSpecification.createdFrom(createdFrom))
+                .and(StructureSpecification.createdTo(createdTo))
+                .and(StructureSpecification.isRoot(isRoot));
+
+        Page<Structure> page = repository.findAll(
+                specification,
+                pageable
+        );
 
         return PaginationUtils.toPageResponse(
                 page,
@@ -151,42 +194,42 @@ public class StructureServiceImpl implements StructureService {
         );
     }
 
-    @Override
-    public PageResponse<StructureResponse> getRootStructures(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<Structure> page =
-                repository.findByParentStructureIsNull(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
-    @Override
-    public PageResponse<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize) {
-        Structure structure = fetchStructure(parentId);
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<Structure> page =
-                repository.findByParentStructure(structure, pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
+//    @Override
+//    public PageResponse<StructureResponse> getRootStructures(int pageNo, int pageSize) {
+//        Pageable pageable =
+//                PageRequest.of(
+//                        pageNo,
+//                        pageSize,
+//                        Sort.by("id").ascending()
+//                );
+//
+//        Page<Structure> page =
+//                repository.findByParentStructureIsNull(pageable);
+//
+//        return PaginationUtils.toPageResponse(
+//                page,
+//                mapper::toResponse
+//        );
+//    }
+//
+//    @Override
+//    public PageResponse<StructureResponse> getChildren(Integer parentId, int pageNo, int pageSize) {
+//        Structure structure = fetchStructure(parentId);
+//        Pageable pageable =
+//                PageRequest.of(
+//                        pageNo,
+//                        pageSize,
+//                        Sort.by("id").ascending()
+//                );
+//
+//        Page<Structure> page =
+//                repository.findByParentStructure(structure, pageable);
+//
+//        return PaginationUtils.toPageResponse(
+//                page,
+//                mapper::toResponse
+//        );
+//    }
 
     @Override
     @Transactional

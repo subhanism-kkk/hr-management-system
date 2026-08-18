@@ -11,14 +11,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -95,61 +98,14 @@ public class StructureController {
     @GetMapping
     @Operation(
             summary = "Get all structures",
-            description = "Returns a list of all active structures."
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Structures retrieved successfully"
-    )
-    public ResponseEntity<PageResponse<StructureResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
-    ) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
-    }
-
-    @GetMapping("/roots")
-    @Operation(
-            summary = "Get top-level (root) structures",
-            description = "Returns all root structures that do not have a parent structure."
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Root structures retrieved successfully"
-    )
-    public ResponseEntity<PageResponse<StructureResponse>> getRootStructures(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
-    ) {
-        return ResponseEntity.ok(service.getRootStructures(pageNo, pageSize));
-    }
-
-    @GetMapping("/{parentId}/children")
-    @Operation(
-            summary = "Get child structures",
-            description = "Returns all direct child structures under a given parent structure ID."
+            description = "Retrieves structure records with optional search, parent ID, isClosed status, status code, date filtering, sorting, and pagination."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Child structures retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Parent structure not found"),
-            @ApiResponse(responseCode = "410", description = "Parent structure is deleted")
+            @ApiResponse(responseCode = "200", description = "Structure records retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
     })
-    public ResponseEntity<PageResponse<StructureResponse>> getChildren(
-            @PathVariable
-            @Positive(message = "Parent ID must be a positive number")
-            Integer parentId,
+    public ResponseEntity<PageResponse<StructureResponse>> getAll(
+
             @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "pageNo cannot be negative")
             int pageNo,
@@ -157,10 +113,103 @@ public class StructureController {
             @RequestParam(defaultValue = "10")
             @Min(value = 1, message = "pageSize must be at least 1")
             @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            int pageSize,
+
+            @RequestParam(defaultValue = "id")
+            String sortBy,
+
+            @RequestParam(defaultValue = "asc")
+            @Pattern(regexp = "asc|desc|ASC|DESC", message = "sortDir must be 'asc' or 'desc'")
+            String sortDir,
+
+            @RequestParam(required = false)
+            String search,
+
+            @RequestParam(required = false)
+            Integer parentId,
+
+            @RequestParam(required = false)
+            Boolean isClosed,
+
+            @RequestParam(required = false)
+            String status,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime createdFrom,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime createdTo,
+
+            @RequestParam(required = false)
+            Boolean isRoot
     ) {
-        return ResponseEntity.ok(service.getChildren(parentId, pageNo, pageSize));
+
+        return ResponseEntity.ok(
+                service.getAll(
+                        pageNo,
+                        pageSize,
+                        sortBy,
+                        sortDir,
+                        search,
+                        parentId,
+                        isClosed,
+                        status,
+                        createdFrom,
+                        createdTo,
+                        isRoot
+                )
+        );
     }
+
+//    @GetMapping("/roots")
+//    @Operation(
+//            summary = "Get top-level (root) structures",
+//            description = "Returns all root structures that do not have a parent structure."
+//    )
+//    @ApiResponse(
+//            responseCode = "200",
+//            description = "Root structures retrieved successfully"
+//    )
+//    public ResponseEntity<PageResponse<StructureResponse>> getRootStructures(
+//            @RequestParam(defaultValue = "0")
+//            @Min(value = 0, message = "pageNo cannot be negative")
+//            int pageNo,
+//
+//            @RequestParam(defaultValue = "10")
+//            @Min(value = 1, message = "pageSize must be at least 1")
+//            @Max(value = 100, message = "pageSize cannot exceed 100")
+//            int pageSize
+//    ) {
+//        return ResponseEntity.ok(service.getRootStructures(pageNo, pageSize));
+//    }
+//
+//    @GetMapping("/{parentId}/children")
+//    @Operation(
+//            summary = "Get child structures",
+//            description = "Returns all direct child structures under a given parent structure ID."
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Child structures retrieved successfully"),
+//            @ApiResponse(responseCode = "404", description = "Parent structure not found"),
+//            @ApiResponse(responseCode = "410", description = "Parent structure is deleted")
+//    })
+//    public ResponseEntity<PageResponse<StructureResponse>> getChildren(
+//            @PathVariable
+//            @Positive(message = "Parent ID must be a positive number")
+//            Integer parentId,
+//            @RequestParam(defaultValue = "0")
+//            @Min(value = 0, message = "pageNo cannot be negative")
+//            int pageNo,
+//
+//            @RequestParam(defaultValue = "10")
+//            @Min(value = 1, message = "pageSize must be at least 1")
+//            @Max(value = 100, message = "pageSize cannot exceed 100")
+//            int pageSize
+//    ) {
+//        return ResponseEntity.ok(service.getChildren(parentId, pageNo, pageSize));
+//    }
 
     @PatchMapping("/{id}/activate")
     @Operation(

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "Positions")
+@Table(name = "position")
 @Setter
 @Getter
 @AllArgsConstructor

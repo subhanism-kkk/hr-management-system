@@ -6,6 +6,7 @@ import az.ingress.hrms.dto.person.PersonResponse;
 import org.springframework.data.domain.Page;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PersonService {
@@ -16,8 +17,16 @@ public interface PersonService {
 
     PersonResponse getById(Integer id);
 
-    PageResponse<PersonResponse> getAll(int pageNo, int pageSize);
-
+    PageResponse<PersonResponse> getAll(
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String sortDir,
+            String search,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo
+    );
     void softDelete(Integer id);
 
     void restore(Integer id);
