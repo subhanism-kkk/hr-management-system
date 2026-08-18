@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.organization;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.StructureSearchCriteria;
 import az.ingress.hrms.dto.structure.StructureRequest;
 import az.ingress.hrms.dto.structure.StructureResponse;
 import az.ingress.hrms.service.organization.StructureService;
@@ -15,6 +16,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,7 +98,6 @@ public class StructureController {
     ) {
         return ResponseEntity.ok(service.getById(id));
     }
-
     @GetMapping
     @Operation(
             summary = "Get all structures",
@@ -105,62 +108,10 @@ public class StructureController {
             @ApiResponse(responseCode = "400", description = "Invalid query parameter")
     })
     public ResponseEntity<PageResponse<StructureResponse>> getAll(
-
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize,
-
-            @RequestParam(defaultValue = "id")
-            String sortBy,
-
-            @RequestParam(defaultValue = "asc")
-            @Pattern(regexp = "asc|desc|ASC|DESC", message = "sortDir must be 'asc' or 'desc'")
-            String sortDir,
-
-            @RequestParam(required = false)
-            String search,
-
-            @RequestParam(required = false)
-            Integer parentId,
-
-            @RequestParam(required = false)
-            Boolean isClosed,
-
-            @RequestParam(required = false)
-            String status,
-
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime createdFrom,
-
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime createdTo,
-
-            @RequestParam(required = false)
-            Boolean isRoot
+            StructureSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-
-        return ResponseEntity.ok(
-                service.getAll(
-                        pageNo,
-                        pageSize,
-                        sortBy,
-                        sortDir,
-                        search,
-                        parentId,
-                        isClosed,
-                        status,
-                        createdFrom,
-                        createdTo,
-                        isRoot
-                )
-        );
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
 //    @GetMapping("/roots")

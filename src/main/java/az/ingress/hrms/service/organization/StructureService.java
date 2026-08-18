@@ -1,8 +1,10 @@
 package az.ingress.hrms.service.organization;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.StructureSearchCriteria;
 import az.ingress.hrms.dto.structure.StructureRequest;
 import az.ingress.hrms.dto.structure.StructureResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 
@@ -18,19 +20,7 @@ public interface StructureService {
 
     StructureResponse getById(Integer id);
 
-    PageResponse<StructureResponse> getAll(
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String sortDir,
-            String search,
-            Integer parentId,
-            Boolean isClosed,
-            String status,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo,
-            Boolean isRoot
-    );
+    PageResponse<StructureResponse> getAll(StructureSearchCriteria criteria, Pageable pageable);
 
 //    PageResponse<StructureResponse> getRootStructures(int pageNo, int pageSize);
 //

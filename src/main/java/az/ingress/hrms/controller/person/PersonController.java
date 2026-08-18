@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonSearchCriteria;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.service.person.PersonService;
@@ -15,6 +16,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,85 +98,17 @@ public class PersonController {
     @GetMapping
     @Operation(
             summary = "Get all persons",
-            description =
-                    "Retrieves a list of active person records, "
-                            + "with optional search, status filtering, "
-                            + "date-range filtering, sorting, and pagination."
+            description = "Retrieves a list of active person records with optional searching, status filtering, date-range filtering, and pagination."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description =
-                            "Person records retrieved successfully"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description =
-                            "Invalid query parameter"
-            )
+            @ApiResponse(responseCode = "200", description = "Person records retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
     })
     public ResponseEntity<PageResponse<PersonResponse>> getAll(
-
-            @RequestParam(defaultValue = "0")
-            @Min(
-                    value = 0,
-                    message = "pageNo cannot be negative"
-            )
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(
-                    value = 1,
-                    message = "pageSize must be at least 1"
-            )
-            @Max(
-                    value = 100,
-                    message = "pageSize cannot exceed 100"
-            )
-            int pageSize,
-
-            @RequestParam(defaultValue = "id")
-            String sortBy,
-
-            @RequestParam(defaultValue = "asc")
-            @Pattern(
-                    regexp = "asc|desc|ASC|DESC",
-                    message =
-                            "sortDir must be 'asc' or 'desc'"
-            )
-            String sortDir,
-
-            @RequestParam(required = false)
-            String search,
-
-            @RequestParam(required = false)
-            String status,
-
-            @RequestParam(required = false)
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE_TIME
-            )
-            LocalDateTime createdFrom,
-
-            @RequestParam(required = false)
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE_TIME
-            )
-            LocalDateTime createdTo
+            PersonSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-
-        return ResponseEntity.ok(
-                service.getAll(
-                        pageNo,
-                        pageSize,
-                        sortBy,
-                        sortDir,
-                        search,
-                        status,
-                        createdFrom,
-                        createdTo
-                )
-        );
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
     @PatchMapping("/{id}/activate")

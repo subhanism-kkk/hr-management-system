@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderSearchCriteria;
 import az.ingress.hrms.dto.order.OrderRequest;
 import az.ingress.hrms.dto.order.OrderResponse;
 import az.ingress.hrms.service.order.OrderService;
@@ -13,6 +14,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -73,24 +78,19 @@ public class OrderController {
     @GetMapping
     @Operation(
             summary = "Get all orders",
-            description = "Returns a paginated list of active order."
+            description = "Returns a paginated and filtered list of orders."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Orders retrieved successfully"
     )
     public ResponseEntity<PageResponse<OrderResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            OrderSearchCriteria criteria,
+            @PageableDefault(sort = "orderDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
+
 
 
     @DeleteMapping("/{id}")

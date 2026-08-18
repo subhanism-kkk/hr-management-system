@@ -1,9 +1,11 @@
 package az.ingress.hrms.service.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonSearchCriteria;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 import java.time.LocalDateTime;
@@ -17,16 +19,8 @@ public interface PersonService {
 
     PersonResponse getById(Integer id);
 
-    PageResponse<PersonResponse> getAll(
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String sortDir,
-            String search,
-            String status,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo
-    );
+    PageResponse<PersonResponse> getAll(PersonSearchCriteria criteria, Pageable pageable);
+
     void softDelete(Integer id);
 
     void restore(Integer id);

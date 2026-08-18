@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.organization;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.StaffingPlanSearchCriteria;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
@@ -122,34 +123,8 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
-    public PageResponse<StaffingPlanResponse> getAll(
-            String search,
-            Integer structureId,
-            Integer positionId,
-            Boolean isClosed,
-            String status,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String sortDir
-    ) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-
-        Specification<StaffingPlan> specification = Specification
-                .where(StaffingPlanSpecification.search(search))
-                .and(StaffingPlanSpecification.hasStructureId(structureId))
-                .and(StaffingPlanSpecification.hasPositionId(positionId))
-                .and(StaffingPlanSpecification.isClosed(isClosed))
-                .and(StaffingPlanSpecification.hasStatusCode(status))
-                .and(StaffingPlanSpecification.createdFrom(createdFrom))
-                .and(StaffingPlanSpecification.createdTo(createdTo));
-
+    public PageResponse<StaffingPlanResponse> getAll(StaffingPlanSearchCriteria criteria, Pageable pageable) {
+        Specification<StaffingPlan> specification = StaffingPlanSpecification.build(criteria);
         Page<StaffingPlan> page = repository.findAll(specification, pageable);
 
         return PaginationUtils.toPageResponse(page, mapper::toResponse);

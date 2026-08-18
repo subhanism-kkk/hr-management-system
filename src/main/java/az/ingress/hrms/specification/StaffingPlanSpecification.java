@@ -1,12 +1,16 @@
 package az.ingress.hrms.specification;
 
+import az.ingress.hrms.dto.criteria.StaffingPlanSearchCriteria;
 import az.ingress.hrms.entity.organization.StaffingPlan;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
-public class StaffingPlanSpecification {
+public final class StaffingPlanSpecification {
+
+    private StaffingPlanSpecification() {
+    }
 
     public static Specification<StaffingPlan> search(String keyword) {
         if (!StringUtils.hasText(keyword)) {
@@ -62,5 +66,19 @@ public class StaffingPlanSpecification {
             return null;
         }
         return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), createdTo);
+    }
+
+    public static Specification<StaffingPlan> build(StaffingPlanSearchCriteria criteria) {
+        if (criteria == null) {
+            return Specification.where(null);
+        }
+
+        return Specification.where(search(criteria.getSearch()))
+                .and(hasStructureId(criteria.getStructureId()))
+                .and(hasPositionId(criteria.getPositionId()))
+                .and(isClosed(criteria.getIsClosed()))
+                .and(hasStatusCode(criteria.getStatus()))
+                .and(createdFrom(criteria.getCreatedFrom()))
+                .and(createdTo(criteria.getCreatedTo()));
     }
 }

@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.organization;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.StaffingPlanSearchCriteria;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
@@ -15,6 +16,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -104,36 +108,10 @@ public class StaffingPlanController {
             description = "Staffing plans retrieved successfully"
     )
     public ResponseEntity<PageResponse<StaffingPlanResponse>> getAll(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer structureId,
-            @RequestParam(required = false) Integer positionId,
-            @RequestParam(required = false) Boolean isClosed,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdFrom,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdTo,
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative") int pageNo,
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100") int pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
+            StaffingPlanSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getAll(
-                search,
-                structureId,
-                positionId,
-                isClosed,
-                status,
-                createdFrom,
-                createdTo,
-                pageNo,
-                pageSize,
-                sortBy,
-                sortDir
-        ));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
 //    @GetMapping("/structure/{structureId}")

@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonSearchCriteria;
 import az.ingress.hrms.dto.person.PersonRequest;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.entity.person.Person;
@@ -86,50 +87,14 @@ public class PersonServiceImpl implements PersonService {
                     "updatedAt"
             );
 
+
     @Override
-    public PageResponse<PersonResponse> getAll(
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String sortDir,
-            String search,
-            String status,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo
-    ) {
+    @Transactional(readOnly = true)
+    public PageResponse<PersonResponse> getAll(PersonSearchCriteria criteria, Pageable pageable) {
+        Specification<Person> specification = PersonSpecification.build(criteria);
+        Page<Person> page = repository.findAll(specification, pageable);
 
-        Sort sort =
-                SortUtils.buildSort(
-                        sortBy,
-                        sortDir,
-                        SORTABLE_FIELDS,
-                        "id"
-                );
-
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        sort
-                );
-
-        Specification<Person> specification =
-                Specification
-                        .where(PersonSpecification.search(search))
-                        .and(PersonSpecification.hasStatusCode(status))
-                        .and(PersonSpecification.createdFrom(createdFrom))
-                        .and(PersonSpecification.createdTo(createdTo));
-
-        Page<Person> page =
-                repository.findAll(
-                        specification,
-                        pageable
-                );
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonSalarySearchCriteria;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryCreateRequest;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryUpdateRequest;
@@ -19,6 +20,7 @@ import az.ingress.hrms.repository.OrderPersonSalaryRepository;
 import az.ingress.hrms.repository.OrderRepository;
 import az.ingress.hrms.repository.StaffingPlanRepository;
 import az.ingress.hrms.service.order.OrderPersonSalaryService;
+import az.ingress.hrms.specification.OrderPersonSalarySpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -167,46 +170,12 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
 
 
     @Override
-    public PageResponse<OrderPersonSalaryResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<OrderPersonSalaryResponse> getAll(OrderPersonSalarySearchCriteria criteria, Pageable pageable) {
+        Specification<OrderPersonSalary> specification = OrderPersonSalarySpecification.build(criteria);
+        Page<OrderPersonSalary> page = repository.findAll(specification, pageable);
 
-        Page<OrderPersonSalary> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
-
-
-    @Override
-    public PageResponse<OrderPersonSalaryResponse> getByStaffingPlan(
-            Integer staffingPlanId,
-            int pageNo, int pageSize
-    ) {
-        fetchStaffingPlan(staffingPlanId);
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<OrderPersonSalary> page =
-                repository.findByStaffingPlanId(staffingPlanId, pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
 
     @Override
     @Transactional

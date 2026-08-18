@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderSearchCriteria;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
@@ -16,6 +17,7 @@ import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.specification.OrderSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,23 +87,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageResponse<OrderResponse> getAll(int pageNo, int pageSize) {
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getAll(OrderSearchCriteria criteria, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.build(criteria);
+        Page<Order> orderPage = repository.findAll(spec, pageable);
 
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<Order> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-
+        return PaginationUtils.toPageResponse(orderPage, mapper::toResponse);
     }
 
     @Override

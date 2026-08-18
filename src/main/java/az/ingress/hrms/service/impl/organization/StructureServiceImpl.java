@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.organization;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.StructureSearchCriteria;
 import az.ingress.hrms.dto.structure.StructureRequest;
 import az.ingress.hrms.dto.structure.StructureResponse;
 import az.ingress.hrms.entity.organization.Structure;
@@ -147,51 +148,11 @@ public class StructureServiceImpl implements StructureService {
             );
 
     @Override
-    public PageResponse<StructureResponse> getAll(
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String sortDir,
-            String search,
-            Integer parentId,
-            Boolean isClosed,
-            String status,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo,
-            Boolean isRoot
-    ) {
+    public PageResponse<StructureResponse> getAll(StructureSearchCriteria criteria, Pageable pageable) {
+        Specification<Structure> specification = StructureSpecification.build(criteria);
+        Page<Structure> page = repository.findAll(specification, pageable);
 
-        Sort sort = SortUtils.buildSort(
-                sortBy,
-                sortDir,
-                SORTABLE_FIELDS,
-                "id"
-        );
-
-        Pageable pageable = PageRequest.of(
-                pageNo,
-                pageSize,
-                sort
-        );
-
-        Specification<Structure> specification = Specification
-                .where(StructureSpecification.search(search))
-                .and(StructureSpecification.hasParentId(parentId))
-                .and(StructureSpecification.isClosed(isClosed))
-                .and(StructureSpecification.hasStatusCode(status))
-                .and(StructureSpecification.createdFrom(createdFrom))
-                .and(StructureSpecification.createdTo(createdTo))
-                .and(StructureSpecification.isRoot(isRoot));
-
-        Page<Structure> page = repository.findAll(
-                specification,
-                pageable
-        );
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
 //    @Override
