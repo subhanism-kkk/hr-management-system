@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonPromotionSearchCriteria;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionCreateRequest;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionResponse;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionUpdateRequest;
@@ -18,6 +19,7 @@ import az.ingress.hrms.log.order.orderPerson.promotion.OrderPersonPromotionLogSe
 import az.ingress.hrms.mapper.OrderPersonPromotionMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonPromotionService;
+import az.ingress.hrms.specification.OrderPersonPromotionSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -153,41 +156,11 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     }
 
     @Override
-    public PageResponse<OrderPersonPromotionResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<OrderPersonPromotionResponse> getAll(OrderPersonPromotionSearchCriteria criteria, Pageable pageable) {
+        Specification<OrderPersonPromotion> specification = OrderPersonPromotionSpecification.build(criteria);
+        Page<OrderPersonPromotion> page = repository.findAll(specification, pageable);
 
-        Page<OrderPersonPromotion> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
-    @Override
-    public PageResponse<OrderPersonPromotionResponse> getByPerson(Integer personId, int pageNo, int pageSize) {
-        fetchPerson(personId);
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<OrderPersonPromotion> page =
-                repository.findByPersonId(personId, pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderTypeSearchCriteria;
 import az.ingress.hrms.entity.lookup.OrderType;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
@@ -13,6 +14,7 @@ import az.ingress.hrms.dto.orderType.OrderTypeRequest;
 import az.ingress.hrms.dto.orderType.OrderTypeResponse;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.specification.OrderTypeSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,22 +93,11 @@ public class OrderTypeServiceImpl implements OrderTypeService {
     }
 
     @Override
-    public PageResponse<OrderTypeResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<OrderTypeResponse> getAll(OrderTypeSearchCriteria criteria, Pageable pageable) {
+        Specification<OrderType> specification = OrderTypeSpecification.build(criteria);
+        Page<OrderType> page = repository.findAll(specification, pageable);
 
-        Page<OrderType> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

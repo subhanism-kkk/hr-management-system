@@ -53,7 +53,7 @@ public class OrderPersonAppointment extends WorkflowEntity {
     private Boolean isClosed = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dismissal_order_id")
+    @JoinColumn(name = "dismissal_order_id", nullable = true)
     private Order dismissalOrder;
 
 }

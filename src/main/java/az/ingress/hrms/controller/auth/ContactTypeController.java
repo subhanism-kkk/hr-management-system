@@ -3,6 +3,7 @@ package az.ingress.hrms.controller.auth;
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.contactType.ContactTypeRequest;
 import az.ingress.hrms.dto.contactType.ContactTypeResponse;
+import az.ingress.hrms.dto.criteria.ContactTypeSearchCriteria;
 import az.ingress.hrms.service.auth.ContactTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +14,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -92,23 +96,17 @@ public class ContactTypeController {
     @GetMapping
     @Operation(
             summary = "Get all contact types",
-            description = "Returns a paginated list of active contact types."
+            description = "Retrieves contact types with optional search, name filtering, sorting, and pagination."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Contact types retrieved successfully"
-    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contact types retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
+    })
     public ResponseEntity<PageResponse<ContactTypeResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            ContactTypeSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
     @DeleteMapping("/{id}")

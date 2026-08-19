@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.auth;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderTypeSearchCriteria;
 import az.ingress.hrms.dto.orderType.OrderTypeRequest;
 import az.ingress.hrms.dto.orderType.OrderTypeResponse;
 import az.ingress.hrms.service.auth.OrderTypeService;
@@ -14,6 +15,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -94,23 +98,17 @@ public class OrderTypeController {
     @GetMapping
     @Operation(
             summary = "Get all order types",
-            description = "Returns a paginated list of active order types."
+            description = "Retrieves order types with optional search, name, code filtering, sorting, and pagination."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Order types retrieved successfully"
-    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Order types retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
+    })
     public ResponseEntity<PageResponse<OrderTypeResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            OrderTypeSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
     @DeleteMapping("/{id}")

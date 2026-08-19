@@ -1,9 +1,11 @@
 package az.ingress.hrms.service.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonPromotionSearchCriteria;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionCreateRequest;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionResponse;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionUpdateRequest;
+import org.springframework.data.domain.Pageable;
 
 
 public interface OrderPersonPromotionService {
@@ -14,9 +16,7 @@ public interface OrderPersonPromotionService {
 
     OrderPersonPromotionResponse getById(Integer id);
 
-    PageResponse<OrderPersonPromotionResponse> getAll(int pageNo, int pageSize);
-
-    PageResponse<OrderPersonPromotionResponse> getByPerson(Integer personId, int pageNo, int pageSize);
+    PageResponse<OrderPersonPromotionResponse> getAll(OrderPersonPromotionSearchCriteria criteria, Pageable pageable);
 
     void softDelete(Integer id);
 

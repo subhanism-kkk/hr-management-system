@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.LeaveTypeSearchCriteria;
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeUpdateRequest;
@@ -14,6 +15,7 @@ import az.ingress.hrms.log.lookup.leaveType.LeaveTypeLogService;
 import az.ingress.hrms.mapper.LeaveTypeMapper;
 import az.ingress.hrms.repository.LeaveTypeRepository;
 import az.ingress.hrms.service.auth.LeaveTypeService;
+import az.ingress.hrms.specification.LeaveTypeSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,21 +120,11 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
     }
 
     @Override
-    public PageResponse<LeaveTypeResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<LeaveTypeResponse> getAll(LeaveTypeSearchCriteria criteria, Pageable pageable) {
+        Specification<LeaveType> specification = LeaveTypeSpecification.build(criteria);
+        Page<LeaveType> page = repository.findAll(specification, pageable);
 
-        Page<LeaveType> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

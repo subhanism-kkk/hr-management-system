@@ -2,13 +2,14 @@ package az.ingress.hrms.repository;
 
 import az.ingress.hrms.entity.lookup.LeaveType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface LeaveTypeRepository extends JpaRepository<LeaveType, Integer> {
+public interface LeaveTypeRepository extends JpaRepository<LeaveType, Integer>, JpaSpecificationExecutor<LeaveType> {
 
     Optional<LeaveType> findByCodeIgnoreCase(String code);
     boolean existsByNameIgnoreCase(String name);

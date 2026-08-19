@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonTransferSearchCriteria;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferCreateRequest;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferResponse;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferUpdateRequest;
@@ -10,10 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -92,49 +94,17 @@ public class OrderPersonTransferController {
     @GetMapping
     @Operation(
             summary = "Get all order person transfers",
-            description = "Returns all active order person transfer records."
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Transfer records retrieved successfully"
-    )
-    public ResponseEntity<PageResponse<OrderPersonTransferResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
-    }
-
-    @GetMapping("/person/{personId}")
-    @Operation(
-            summary = "Get order person transfers by Person ID",
-            description = "Returns all transfer records associated with a specific person."
+            description = "Retrieves order person transfer records with optional search, person ID, order ID, old/new structure IDs or names, old/new position IDs or names, effective date range, status, created date filtering, sorting, and pagination."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transfer records retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Person not found"),
-            @ApiResponse(responseCode = "410", description = "Person is deleted")
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
     })
-    public ResponseEntity<PageResponse<OrderPersonTransferResponse>> getByPerson(
-            @PathVariable
-            @Positive(message = "Person ID must be a positive number")
-            Integer personId,
-
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+    public ResponseEntity<PageResponse<OrderPersonTransferResponse>> getAll(
+            OrderPersonTransferSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getByPerson(personId, pageNo, pageSize));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
     @PatchMapping("/{id}/activate")

@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonTransferSearchCriteria;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferCreateRequest;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferResponse;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferUpdateRequest;
@@ -20,6 +21,7 @@ import az.ingress.hrms.log.order.orderPerson.transfer.OrderPersonTransferLogServ
 import az.ingress.hrms.mapper.OrderPersonTransferMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonTransferService;
+import az.ingress.hrms.specification.OrderPersonTransferSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -202,40 +205,11 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     }
 
     @Override
-    public PageResponse<OrderPersonTransferResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<OrderPersonTransferResponse> getAll(OrderPersonTransferSearchCriteria criteria, Pageable pageable) {
+        Specification<OrderPersonTransfer> specification = OrderPersonTransferSpecification.build(criteria);
+        Page<OrderPersonTransfer> page = repository.findAll(specification, pageable);
 
-        Page<OrderPersonTransfer> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
-    @Override
-    public PageResponse<OrderPersonTransferResponse> getByPerson(Integer personId, int pageNo, int pageSize) {
-        fetchPerson(personId);
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<OrderPersonTransfer> page =
-                repository.findByPersonId(personId, pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

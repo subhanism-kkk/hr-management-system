@@ -1,10 +1,12 @@
 package az.ingress.hrms.service.auth;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.LeaveTypeSearchCriteria;
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeUpdateRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ public interface LeaveTypeService {
 
     LeaveTypeResponse getByCode(String code);
 
-    PageResponse<LeaveTypeResponse> getAll(int pageNo, int pageSize);
+    PageResponse<LeaveTypeResponse> getAll(LeaveTypeSearchCriteria criteria, Pageable pageable);
 
     void softDelete(Integer id);
 

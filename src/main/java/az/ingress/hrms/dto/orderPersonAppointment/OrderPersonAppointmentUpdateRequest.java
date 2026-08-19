@@ -26,8 +26,8 @@ public class OrderPersonAppointmentUpdateRequest {
 
     @NotNull
     private LocalDate startDate;
-//
 
-//    @NotNull
-//    private LocalDate endDate;
+
+    @NotNull
+    private LocalDate endDate;
 }

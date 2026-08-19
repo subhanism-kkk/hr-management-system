@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonDismissalSearchCriteria;
 import az.ingress.hrms.dto.orderPersonDismissal.OrderPersonDismissalCreateRequest;
 import az.ingress.hrms.dto.orderPersonDismissal.OrderPersonDismissalResponse;
 import az.ingress.hrms.dto.orderPersonDismissal.OrderPersonDismissalUpdateRequest;
@@ -14,6 +15,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -92,49 +96,17 @@ public class OrderPersonDismissalController {
     @GetMapping
     @Operation(
             summary = "Get all order person dismissals",
-            description = "Returns all active order person dismissal records."
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Dismissal records retrieved successfully"
-    )
-    public ResponseEntity<PageResponse<OrderPersonDismissalResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
-    ) {
-        return ResponseEntity.ok(service.getAll(pageNo,pageSize));
-    }
-
-    @GetMapping("/person/{personId}")
-    @Operation(
-            summary = "Get order person dismissals by Person ID",
-            description = "Returns all dismissal records associated with a specific person."
+            description = "Retrieves order person dismissal records with optional search, person ID, order ID, dismissal date range, status, created date filtering, sorting, and pagination."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Dismissal records retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Person not found"),
-            @ApiResponse(responseCode = "410", description = "Person is deleted")
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
     })
-    public ResponseEntity<PageResponse<OrderPersonDismissalResponse>> getByPerson(
-            @PathVariable
-            @Positive(message = "Person ID must be a positive number")
-            Integer personId,
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+    public ResponseEntity<PageResponse<OrderPersonDismissalResponse>> getAll(
+            OrderPersonDismissalSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getByPerson(personId, pageNo,pageSize));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
 

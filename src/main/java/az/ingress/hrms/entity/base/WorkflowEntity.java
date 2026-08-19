@@ -5,10 +5,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -17,14 +14,14 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
-public abstract class WorkflowEntity
-        extends SoftDeleteEntity {
+public abstract class WorkflowEntity extends SoftDeleteEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "status_id",
             nullable = false
     )
-    private Status status;
+    @Builder.Default
+    private Status status = Status.builder().id(1).build();
 
 }

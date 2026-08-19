@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.order;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.OrderPersonLeaveSearchCriteria;
 import az.ingress.hrms.dto.orderPersonLeave.OrderPersonLeaveCreateRequest;
 import az.ingress.hrms.dto.orderPersonLeave.OrderPersonLeaveResponse;
 import az.ingress.hrms.dto.orderPersonLeave.OrderPersonLeaveUpdateRequest;
@@ -18,6 +19,7 @@ import az.ingress.hrms.log.order.orderPerson.leave.OrderPersonLeaveLogService;
 import az.ingress.hrms.mapper.OrderPersonLeaveMapper;
 import az.ingress.hrms.repository.*;
 import az.ingress.hrms.service.order.OrderPersonLeaveService;
+import az.ingress.hrms.specification.OrderPersonLeaveSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -156,39 +159,11 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     }
 
     @Override
-    public PageResponse<OrderPersonLeaveResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<OrderPersonLeaveResponse> getAll(OrderPersonLeaveSearchCriteria criteria, Pageable pageable) {
+        Specification<OrderPersonLeave> specification = OrderPersonLeaveSpecification.build(criteria);
+        Page<OrderPersonLeave> page = repository.findAll(specification, pageable);
 
-        Page<OrderPersonLeave> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
-    @Override
-    public PageResponse<OrderPersonLeaveResponse> getByPerson(Integer personId, int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<OrderPersonLeave> page =
-                repository.findByPerson(fetchPerson(personId), pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

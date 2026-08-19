@@ -2,9 +2,11 @@ package az.ingress.hrms.service.organization;
 
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PositionSearchCriteria;
 import az.ingress.hrms.dto.position.PositionRequest;
 import az.ingress.hrms.dto.position.PositionResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,7 +17,7 @@ public interface PositionService {
 
     PositionResponse getById(Integer id);
 
-    PageResponse<PositionResponse> getAll(int pageNo, int pageSize);
+    PageResponse<PositionResponse> getAll(PositionSearchCriteria criteria, Pageable pageable);
 
     void softDelete(Integer id);
 

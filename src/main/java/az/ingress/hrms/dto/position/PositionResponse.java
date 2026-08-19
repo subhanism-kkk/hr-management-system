@@ -16,6 +16,7 @@ public class PositionResponse {
     private Integer id;
     private String name;
     private String description;
+    private Integer statusName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
