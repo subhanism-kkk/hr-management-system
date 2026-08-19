@@ -1,12 +1,12 @@
 package az.ingress.hrms.service.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonContactInfoSearchCriteria;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoCreateRequest;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoUpdateRequest;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface PersonContactInfoService {
     PersonContactInfoResponse create(PersonContactInfoCreateRequest request);
@@ -15,9 +15,7 @@ public interface PersonContactInfoService {
 
     PersonContactInfoResponse getById(Integer id);
 
-    PageResponse<PersonContactInfoResponse> getAll(int pageNo, int pageSize);
-
-    PageResponse<PersonContactInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
+    PageResponse<PersonContactInfoResponse> getAll(PersonContactInfoSearchCriteria criteria, Pageable pageable);
 
     void softDelete(Integer id);
 

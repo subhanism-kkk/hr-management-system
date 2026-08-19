@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonPhotoSearchCriteria;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoCreateRequest;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoResponse;
@@ -17,6 +18,7 @@ import az.ingress.hrms.mapper.PersonPhotoMapper;
 import az.ingress.hrms.repository.PersonPhotoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
+import az.ingress.hrms.specification.PersonPhotoSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,44 +125,12 @@ public class PersonPhotoServiceImpl implements PersonPhotoService {
     }
 
     @Override
-    public PageResponse<PersonPhotoResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<PersonPhotoResponse> getAll(PersonPhotoSearchCriteria criteria, Pageable pageable) {
+        Specification<PersonPhoto> specification = PersonPhotoSpecification.build(criteria);
+        Page<PersonPhoto> page = repository.findAll(specification, pageable);
 
-        Page<PersonPhoto> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
-
-    @Override
-    public PageResponse<PersonPhotoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
-        if (!personRepository.existsById(personId)) {
-            throw new ResourceNotFoundException("Person not found with id: " + personId);
-        }
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<PersonPhoto> page =
-                repository.findByPersonId(personId, pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
     @Override
     @Transactional
     public PersonPhotoResponse getMainPhoto(Integer personId) {

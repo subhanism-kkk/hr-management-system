@@ -3,6 +3,7 @@ package az.ingress.hrms.repository;
 import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.entity.person.PersonPersonalInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PersonPersonalInfoRepository extends JpaRepository<PersonPersonalInfo,Integer> {
+public interface PersonPersonalInfoRepository extends JpaRepository<PersonPersonalInfo,Integer>, JpaSpecificationExecutor<PersonPersonalInfo> {
 
     Optional<PersonPersonalInfo> findByPerson(Person person);
 

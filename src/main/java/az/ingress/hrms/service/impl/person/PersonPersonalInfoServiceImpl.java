@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonPersonalInfoSearchCriteria;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoCreateRequest;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoResponse;
@@ -17,6 +18,7 @@ import az.ingress.hrms.mapper.PersonPersonalInfoMapper;
 import az.ingress.hrms.repository.PersonPersonalInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonPersonalInfoService;
+import az.ingress.hrms.specification.PersonPersonalInfoSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,21 +102,11 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
     }
 
     @Override
-    public PageResponse<PersonPersonalInfoResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<PersonPersonalInfoResponse> getAll(PersonPersonalInfoSearchCriteria criteria, Pageable pageable) {
+        Specification<PersonPersonalInfo> specification = PersonPersonalInfoSpecification.build(criteria);
+        Page<PersonPersonalInfo> page = repository.findAll(specification, pageable);
 
-        Page<PersonPersonalInfo> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

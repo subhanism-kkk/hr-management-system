@@ -1,6 +1,7 @@
 package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonAddressInfoSearchCriteria;
 import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
@@ -17,6 +18,7 @@ import az.ingress.hrms.mapper.PersonAddressInfoMapper;
 import az.ingress.hrms.repository.PersonAddressInfoRepository;
 import az.ingress.hrms.repository.PersonRepository;
 import az.ingress.hrms.service.person.PersonAddressInfoService;
+import az.ingress.hrms.specification.PersonAddressInfoSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,43 +112,11 @@ public class PersonAddressInfoServiceImpl implements PersonAddressInfoService {
     }
 
     @Override
-    public PageResponse<PersonAddressInfoResponse> getAll(int pageNo, int pageSize) {
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
+    public PageResponse<PersonAddressInfoResponse> getAll(PersonAddressInfoSearchCriteria criteria, Pageable pageable) {
+        Specification<PersonAddressInfo> specification = PersonAddressInfoSpecification.build(criteria);
+        Page<PersonAddressInfo> page = repository.findAll(specification, pageable);
 
-        Page<PersonAddressInfo> page =
-                repository.findAll(pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
-    }
-
-    @Override
-    public PageResponse<PersonAddressInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Person not found"
-                ));
-        Pageable pageable =
-                PageRequest.of(
-                        pageNo,
-                        pageSize,
-                        Sort.by("id").ascending()
-                );
-
-        Page<PersonAddressInfo> page =
-                repository.findByPerson(person, pageable);
-
-        return PaginationUtils.toPageResponse(
-                page,
-                mapper::toResponse
-        );
+        return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
     @Override

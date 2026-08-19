@@ -1,10 +1,12 @@
 package az.ingress.hrms.service.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonAddressInfoSearchCriteria;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoCreateRequest;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoResponse;
 import az.ingress.hrms.dto.personAddressInfo.PersonAddressInfoUpdateRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,9 +20,7 @@ public interface PersonAddressInfoService {
 
     PersonAddressInfoResponse getById(Integer id);
 
-    PageResponse<PersonAddressInfoResponse> getAll(int pageNo, int pageSize);
-
-    PageResponse<PersonAddressInfoResponse> getAllByPerson(Integer personId, int pageNo, int pageSize);
+    PageResponse<PersonAddressInfoResponse> getAll(PersonAddressInfoSearchCriteria criteria, Pageable pageable);
 
     void softDelete(Integer id);
 

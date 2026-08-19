@@ -1,6 +1,7 @@
 package az.ingress.hrms.controller.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.criteria.PersonPersonalInfoSearchCriteria;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoCreateRequest;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoResponse;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoUpdateRequest;
@@ -15,6 +16,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -94,23 +98,17 @@ public class PersonPersonalInfoController {
     @GetMapping
     @Operation(
             summary = "Get all personal info records",
-            description = "Retrieves a list of all active personal information records."
+            description = "Retrieves personal information records with optional search, gender, FIN code, birth date range, status, date filtering, sorting, and pagination."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Personal information records retrieved successfully"
-    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Personal information records retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter")
+    })
     public ResponseEntity<PageResponse<PersonPersonalInfoResponse>> getAll(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "pageNo cannot be negative")
-            int pageNo,
-
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "pageSize must be at least 1")
-            @Max(value = 100, message = "pageSize cannot exceed 100")
-            int pageSize
+            PersonPersonalInfoSearchCriteria criteria,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(service.getAll(pageNo, pageSize));
+        return ResponseEntity.ok(service.getAll(criteria, pageable));
     }
 
     @PatchMapping("/{id}/activate")

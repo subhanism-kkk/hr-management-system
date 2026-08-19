@@ -6,13 +6,14 @@ import az.ingress.hrms.entity.person.PersonContactInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface PersonContactInfoRepository
-        extends JpaRepository<PersonContactInfo, Integer> {
+        extends JpaRepository<PersonContactInfo, Integer>, JpaSpecificationExecutor<PersonContactInfo> {
 
     List<PersonContactInfo> findByPerson(Person person);
 
