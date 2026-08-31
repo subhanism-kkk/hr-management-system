@@ -3,6 +3,7 @@ package az.ingress.hrms.entity.person;
 import az.ingress.hrms.entity.base.WorkflowEntity;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonPromotion;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonBonus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -72,4 +73,12 @@ public class Person extends WorkflowEntity  {
             fetch = FetchType.LAZY
     )
     private List<OrderPersonPromotion> promotions = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "person",
+            fetch = FetchType.LAZY
+    )
+    private List<OrderPersonBonus> bonuses =
+            new ArrayList<>();
+
 }

@@ -33,7 +33,9 @@ public class OrderPersonTransferResponse {
     private String newPositionName;
 
     private LocalDate effectiveDate;
-    private String statusCode;
+
+    private String statusName;
+    private Integer statusId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

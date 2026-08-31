@@ -5,24 +5,36 @@ import az.ingress.hrms.dto.criteria.OrderPersonPromotionSearchCriteria;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionCreateRequest;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionResponse;
 import az.ingress.hrms.dto.orderPersonPromotion.OrderPersonPromotionUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 
 public interface OrderPersonPromotionService {
 
-    OrderPersonPromotionResponse create(OrderPersonPromotionCreateRequest request);
+    OrderPersonPromotionResponse create(
+            Order order,
+            OrderPersonPromotionCreateRequest request
+    );
 
-    OrderPersonPromotionResponse update(Integer id, OrderPersonPromotionUpdateRequest request);
+    OrderPersonPromotionResponse update(
+            Order order,
+            OrderPersonPromotionUpdateRequest request
+    );
 
-    OrderPersonPromotionResponse getById(Integer id);
+    void activate(Order order);
 
-    PageResponse<OrderPersonPromotionResponse> getAll(OrderPersonPromotionSearchCriteria criteria, Pageable pageable);
+    void deactivate(Order order);
 
-    void softDelete(Integer id);
+    void softDelete(Order order);
 
-    void restore(Integer id);
+    void restore(Order order);
 
-    OrderPersonPromotionResponse activate(Integer id);
+    PageResponse<OrderPersonPromotionResponse> getAll(
+            OrderPersonPromotionSearchCriteria criteria,
+            Pageable pageable
+    );
 
-    OrderPersonPromotionResponse deactivate(Integer id);
+    List<OrderPersonPromotionResponse> getByOrderId(Integer orderId);
 }

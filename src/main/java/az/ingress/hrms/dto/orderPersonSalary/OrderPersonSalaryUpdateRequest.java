@@ -15,6 +15,10 @@ import java.time.LocalDate;
 @Builder
 public class OrderPersonSalaryUpdateRequest {
 
+    @NotNull(message = "Staffing Plan ID cannot be null.")
+    @Positive(message = "Staffing Plan ID must be positive.")
+    private Integer staffingPlanId;
+
     @NotNull(message = "New salary cannot be null.")
     @Positive(message = "New salary must be positive.")
     private BigDecimal newSalary;

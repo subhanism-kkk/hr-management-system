@@ -3,33 +3,29 @@ package az.ingress.hrms.service.impl.organization;
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.criteria.PositionSearchCriteria;
 import az.ingress.hrms.entity.organization.Position;
-import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.organization.position.PositionLogService;
-import az.ingress.hrms.mapper.PositionMapper;
-import az.ingress.hrms.repository.PositionRepository;
+import az.ingress.hrms.mapper.organization.PositionMapper;
+import az.ingress.hrms.repository.organization.PositionRepository;
 import az.ingress.hrms.service.organization.PositionService;
 import az.ingress.hrms.dto.position.PositionRequest;
 import az.ingress.hrms.dto.position.PositionResponse;
 
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
-import az.ingress.hrms.specification.PositionSpecification;
+import az.ingress.hrms.specification.organization.PositionSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

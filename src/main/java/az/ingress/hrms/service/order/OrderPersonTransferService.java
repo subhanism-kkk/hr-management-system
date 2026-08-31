@@ -5,24 +5,31 @@ import az.ingress.hrms.dto.criteria.OrderPersonTransferSearchCriteria;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferCreateRequest;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferResponse;
 import az.ingress.hrms.dto.orderPersonTransfer.OrderPersonTransferUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 
 public interface OrderPersonTransferService {
 
-    OrderPersonTransferResponse create(OrderPersonTransferCreateRequest request);
+    OrderPersonTransferResponse create(
+            Order order,
+                                       OrderPersonTransferCreateRequest request);
 
-    OrderPersonTransferResponse update(Integer id, OrderPersonTransferUpdateRequest request);
+    OrderPersonTransferResponse update(
+            Order order,
+            OrderPersonTransferUpdateRequest request);
 
-    OrderPersonTransferResponse getById(Integer id);
+    List<OrderPersonTransferResponse> getByOrderId(Integer orderId);
 
     PageResponse<OrderPersonTransferResponse> getAll(OrderPersonTransferSearchCriteria criteria, Pageable pageable);
 
-    void softDelete(Integer id);
+    void softDelete(Order order);
 
-    void restore(Integer id);
+    void restore(Order order);
 
-    OrderPersonTransferResponse activate(Integer id);
+    void activate(Order order);
 
-    OrderPersonTransferResponse deactivate(Integer id);
+    void deactivate(Order order);
 }

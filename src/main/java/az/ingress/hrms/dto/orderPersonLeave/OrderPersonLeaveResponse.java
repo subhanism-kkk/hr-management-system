@@ -22,10 +22,15 @@ public class OrderPersonLeaveResponse {
 
     private Integer leaveTypeId;
     private String leaveTypeName;
+
     private LocalDate startDate;
     private LocalDate endDate;
+
     private String reason;
 
-    private String statusCode;
+    private Integer statusId;
+    private String statusName;
+
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

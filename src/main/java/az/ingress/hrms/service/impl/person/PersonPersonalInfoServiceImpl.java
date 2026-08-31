@@ -2,7 +2,6 @@ package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.criteria.PersonPersonalInfoSearchCriteria;
-import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoCreateRequest;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoResponse;
 import az.ingress.hrms.dto.personPersonalInfo.PersonPersonalInfoUpdateRequest;
@@ -14,24 +13,21 @@ import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.person.personPersonalInfo.PersonPersonalInfoLogService;
-import az.ingress.hrms.mapper.PersonPersonalInfoMapper;
-import az.ingress.hrms.repository.PersonPersonalInfoRepository;
-import az.ingress.hrms.repository.PersonRepository;
+import az.ingress.hrms.mapper.person.PersonPersonalInfoMapper;
+import az.ingress.hrms.repository.person.PersonPersonalInfoRepository;
+import az.ingress.hrms.repository.person.PersonRepository;
 import az.ingress.hrms.service.person.PersonPersonalInfoService;
-import az.ingress.hrms.specification.PersonPersonalInfoSpecification;
+import az.ingress.hrms.specification.person.PersonPersonalInfoSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -176,7 +172,7 @@ public class PersonPersonalInfoServiceImpl implements PersonPersonalInfoService 
         personalInfoLogService.log(
                 entity,
                 LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()        );
+                SecurityUtils.getCurrentUsername());
 
         entity.setStatus(statusHelper.getInactive());
 

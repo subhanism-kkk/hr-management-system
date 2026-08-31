@@ -15,10 +15,6 @@ import java.time.LocalDate;
 @Builder
 public class OrderPersonSalaryCreateRequest {
 
-    @NotNull(message = "Order ID cannot be null.")
-    @Positive(message = "Order ID must be positive.")
-    private Integer orderId;
-
     @NotNull(message = "Staffing plan ID cannot be null.")
     @Positive(message = "Staffing plan ID must be positive.")
     private Integer staffingPlanId;

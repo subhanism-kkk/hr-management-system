@@ -2,7 +2,6 @@ package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.criteria.PersonContactInfoSearchCriteria;
-import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoCreateRequest;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoResponse;
 import az.ingress.hrms.dto.personContactInfo.PersonContactInfoUpdateRequest;
@@ -15,25 +14,22 @@ import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.person.personContactInfo.PersonContactInfoLogService;
-import az.ingress.hrms.mapper.PersonContactInfoMapper;
+import az.ingress.hrms.mapper.person.PersonContactInfoMapper;
 import az.ingress.hrms.repository.ContactTypeRepository;
-import az.ingress.hrms.repository.PersonContactInfoRepository;
-import az.ingress.hrms.repository.PersonRepository;
+import az.ingress.hrms.repository.person.PersonContactInfoRepository;
+import az.ingress.hrms.repository.person.PersonRepository;
 import az.ingress.hrms.service.person.PersonContactInfoService;
-import az.ingress.hrms.specification.PersonContactInfoSpecification;
+import az.ingress.hrms.specification.person.PersonContactInfoSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

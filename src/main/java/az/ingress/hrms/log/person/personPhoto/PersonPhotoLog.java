@@ -28,7 +28,7 @@ public class PersonPhotoLog {
     private String filePath;
 
     @Column(name = "is_main")
-    private Integer isMain;
+    private Boolean isMain;
 
     @Column(name = "status_id")
     private Integer statusId;

@@ -13,9 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class OrderPersonPromotionCreateRequest {
-    @NotNull(message = "Order ID cannot be null.")
-    @Positive(message = "Order ID must be positive.")
-    private Integer orderId;
 
     @NotNull(message = "Person ID cannot be null.")
     @Positive(message = "Person ID must be positive.")

@@ -14,10 +14,6 @@ import java.time.LocalDate;
 @Builder
 public class OrderPersonDismissalCreateRequest {
 
-    @NotNull(message = "Order ID cannot be null.")
-    @Positive(message = "Order ID must be positive.")
-    private Integer orderId;
-
     @NotNull(message = "Person ID cannot be null.")
     @Positive(message = "Person ID must be positive.")
     private Integer personId;

@@ -5,24 +5,36 @@ import az.ingress.hrms.dto.criteria.OrderPersonDismissalSearchCriteria;
 import az.ingress.hrms.dto.orderPersonDismissal.OrderPersonDismissalCreateRequest;
 import az.ingress.hrms.dto.orderPersonDismissal.OrderPersonDismissalResponse;
 import az.ingress.hrms.dto.orderPersonDismissal.OrderPersonDismissalUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
+import az.ingress.hrms.entity.order.orderPerson.OrderPersonDismissal;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 
 public interface OrderPersonDismissalService {
 
-    OrderPersonDismissalResponse create(OrderPersonDismissalCreateRequest request);
+    OrderPersonDismissalResponse create(
+            Order order,
+            OrderPersonDismissalCreateRequest request
+    );
 
-    OrderPersonDismissalResponse update(Integer id, OrderPersonDismissalUpdateRequest request);
+    OrderPersonDismissalResponse update(
+            Order order,
+            OrderPersonDismissalUpdateRequest request
+    );
 
-    OrderPersonDismissalResponse getById(Integer id);
+    void activate(Order order);
 
-    PageResponse<OrderPersonDismissalResponse> getAll(OrderPersonDismissalSearchCriteria criteria, Pageable pageable);
+    void deactivate(Order order);
 
-    void softDelete(Integer id);
+    void softDelete(Order order);
 
-    void restore(Integer id);
+    void restore(Order order);
 
-//    OrderPersonDismissalResponse activate(Integer id);
-//
-//    OrderPersonDismissalResponse deactivate(Integer id);
+    PageResponse<OrderPersonDismissalResponse> getAll(
+            OrderPersonDismissalSearchCriteria criteria,
+            Pageable pageable
+    );
+
+    List<OrderPersonDismissalResponse> getByOrderId(Integer orderId);
 }

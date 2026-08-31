@@ -40,7 +40,7 @@ public class OrderPersonAppointmentLog {
     @Column(name = "is_closed")
     private Boolean isClosed;
 
-    @Column(name = "dismissal_order_id")
+    @Column(name = "dismissal_order_id", nullable = true)
     private Integer dismissalOrderId;
 
     @Column(name = "status_id")

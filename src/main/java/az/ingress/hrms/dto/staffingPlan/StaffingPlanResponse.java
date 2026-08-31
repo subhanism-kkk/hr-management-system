@@ -1,6 +1,7 @@
 package az.ingress.hrms.dto.staffingPlan;
 
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class StaffingPlanResponse {
     private Integer id;
+    private Integer orderId;
     private Integer structureId;
     private String structureName;
     private Integer positionId;
@@ -18,6 +20,8 @@ public class StaffingPlanResponse {
     private BigDecimal salary;
     private Integer capacity;
     private Boolean isClosed;
+    private Integer statusId;
+    private String statusName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

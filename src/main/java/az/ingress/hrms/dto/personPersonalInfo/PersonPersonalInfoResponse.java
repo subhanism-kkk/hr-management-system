@@ -23,6 +23,10 @@ public class PersonPersonalInfoResponse {
 
     private String finCode;
 
+    private String statusName;
+
+    private Integer statusId;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

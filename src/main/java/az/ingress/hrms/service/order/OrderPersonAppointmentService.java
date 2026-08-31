@@ -5,35 +5,35 @@ import az.ingress.hrms.dto.criteria.OrderPersonAppointmentSearchCriteria;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentResponse;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+import java.util.List;
 
 public interface OrderPersonAppointmentService {
+
     OrderPersonAppointmentResponse create(
+            Order order,
             OrderPersonAppointmentCreateRequest request
     );
 
     OrderPersonAppointmentResponse update(
-            Integer id,
+            Order order,
             OrderPersonAppointmentUpdateRequest request
     );
 
-    OrderPersonAppointmentResponse getById(Integer id);
+    void activate(Order order);
 
-    PageResponse<OrderPersonAppointmentResponse> getAll(OrderPersonAppointmentSearchCriteria criteria, Pageable pageable);
+    void deactivate(Order order);
 
-    void dismiss(
-            Integer appointmentId,
-            Integer dismissalOrderId,
-            LocalDate dismissalDate
+    void softDelete(Order order);
+
+    void restore(Order order);
+
+    PageResponse<OrderPersonAppointmentResponse> getAll(
+            OrderPersonAppointmentSearchCriteria criteria,
+            Pageable pageable
     );
 
-    void softDelete(Integer id);
-
-    void restore(Integer id);
-
-    OrderPersonAppointmentResponse activate(Integer id);
-
-    OrderPersonAppointmentResponse deactivate(Integer id);
+    List<OrderPersonAppointmentResponse> getByOrderId(Integer orderId);
 }

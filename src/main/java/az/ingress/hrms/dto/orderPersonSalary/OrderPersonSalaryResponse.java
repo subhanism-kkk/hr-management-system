@@ -25,7 +25,7 @@ public class OrderPersonSalaryResponse {
 
     private LocalDate effectiveDate;
 
-    private String statusCode;
+    private Integer statusId;
     private String statusName;
 
     private LocalDateTime createdAt;

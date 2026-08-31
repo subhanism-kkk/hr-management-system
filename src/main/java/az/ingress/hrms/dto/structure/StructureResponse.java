@@ -12,8 +12,12 @@ public class StructureResponse {
 
     private Integer id;
     private String name;
+    private Integer orderId;
     private Integer parentStructureId;
     private String parentStructureName;
     private Boolean isClosed;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private Integer statusId;
+    private String statusName;
 }

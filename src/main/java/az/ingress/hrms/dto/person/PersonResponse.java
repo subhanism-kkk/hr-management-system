@@ -15,6 +15,8 @@ public class PersonResponse {
     private Integer id;
     private String firstName;
     private String lastName;
+    private String statusName;
+    private Integer statusId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

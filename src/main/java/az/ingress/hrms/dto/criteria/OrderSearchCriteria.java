@@ -13,6 +13,7 @@ public class OrderSearchCriteria {
     private String keyword;
     private Long orderTypeId;
     private String orderTypeCode;
+    private String orderNumber;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate orderDateFrom;

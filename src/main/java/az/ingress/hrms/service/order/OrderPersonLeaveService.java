@@ -5,24 +5,31 @@ import az.ingress.hrms.dto.criteria.OrderPersonLeaveSearchCriteria;
 import az.ingress.hrms.dto.orderPersonLeave.OrderPersonLeaveCreateRequest;
 import az.ingress.hrms.dto.orderPersonLeave.OrderPersonLeaveResponse;
 import az.ingress.hrms.dto.orderPersonLeave.OrderPersonLeaveUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 
 public interface OrderPersonLeaveService {
 
-    OrderPersonLeaveResponse create(OrderPersonLeaveCreateRequest request);
+    OrderPersonLeaveResponse create(
+            Order order,
+            OrderPersonLeaveCreateRequest request);
 
-    OrderPersonLeaveResponse update(Integer id, OrderPersonLeaveUpdateRequest request);
+    OrderPersonLeaveResponse update(
+            Order order,
+            OrderPersonLeaveUpdateRequest request);
 
-    OrderPersonLeaveResponse getById(Integer id);
+    List<OrderPersonLeaveResponse> getByOrderId(Integer orderId);
 
     PageResponse<OrderPersonLeaveResponse> getAll(OrderPersonLeaveSearchCriteria criteria, Pageable pageable);
 
-    void softDelete(Integer id);
+    void softDelete(Order order);
 
-    void restore(Integer id);
+    void restore(Order order);
 
-    OrderPersonLeaveResponse activate(Integer id);
+    void activate(Order order);
 
-    OrderPersonLeaveResponse deactivate(Integer id);
+    void deactivate(Order order);
 }

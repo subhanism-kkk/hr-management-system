@@ -18,6 +18,10 @@ public class OrderPersonTransferUpdateRequest {
     @Positive(message = "New structure ID must be positive.")
     private Integer newStructureId;
 
+    @NotNull(message = "Person ID cannot be null.")
+    @Positive(message = "Person ID must be positive.")
+    private Integer personId;
+
     @NotNull(message = "New position ID cannot be null.")
     @Positive(message = "New position ID must be positive.")
     private Integer newPositionId;

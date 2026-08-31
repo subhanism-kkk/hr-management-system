@@ -13,6 +13,9 @@ import java.time.LocalDate;
 @Builder
 public class OrderPersonDismissalUpdateRequest {
 
+    @NotNull(message = "Person ID cannot be null.")
+    private Integer personId;
+
     @NotNull(message = "Dismissal date cannot be null.")
     private LocalDate dismissalDate;
 

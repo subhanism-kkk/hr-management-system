@@ -26,8 +26,9 @@ public class PersonPhotoLogService {
 
         PersonPhotoLog log = PersonPhotoLog.builder()
                 .mainId(personPhoto.getId())
-                .personId(personPhoto.getPerson().getId())
+                .personId(personPhoto.getPerson() != null ? personPhoto.getPerson().getId() : null)
                 .filePath(personPhoto.getFilePath())
+                .isMain(Boolean.TRUE.equals(personPhoto.getIsMain()))
                 .statusId(
                         personPhoto.getStatus() != null
                                 ? personPhoto.getStatus().getId()
@@ -35,7 +36,7 @@ public class PersonPhotoLogService {
                 )
                 .createdAt(personPhoto.getCreatedAt())
                 .updatedAt(personPhoto.getUpdatedAt())
-                .isDeleted(personPhoto.getIsDeleted())
+                .isDeleted(Boolean.TRUE.equals(personPhoto.getIsDeleted()))
                 .deletedAt(personPhoto.getDeletedAt())
                 .deletedBy(personPhoto.getDeletedBy())
                 .actionType(action.name())

@@ -1,6 +1,5 @@
 package az.ingress.hrms.service.impl.order;
 
-
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.criteria.OrderPersonAppointmentSearchCriteria;
 import az.ingress.hrms.dto.orderPersonAppointment.OrderPersonAppointmentCreateRequest;
@@ -17,78 +16,87 @@ import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.order.orderPerson.appointment.OrderPersonAppointmentLogService;
-import az.ingress.hrms.mapper.OrderPersonAppointmentMapper;
-import az.ingress.hrms.repository.OrderPersonAppointmentRepository;
-import az.ingress.hrms.repository.OrderRepository;
-import az.ingress.hrms.repository.PersonRepository;
-import az.ingress.hrms.repository.StaffingPlanRepository;
+import az.ingress.hrms.mapper.order.OrderPersonAppointmentMapper;
+import az.ingress.hrms.repository.order.OrderPersonAppointmentRepository;
+import az.ingress.hrms.repository.organization.StaffingPlanRepository;
+import az.ingress.hrms.repository.person.PersonRepository;
 import az.ingress.hrms.service.order.OrderPersonAppointmentService;
-import az.ingress.hrms.specification.OrderPersonAppointmentSpecification;
+import az.ingress.hrms.specification.order.OrderPersonAppointmentSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
-public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointmentService {
+public class OrderPersonAppointmentServiceImpl
+        implements OrderPersonAppointmentService {
 
     private final OrderPersonAppointmentRepository repository;
-    private final OrderRepository orderRepository;
     private final PersonRepository personRepository;
     private final StaffingPlanRepository staffingPlanRepository;
-    private final OrderPersonAppointmentLogService appointmentLogService;
 
+    private final OrderPersonAppointmentLogService appointmentLogService;
     private final OrderPersonAppointmentMapper mapper;
     private final StatusHelper statusHelper;
 
 
     @Override
     @Transactional
-    public OrderPersonAppointmentResponse create(OrderPersonAppointmentCreateRequest request) {
+    public OrderPersonAppointmentResponse create(
+            Order order,
+            OrderPersonAppointmentCreateRequest request
+    ) {
+
         Person person = fetchPerson(request.getPersonId());
-        Order order = fetchOrder(request.getOrderId());
 
-        if (!order.getOrderType().getCode().equals("APT")) {
-            throw new BadRequestException(
-                    "Selected order is not a Appointment order."
-            );
-        }
+        StaffingPlan staffingPlan =
+                fetchStaffingPlan(request.getStaffingPlanId());
 
-        StaffingPlan staffingPlan = fetchStaffingPlan(request.getStaffingPlanId());
+        if (repository.existsByPersonIdAndIsClosedFalse(
+                person.getId())) {
 
-        if (repository.existsByPersonIdAndIsClosedFalse(person.getId())) {
             throw new DuplicateResourceException(
-                    "Person with ID " + person.getId() + " already has an active appointment."
+                    "Person with ID "
+                            + person.getId()
+                            + " already has an active appointment."
             );
         }
 
-        long activeAppointmentsCount = repository.countByStaffingPlanIdAndIsClosedFalse(staffingPlan.getId());
+        long activeAppointmentsCount =
+                repository.countByStaffingPlanIdAndIsClosedFalse(
+                        staffingPlan.getId()
+                );
+
         if (activeAppointmentsCount >= staffingPlan.getCapacity()) {
+
             throw new BadRequestException(
-                    "Staffing plan capacity limit reached (" + staffingPlan.getCapacity() + ")."
+                    "Staffing plan capacity limit reached ("
+                            + staffingPlan.getCapacity()
+                            + ")."
             );
         }
 
+        OrderPersonAppointment entity =
+                mapper.toEntity(request);
 
-        OrderPersonAppointment entity = mapper.toEntity(request);
         entity.setPerson(person);
         entity.setOrder(order);
         entity.setStaffingPlan(staffingPlan);
         entity.setIsClosed(false);
         entity.setStatus(statusHelper.getActive());
 
-        OrderPersonAppointment savedEntity = repository.save(entity);
+        OrderPersonAppointment savedEntity =
+                repository.save(entity);
 
         appointmentLogService.log(
                 savedEntity,
@@ -99,15 +107,24 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
         return mapper.toResponse(savedEntity);
     }
 
+
+
+
     @Override
     @Transactional
-    public OrderPersonAppointmentResponse update(Integer id, OrderPersonAppointmentUpdateRequest request) {
-        OrderPersonAppointment entity = fetchAppointment(id);
+    public OrderPersonAppointmentResponse update(
+            Order order,
+            OrderPersonAppointmentUpdateRequest request
+    ) {
+
+        OrderPersonAppointment entity =
+                fetchAppointment(order.getId(), request.getPersonId());
 
         StaffingPlan staffingPlan =
                 fetchStaffingPlan(request.getStaffingPlanId());
 
-        if (!entity.getStaffingPlan().getId().equals(staffingPlan.getId())) {
+        if (!entity.getStaffingPlan().getId()
+                .equals(staffingPlan.getId())) {
 
             long activeAppointments =
                     repository.countByStaffingPlanIdAndIsClosedFalse(
@@ -131,203 +148,226 @@ public class OrderPersonAppointmentServiceImpl implements OrderPersonAppointment
 
         mapper.updateEntity(entity, request);
 
-        repository.save(entity);
-        return mapper.toResponse(entity);
+        OrderPersonAppointment saved =
+                repository.save(entity);
+
+        return mapper.toResponse(saved);
     }
 
-    @Override
-    public OrderPersonAppointmentResponse getById(Integer id) {
-        return mapper.toResponse(fetchAppointment(id));
-    }
 
-    @Override
-    public PageResponse<OrderPersonAppointmentResponse> getAll(OrderPersonAppointmentSearchCriteria criteria, Pageable pageable) {
-        Specification<OrderPersonAppointment> specification = OrderPersonAppointmentSpecification.build(criteria);
-        Page<OrderPersonAppointment> page = repository.findAll(specification, pageable);
-
-        return PaginationUtils.toPageResponse(page, mapper::toResponse);
-    }
 
     @Override
     @Transactional
-    public void dismiss(Integer appointmentId, Integer dismissalOrderId, LocalDate dismissalDate) {
-        OrderPersonAppointment appointment = fetchAppointment(appointmentId);
+    public void activate(Order order) {
 
+        List<OrderPersonAppointment> appointments =
+                repository.findAllByOrderId(order.getId());
 
-        if (Boolean.TRUE.equals(appointment.getIsClosed())) {
-            throw new BadRequestException("Appointment with ID " + appointmentId + " is already closed/dismissed.");
-        }
+        for (OrderPersonAppointment entity : appointments) {
 
-        if (dismissalDate.isBefore(appointment.getStartDate())) {
-            throw new BadRequestException("Dismissal date cannot be before the appointment start date.");
-        }
+            appointmentLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    SecurityUtils.getCurrentUsername()
+            );
 
-        Order dismissalOrder = fetchOrder(dismissalOrderId);
-
-        if (!dismissalOrder.getOrderType()
-                .getCode()
-                .equals("DIS")) {
-
-            throw new BadRequestException(
-                    "Order is not a dismissal order."
+            entity.setStatus(
+                    statusHelper.getActive()
             );
         }
 
-        appointmentLogService.log(
-                appointment,
-                LogAction.PUT,
-                SecurityUtils.getCurrentUsername()
-        );
-
-        appointment.setDismissalOrder(dismissalOrder);
-        appointment.setEndDate(dismissalDate);
-        appointment.setIsClosed(true);
-        appointment.setStatus(statusHelper.getInactive());
-
-        repository.save(appointment);
-
-
+        repository.saveAll(appointments);
     }
 
     @Override
     @Transactional
-    public void softDelete(Integer id) {
-        OrderPersonAppointment entity = fetchAppointment(id);
+    public void deactivate(Order order) {
 
-        appointmentLogService.log(
-                entity,
-                LogAction.DELETE,
-                SecurityUtils.getCurrentUsername());
+        List<OrderPersonAppointment> appointments =
+                repository.findAllByOrderId(order.getId());
 
-        entity.setIsDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
+        for (OrderPersonAppointment entity : appointments) {
 
-        repository.save(entity);
+            appointmentLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    SecurityUtils.getCurrentUsername()
+            );
 
-    }
-
-    @Override
-    @Transactional
-    public void restore(Integer id) {
-        OrderPersonAppointment entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Deleted appointment not found with id: " + id));
-
-        if (!entity.getIsDeleted()) {
-            throw new IllegalStateException("Appointment is not deleted.");
+            entity.setStatus(
+                    statusHelper.getInactive()
+            );
         }
 
-        appointmentLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
-
-        entity.setIsDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
-
-        repository.save(entity);
-
+        repository.saveAll(appointments);
     }
+
 
     @Override
     @Transactional
-    public OrderPersonAppointmentResponse activate(Integer id) {
-        OrderPersonAppointment entity = fetchAppointment(id);
+    public void softDelete(Order order) {
 
-        appointmentLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
+        List<OrderPersonAppointment> appointments =
+                repository.findAllByOrderId(order.getId());
 
-        entity.setStatus(statusHelper.getActive());
+        LocalDateTime now = LocalDateTime.now();
+        String username = SecurityUtils.getCurrentUsername();
 
-        OrderPersonAppointment saved = repository.save(entity);
+        for (OrderPersonAppointment entity : appointments) {
 
+            appointmentLogService.log(
+                    entity,
+                    LogAction.DELETE,
+                    username
+            );
 
-        return mapper.toResponse(saved);
+            entity.setIsDeleted(true);
+            entity.setDeletedAt(now);
+            entity.setDeletedBy(username);
+        }
+
+        repository.saveAll(appointments);
     }
+
+
 
     @Override
     @Transactional
-    public OrderPersonAppointmentResponse deactivate(Integer id) {
-        OrderPersonAppointment entity = fetchAppointment(id);
+    public void restore(Order order) {
 
-        appointmentLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
+        List<OrderPersonAppointment> appointments =
+                repository.findAllByOrderIdWithDeleted(
+                        order.getId()
+                );
 
-        entity.setStatus(statusHelper.getInactive());
+        String username = SecurityUtils.getCurrentUsername();
 
-        OrderPersonAppointment saved = repository.save(entity);
+        for (OrderPersonAppointment entity : appointments) {
 
+            if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
+                continue;
+            }
 
-        return mapper.toResponse(saved);
+            appointmentLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    username
+            );
+
+            entity.setIsDeleted(false);
+            entity.setDeletedAt(null);
+            entity.setDeletedBy(null);
+        }
+
+        repository.saveAll(appointments);
     }
 
-    private OrderPersonAppointment fetchAppointment(Integer id) {
+
+
+    @Override
+    public PageResponse<OrderPersonAppointmentResponse> getAll(
+            OrderPersonAppointmentSearchCriteria criteria,
+            Pageable pageable
+    ) {
+
+        Specification<OrderPersonAppointment> specification =
+                OrderPersonAppointmentSpecification.build(criteria);
+
+        Page<OrderPersonAppointment> page =
+                repository.findAll(
+                        specification,
+                        pageable
+                );
+
+        return PaginationUtils.toPageResponse(
+                page,
+                mapper::toResponse
+        );
+    }
+
+    @Override
+    public List<OrderPersonAppointmentResponse> getByOrderId(Integer orderId) {
+        return repository.findByOrderIdAndIsDeletedFalse(orderId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    private OrderPersonAppointment fetchAppointment(
+            Integer id
+    ) {
 
         return repository.findById(id)
                 .orElseGet(() -> {
+
                     repository.findByIdWithDeleted(id)
                             .ifPresent(e -> {
-
                                 throw new DeletedResourceException(
-                                        "Appointment is deleted.");
+                                        "Appointment is deleted."
+                                );
                             });
 
                     throw new ResourceNotFoundException(
-                            "Appointment not found.");
+                            "Appointment not found."
+                    );
                 });
     }
+
+
 
     private Person fetchPerson(Integer personId) {
+
         return personRepository.findById(personId)
                 .orElseGet(() -> {
+
                     personRepository.findByIdWithDeleted(personId)
                             .ifPresent(e -> {
-
                                 throw new DeletedResourceException(
-                                        "person is deleted.");
+                                        "Person is deleted."
+                                );
                             });
 
                     throw new ResourceNotFoundException(
-                            "person not found.");
+                            "Person not found."
+                    );
                 });
     }
 
-    private Order fetchOrder(Integer orderId) {
-        return orderRepository.findById(orderId)
+
+    private StaffingPlan fetchStaffingPlan(
+            Integer staffingPlanId
+    ) {
+
+        return staffingPlanRepository
+                .findById(staffingPlanId)
                 .orElseGet(() -> {
-                    orderRepository.findByIdWithDeleted(orderId)
-                            .ifPresent(e -> {
 
+                    staffingPlanRepository
+                            .findByIdWithDeleted(staffingPlanId)
+                            .ifPresent(e -> {
                                 throw new DeletedResourceException(
-                                        "order is deleted.");
+                                        "StaffingPlan is deleted."
+                                );
                             });
 
                     throw new ResourceNotFoundException(
-                            "order not found.");
+                            "StaffingPlan not found."
+                    );
                 });
     }
 
-    private StaffingPlan fetchStaffingPlan(Integer staffingPlanId) {
-        return staffingPlanRepository.findById(staffingPlanId)
-                .orElseGet(() -> {
-                    staffingPlanRepository.findByIdWithDeleted(staffingPlanId)
-                            .ifPresent(e -> {
-
-                                throw new DeletedResourceException(
-                                        "StaffingPlan is deleted.");
-                            });
-
-                    throw new ResourceNotFoundException(
-                            "StaffingPlan not found.");
-                });
+    private OrderPersonAppointment fetchAppointment(
+            Integer orderId,
+            Integer personId
+    ) {
+        return repository.findByOrderIdAndPersonId(orderId, personId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Appointment not found for person ID "
+                                        + personId
+                                        + " in order ID "
+                                        + orderId
+                        )
+                );
     }
-
 }

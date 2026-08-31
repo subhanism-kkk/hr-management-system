@@ -22,4 +22,8 @@ public class OrderResponse {
     private String orderNumber;
 
     private LocalDate orderDate;
+
+    private Integer statusId;
+
+    private String statusName;
 }

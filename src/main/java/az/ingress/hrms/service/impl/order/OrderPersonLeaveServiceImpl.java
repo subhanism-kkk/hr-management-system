@@ -16,24 +16,25 @@ import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.order.orderPerson.leave.OrderPersonLeaveLogService;
-import az.ingress.hrms.mapper.OrderPersonLeaveMapper;
-import az.ingress.hrms.repository.*;
+import az.ingress.hrms.mapper.order.OrderPersonLeaveMapper;
+import az.ingress.hrms.repository.LeaveTypeRepository;
+import az.ingress.hrms.repository.order.OrderPersonAppointmentRepository;
+import az.ingress.hrms.repository.order.OrderPersonLeaveRepository;
+import az.ingress.hrms.repository.person.PersonRepository;
 import az.ingress.hrms.service.order.OrderPersonLeaveService;
-import az.ingress.hrms.specification.OrderPersonLeaveSpecification;
+import az.ingress.hrms.specification.order.OrderPersonLeaveSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,6 @@ import java.util.List;
 public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
 
     private final OrderPersonLeaveRepository repository;
-    private final OrderRepository orderRepository;
     private final PersonRepository personRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final OrderPersonAppointmentRepository appointmentRepository;
@@ -52,15 +52,12 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
 
     @Override
     @Transactional
-    public OrderPersonLeaveResponse create(OrderPersonLeaveCreateRequest request) {
+    public OrderPersonLeaveResponse create(
+            Order order,
+            OrderPersonLeaveCreateRequest request
+    ) {
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new BadRequestException("Leave end date cannot be before start date.");
-        }
-
-        Order order = fetchOrder(request.getOrderId());
-
-        if (!"LEV".equalsIgnoreCase(order.getOrderType().getCode())) {
-            throw new BadRequestException("Selected order is not a leave order.");
         }
 
         if (request.getStartDate().isBefore(order.getOrderDate())) {
@@ -70,10 +67,8 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         Person person = fetchPerson(request.getPersonId());
         LeaveType leaveType = fetchLeaveType(request.getLeaveTypeId());
 
-        if (!leaveType.getStatus().getCode().equals("ACTIVE")) {
-            throw new BadRequestException(
-                    "Leave type is inactive."
-            );
+        if (!"ACTIVE".equals(leaveType.getStatus().getCode())) {
+            throw new BadRequestException("Leave type is inactive.");
         }
 
         OrderPersonAppointment appointment = appointmentRepository
@@ -108,16 +103,14 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     @Override
     @Transactional
     public OrderPersonLeaveResponse update(
-            Integer id,
+            Order order,
             OrderPersonLeaveUpdateRequest request
     ) {
-        OrderPersonLeave entity = fetchLeave(id);
+        OrderPersonLeave entity = fetchLeaveByOrderAndPerson(order.getId(), request.getPersonId());
 
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new BadRequestException("Leave end date cannot be before start date.");
         }
-
-        Order order = entity.getOrder();
 
         if (request.getStartDate().isBefore(order.getOrderDate())) {
             throw new BadRequestException("Leave start date cannot be before the order date.");
@@ -144,7 +137,8 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
         leaveLogService.log(
                 entity,
                 LogAction.PUT,
-                SecurityUtils.getCurrentUsername());
+                SecurityUtils.getCurrentUsername()
+        );
 
         mapper.updateEntity(entity, request);
         entity.setLeaveType(newLeaveType);
@@ -154,113 +148,120 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     }
 
     @Override
-    public OrderPersonLeaveResponse getById(Integer id) {
-        return mapper.toResponse(fetchLeave(id));
+    public List<OrderPersonLeaveResponse> getByOrderId(Integer orderId) {
+        return repository.findByOrderIdAndIsDeletedFalse(orderId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public PageResponse<OrderPersonLeaveResponse> getAll(OrderPersonLeaveSearchCriteria criteria, Pageable pageable) {
+    public PageResponse<OrderPersonLeaveResponse> getAll(
+            OrderPersonLeaveSearchCriteria criteria,
+            Pageable pageable
+    ) {
         Specification<OrderPersonLeave> specification = OrderPersonLeaveSpecification.build(criteria);
         Page<OrderPersonLeave> page = repository.findAll(specification, pageable);
 
         return PaginationUtils.toPageResponse(page, mapper::toResponse);
     }
 
-    @Override
-    @Transactional
-    public void softDelete(Integer id) {
-        OrderPersonLeave entity = fetchLeave(id);
 
-        leaveLogService.log(
-                entity,
-                LogAction.DELETE,
-                SecurityUtils.getCurrentUsername());
-
-        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
-        entity.setIsDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-
-        repository.save(entity);
-    }
 
     @Override
     @Transactional
-    public void restore(Integer id) {
-        OrderPersonLeave entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Deleted leave record not found with id: " + id));
+    public void softDelete(Order order) {
+        List<OrderPersonLeave> leaves = repository.findAllByOrderId(order.getId());
 
-        if (!entity.getIsDeleted()) {
-            throw new BadRequestException("Leave record is not deleted.");
+        LocalDateTime now = LocalDateTime.now();
+        String username = SecurityUtils.getCurrentUsername();
+
+        for (OrderPersonLeave entity : leaves) {
+            leaveLogService.log(
+                    entity,
+                    LogAction.DELETE,
+                    username
+            );
+
+            entity.setIsDeleted(true);
+            entity.setDeletedAt(now);
+            entity.setDeletedBy(username);
         }
 
-        leaveLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername());
-
-        entity.setIsDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
-
-        repository.save(entity);
+        repository.saveAll(leaves);
     }
 
     @Override
     @Transactional
-    public OrderPersonLeaveResponse activate(Integer id) {
-        OrderPersonLeave entity = fetchLeave(id);
+    public void restore(Order order) {
+        List<OrderPersonLeave> leaves = repository.findAllByOrderIdWithDeleted(order.getId());
 
-        if (entity.getEndDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException("Cannot activate an expired leave record.");
+        String username = SecurityUtils.getCurrentUsername();
+
+        for (OrderPersonLeave entity : leaves) {
+            if (!Boolean.TRUE.equals(entity.getIsDeleted())) {
+                continue;
+            }
+
+            leaveLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    username
+            );
+
+            entity.setIsDeleted(false);
+            entity.setDeletedAt(null);
+            entity.setDeletedBy(null);
         }
 
-        leaveLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
-        entity.setStatus(statusHelper.getActive());
-        OrderPersonLeave saved = repository.save(entity);
-        return mapper.toResponse(saved);
+        repository.saveAll(leaves);
     }
 
     @Override
     @Transactional
-    public OrderPersonLeaveResponse deactivate(Integer id) {
-        OrderPersonLeave entity = fetchLeave(id);
+    public void activate(Order order) {
+        List<OrderPersonLeave> leaves = repository.findAllByOrderId(order.getId());
 
-        leaveLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername());
+        String username = SecurityUtils.getCurrentUsername();
 
-        entity.setStatus(statusHelper.getInactive());
+        for (OrderPersonLeave entity : leaves) {
+            leaveLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    username
+            );
 
-        OrderPersonLeave saved = repository.save(entity);
-        return mapper.toResponse(saved);
+            entity.setStatus(statusHelper.getActive());
+        }
+
+        repository.saveAll(leaves);
     }
 
+    @Override
+    @Transactional
+    public void deactivate(Order order) {
+        List<OrderPersonLeave> leaves = repository.findAllByOrderId(order.getId());
 
-    private OrderPersonLeave fetchLeave(Integer id) {
-        return repository.findById(id)
-                .orElseGet(() -> {
-                    repository.findByIdWithDeleted(id)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException("Leave record is deleted.");
-                            });
-                    throw new ResourceNotFoundException("Leave record not found.");
-                });
+        String username = SecurityUtils.getCurrentUsername();
+
+        for (OrderPersonLeave entity : leaves) {
+            leaveLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    username
+            );
+
+            entity.setStatus(statusHelper.getInactive());
+        }
+
+        repository.saveAll(leaves);
     }
 
-    private Order fetchOrder(Integer orderId) {
-        return orderRepository.findById(orderId)
-                .orElseGet(() -> {
-                    orderRepository.findByIdWithDeleted(orderId)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException("Order is deleted.");
-                            });
-                    throw new ResourceNotFoundException("Order not found with id: " + orderId);
-                });
+    private OrderPersonLeave fetchLeaveByOrderAndPerson(Integer orderId, Integer personId) {
+        return repository.findByOrderIdAndPersonId(orderId, personId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Leave record not found for person ID " + personId + " in order ID " + orderId
+                ));
     }
 
     private Person fetchPerson(Integer personId) {
@@ -275,7 +276,6 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     }
 
     private LeaveType fetchLeaveType(Integer leaveTypeId) {
-
         return leaveTypeRepository.findById(leaveTypeId)
                 .orElseGet(() -> {
                     leaveTypeRepository.findByIdWithDeleted(leaveTypeId)

@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.organization;
 
 import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.Order; // Added import
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonAppointment;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +24,13 @@ public class StaffingPlan extends WorkflowEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
+            name = "order_id",
+            nullable = false
+    )
+    private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
             name = "structure_id",
             nullable = false
     )
@@ -40,7 +48,8 @@ public class StaffingPlan extends WorkflowEntity {
             nullable = false,
             precision = 12,
             scale = 2
-    )    private BigDecimal salary;
+    )
+    private BigDecimal salary;
 
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
@@ -49,12 +58,10 @@ public class StaffingPlan extends WorkflowEntity {
     @Builder.Default
     private Boolean isClosed = false;
 
-
     @OneToMany(
             mappedBy = "staffingPlan",
             fetch = FetchType.LAZY
     )
     private List<OrderPersonAppointment> appointments =
             new ArrayList<>();
-
 }

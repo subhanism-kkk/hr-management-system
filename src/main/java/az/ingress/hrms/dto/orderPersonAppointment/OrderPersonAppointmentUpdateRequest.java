@@ -12,22 +12,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class OrderPersonAppointmentUpdateRequest {
-//    @NotNull(message = "OrderId cannot be null.")
-//    @Positive
-//    private Integer orderId;
-//
-//    @NotNull(message = "PersonId cannot be null.")
-//    @Positive
-//    private Integer personId;
+
+    @NotNull(message = "PersonId cannot be null.")
+    @Positive(message = "PersonId must be positive.")
+    private Integer personId;
 
     @NotNull(message = "StaffingPlanId cannot be null.")
-    @Positive
+    @Positive(message = "StaffingPlanId must be positive.")
     private Integer staffingPlanId;
 
-    @NotNull
+    @NotNull(message = "Start date cannot be null.")
     private LocalDate startDate;
 
-
-    @NotNull
     private LocalDate endDate;
 }

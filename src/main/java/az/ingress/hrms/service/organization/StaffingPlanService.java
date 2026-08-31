@@ -5,21 +5,20 @@ import az.ingress.hrms.dto.criteria.StaffingPlanSearchCriteria;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanCreateRequest;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanResponse;
 import az.ingress.hrms.dto.staffingPlan.StaffingPlanUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 public interface StaffingPlanService {
 
-    StaffingPlanResponse create(StaffingPlanCreateRequest request);
+    StaffingPlanResponse create(Order order,
+                                StaffingPlanCreateRequest request);
 
-    StaffingPlanResponse update(Integer id, StaffingPlanUpdateRequest request);
+    StaffingPlanResponse update(Order order,
+                                StaffingPlanUpdateRequest request);
 
-    StaffingPlanResponse getById(Integer id);
-
-//    PageResponse<StaffingPlanResponse> getByStructure(Integer structureId, int pageNo, int pageSize);
-//
-//    PageResponse<StaffingPlanResponse> getByPosition(Integer positionId, int pageNo, int pageSize);
+    List<StaffingPlanResponse> getByOrderId(Integer orderId);
 
     PageResponse<StaffingPlanResponse> getAll(StaffingPlanSearchCriteria criteria, Pageable pageable);
 
@@ -27,12 +26,12 @@ public interface StaffingPlanService {
 
     void reopen(Integer id);
 
-    void softDelete(Integer id);
+    void softDelete(Order order);
 
-    void restore(Integer id);
+    void restore(Order order);
 
-    StaffingPlanResponse activate(Integer id);
+    List<StaffingPlanResponse> activate(Order order);
 
-    StaffingPlanResponse deactivate(Integer id);
+    List<StaffingPlanResponse> deactivate(Order order);
 
 }

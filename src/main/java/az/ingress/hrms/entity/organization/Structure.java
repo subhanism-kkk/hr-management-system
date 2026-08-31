@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.organization;
 
 import az.ingress.hrms.entity.base.WorkflowEntity;
+import az.ingress.hrms.entity.order.Order;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -18,6 +19,13 @@ import java.util.List;
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
 public class Structure extends WorkflowEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "order_id",
+            nullable = false
+    )
+    private Order order;
 
     @Column(name = "name", nullable = false, length = 150)
     private String name;

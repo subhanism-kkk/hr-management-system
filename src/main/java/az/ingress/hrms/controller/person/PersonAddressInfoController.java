@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/person-address-info")
+@RequestMapping("/api/v1/person-addresses")
 @RequiredArgsConstructor
 @Validated
 @Tag(

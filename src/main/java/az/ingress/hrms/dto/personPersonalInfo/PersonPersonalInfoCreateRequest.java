@@ -18,14 +18,14 @@ import java.time.LocalDate;
 @Builder
 public class PersonPersonalInfoCreateRequest {
 
-    @NotNull
+    @NotNull(message = "Person ID is required.")
     private Integer personId;
 
-    @NotNull
+    @NotNull(message = "Gender is required.")
     private Gender gender;
 
-    @NotNull
-    @Past
+    @NotNull(message = "Date of birth is required.")
+    @Past(message = "Date of birth must be in the past.")
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "cannot be blank.")

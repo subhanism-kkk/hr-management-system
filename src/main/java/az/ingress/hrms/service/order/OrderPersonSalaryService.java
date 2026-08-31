@@ -5,29 +5,33 @@ import az.ingress.hrms.dto.criteria.OrderPersonSalarySearchCriteria;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryCreateRequest;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryResponse;
 import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryUpdateRequest;
+import az.ingress.hrms.entity.order.Order;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 
 public interface OrderPersonSalaryService {
 
-    OrderPersonSalaryResponse create(
+    OrderPersonSalaryResponse create(Order order,
             OrderPersonSalaryCreateRequest request
     );
 
     OrderPersonSalaryResponse update(
-            Integer id,
+            Order order,
             OrderPersonSalaryUpdateRequest request
     );
 
-    OrderPersonSalaryResponse getById(Integer id);
-
     PageResponse<OrderPersonSalaryResponse> getAll(OrderPersonSalarySearchCriteria criteria, Pageable pageable);
 
-    void softDelete(Integer id);
+    void softDelete(Order order);
 
-    void restore(Integer id);
+    void restore(Order order);
 
-    OrderPersonSalaryResponse activate(Integer id);
+    void activate(Order order);
 
-    OrderPersonSalaryResponse deactivate(Integer id);
+    void deactivate(Order order);
+
+    List<OrderPersonSalaryResponse> getByOrderId(Integer orderId);
 }

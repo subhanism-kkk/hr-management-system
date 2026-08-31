@@ -39,4 +39,7 @@ public class OrderPersonAppointmentResponse {
 
     private Integer dismissalOrderId;
 
+    private Integer statusId;
+
+    private String statusName;
 }

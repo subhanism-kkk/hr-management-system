@@ -14,6 +14,8 @@ public class PersonAddressInfoResponse {
     private Integer id;
     private Integer personId;
     private String address;
+    private String statusName;
+    private Integer statusId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

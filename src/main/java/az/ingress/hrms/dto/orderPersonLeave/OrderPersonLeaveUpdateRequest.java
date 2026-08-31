@@ -14,6 +14,9 @@ import java.time.LocalDate;
 @Builder
 public class OrderPersonLeaveUpdateRequest {
 
+    @NotNull(message = "Person ID cannot be null.")
+    private Integer personId;
+
     @NotNull(message = "Leave type ID cannot be null.")
     @Positive(message = "Leave type ID must be positive.")
     private Integer leaveTypeId;

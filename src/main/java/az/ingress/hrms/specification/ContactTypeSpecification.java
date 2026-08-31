@@ -5,7 +5,7 @@ import az.ingress.hrms.entity.lookup.ContactType;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-public class ContactTypeSpecification {
+public final class ContactTypeSpecification {
     private ContactTypeSpecification() {
 
     }

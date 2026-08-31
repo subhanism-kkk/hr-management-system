@@ -12,9 +12,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class OrderPersonAppointmentCreateRequest {
-    @NotNull(message = "OrderId cannot be null.")
-    @Positive
-    private Integer orderId;
 
     @NotNull(message = "PersonId cannot be null.")
     @Positive
@@ -27,7 +24,5 @@ public class OrderPersonAppointmentCreateRequest {
     @NotNull
     private LocalDate startDate;
 
-
-    @NotNull
     private LocalDate endDate;
 }

@@ -23,7 +23,9 @@ public class OrderPersonDismissalResponse {
     private LocalDate dismissalDate;
     private String description;
 
-    private String statusCode;
+    private Integer statusId;
+    private String statusName;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

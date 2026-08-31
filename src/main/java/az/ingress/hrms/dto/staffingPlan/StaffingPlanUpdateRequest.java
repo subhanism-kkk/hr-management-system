@@ -14,6 +14,10 @@ import java.math.BigDecimal;
 @Builder
 public class StaffingPlanUpdateRequest {
 
+    @NotNull(message = "Order Id cannot be Null.")
+    @Positive(message = "Order Id must be positive.")
+    private Integer orderId;
+
     @NotNull(message = "Structure Id cannot be Null.")
     @Positive
     private Integer structureId;

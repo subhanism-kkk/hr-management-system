@@ -2,7 +2,6 @@ package az.ingress.hrms.service.impl.person;
 
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.criteria.PersonPhotoSearchCriteria;
-import az.ingress.hrms.dto.person.PersonResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoCreateRequest;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoResponse;
 import az.ingress.hrms.dto.personPhoto.PersonPhotoUpdateRequest;
@@ -14,24 +13,21 @@ import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.person.personPhoto.PersonPhotoLogService;
-import az.ingress.hrms.mapper.PersonPhotoMapper;
-import az.ingress.hrms.repository.PersonPhotoRepository;
-import az.ingress.hrms.repository.PersonRepository;
+import az.ingress.hrms.mapper.person.PersonPhotoMapper;
+import az.ingress.hrms.repository.person.PersonPhotoRepository;
+import az.ingress.hrms.repository.person.PersonRepository;
 import az.ingress.hrms.service.person.PersonPhotoService;
-import az.ingress.hrms.specification.PersonPhotoSpecification;
+import az.ingress.hrms.specification.person.PersonPhotoSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

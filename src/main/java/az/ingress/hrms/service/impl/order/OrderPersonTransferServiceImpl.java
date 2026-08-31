@@ -18,24 +18,27 @@ import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.order.orderPerson.transfer.OrderPersonTransferLogService;
-import az.ingress.hrms.mapper.OrderPersonTransferMapper;
-import az.ingress.hrms.repository.*;
+import az.ingress.hrms.mapper.order.OrderPersonTransferMapper;
+import az.ingress.hrms.repository.order.OrderPersonAppointmentRepository;
+import az.ingress.hrms.repository.order.OrderPersonTransferRepository;
+import az.ingress.hrms.repository.organization.PositionRepository;
+import az.ingress.hrms.repository.organization.StaffingPlanRepository;
+import az.ingress.hrms.repository.organization.StructureRepository;
+import az.ingress.hrms.repository.person.PersonRepository;
 import az.ingress.hrms.service.order.OrderPersonTransferService;
-import az.ingress.hrms.specification.OrderPersonTransferSpecification;
+import az.ingress.hrms.specification.order.OrderPersonTransferSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +46,6 @@ import java.util.List;
 public class OrderPersonTransferServiceImpl implements OrderPersonTransferService {
 
     private final OrderPersonTransferRepository repository;
-    private final OrderRepository orderRepository;
     private final PersonRepository personRepository;
     private final StructureRepository structureRepository;
     private final PositionRepository positionRepository;
@@ -56,25 +58,23 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
 
     @Override
     @Transactional
-    public OrderPersonTransferResponse create(OrderPersonTransferCreateRequest request) {
+    public OrderPersonTransferResponse create(
+            Order order,
+            OrderPersonTransferCreateRequest request
+    ) {
         if (request.getOldStructureId().equals(request.getNewStructureId()) &&
                 request.getOldPositionId().equals(request.getNewPositionId())) {
             throw new BadRequestException(
-                    "Target structure and position cannot be identical to current structure and position.");
+                    "Target structure and position cannot be identical to current structure and position."
+            );
         }
 
-        Order order = fetchOrder(request.getOrderId());
-
-        if (!order.getOrderType().getCode().equals("TRF")) {
-            throw new BadRequestException(
-                    "Selected order is not a transfer order."
-            );
+        if (!"TRF".equals(order.getOrderType().getCode())) {
+            throw new BadRequestException("Selected order is not a transfer order.");
         }
 
         if (request.getEffectiveDate().isBefore(order.getOrderDate())) {
-            throw new BadRequestException(
-                    "Effective date cannot be before the order date."
-            );
+            throw new BadRequestException("Effective date cannot be before the order date.");
         }
 
         Person person = fetchPerson(request.getPersonId());
@@ -83,59 +83,32 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
         Position oldPosition = fetchPosition(request.getOldPositionId());
         Position newPosition = fetchPosition(request.getNewPositionId());
 
-        StaffingPlan staffingPlan =
-                staffingPlanRepository
-                        .findByStructureIdAndPositionId(
-                                newStructure.getId(),
-                                newPosition.getId()
-                        )
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "No staffing plan exists for the selected structure and position."
-                                ));
+        StaffingPlan staffingPlan = staffingPlanRepository
+                .findByStructureIdAndPositionId(newStructure.getId(), newPosition.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No staffing plan exists for the selected structure and position."
+                ));
 
-        OrderPersonAppointment appointment =
-                appointmentRepository
-                        .findByPersonIdAndIsClosedFalse(person.getId())
-                        .orElseThrow(() ->
-                                new BadRequestException(
-                                        "Person does not have an active appointment."
-                                ));
+        OrderPersonAppointment appointment = appointmentRepository
+                .findByPersonIdAndIsClosedFalse(person.getId())
+                .orElseThrow(() -> new BadRequestException("Person does not have an active appointment."));
 
-        if (!appointment.getStaffingPlan()
-                .getStructure()
-                .getId()
-                .equals(oldStructure.getId())) {
-
-            throw new BadRequestException(
-                    "Old structure does not match employee's current structure."
-            );
+        if (!appointment.getStaffingPlan().getStructure().getId().equals(oldStructure.getId())) {
+            throw new BadRequestException("Old structure does not match employee's current structure.");
         }
 
-        if (!appointment.getStaffingPlan()
-                .getPosition()
-                .getId()
-                .equals(oldPosition.getId())) {
-
-            throw new BadRequestException(
-                    "Old position does not match employee's current position."
-            );
+        if (!appointment.getStaffingPlan().getPosition().getId().equals(oldPosition.getId())) {
+            throw new BadRequestException("Old position does not match employee's current position.");
         }
 
-
-        long activeEmployees =
-                appointmentRepository
-                        .countByStaffingPlanIdAndIsClosedFalse(
-                                staffingPlan.getId()
-                        );
+        long activeEmployees = appointmentRepository.countByStaffingPlanIdAndIsClosedFalse(staffingPlan.getId());
 
         if (activeEmployees >= staffingPlan.getCapacity()) {
-
-            throw new BadRequestException(
-                    "Target staffing plan is already full."
-            );
+            throw new BadRequestException("Target staffing plan is already full.");
         }
 
+        appointment.setStaffingPlan(staffingPlan);
+        appointmentRepository.save(appointment);
 
         OrderPersonTransfer entity = mapper.toEntity(request);
         entity.setOrder(order);
@@ -160,10 +133,10 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     @Override
     @Transactional
     public OrderPersonTransferResponse update(
-            Integer id,
+            Order order,
             OrderPersonTransferUpdateRequest request
     ) {
-        OrderPersonTransfer entity = fetchTransfer(id);
+        OrderPersonTransfer entity = fetchTransferByOrderAndPerson(order.getId(), request.getPersonId());
 
         Structure newStructure = fetchStructure(request.getNewStructureId());
         Position newPosition = fetchPosition(request.getNewPositionId());
@@ -175,12 +148,8 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
             );
         }
 
-        Order order = entity.getOrder();
-
         if (request.getEffectiveDate().isBefore(order.getOrderDate())) {
-            throw new BadRequestException(
-                    "Effective date cannot be before the order date."
-            );
+            throw new BadRequestException("Effective date cannot be before the order date.");
         }
 
         transferLogService.log(
@@ -200,8 +169,11 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
     }
 
     @Override
-    public OrderPersonTransferResponse getById(Integer id) {
-        return mapper.toResponse(fetchTransfer(id));
+    public List<OrderPersonTransferResponse> getByOrderId(Integer orderId) {
+        return repository.findByOrderIdAndIsDeletedFalse(orderId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -214,108 +186,134 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
 
     @Override
     @Transactional
-    public void softDelete(Integer id) {
-        OrderPersonTransfer entity = fetchTransfer(id);
+    public void softDelete(Order order) {
+        List<OrderPersonTransfer> entities = repository.findAllByOrderId(order.getId());
 
-        transferLogService.log(
-                entity,
-                LogAction.DELETE,
-                SecurityUtils.getCurrentUsername()
-        );
-
-        entity.setDeletedBy(SecurityUtils.getCurrentUsername());
-        entity.setIsDeleted(true);
-        entity.setDeletedAt(LocalDateTime.now());
-
-        repository.save(entity);
-    }
-
-    @Override
-    @Transactional
-    public void restore(Integer id) {
-        OrderPersonTransfer entity = repository.findByIdWithDeleted(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Deleted transfer record not found with id: " + id));
-
-        if (!entity.getIsDeleted()) {
-            throw new BadRequestException(
-                    "Transfer is not deleted."
-            );
+        if (entities.isEmpty()) {
+            return;
         }
 
-        transferLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
+        String currentUsername = SecurityUtils.getCurrentUsername();
+        LocalDateTime now = LocalDateTime.now();
 
-        entity.setIsDeleted(false);
-        entity.setDeletedAt(null);
-        entity.setDeletedBy(null);
+        for (OrderPersonTransfer entity : entities) {
+            transferLogService.log(
+                    entity,
+                    LogAction.DELETE,
+                    currentUsername
+            );
 
-        repository.save(entity);
+            entity.setDeletedBy(currentUsername);
+            entity.setIsDeleted(true);
+            entity.setDeletedAt(now);
+        }
+
+        repository.saveAll(entities);
     }
 
     @Override
     @Transactional
-    public OrderPersonTransferResponse activate(Integer id) {
-        OrderPersonTransfer entity = fetchTransfer(id);
+    public void restore(Order order) {
+        List<OrderPersonTransfer> entities = repository.findAllByOrderIdWithDeleted(order.getId());
 
-        transferLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
+        if (entities.isEmpty()) {
+            return;
+        }
 
-        entity.setStatus(statusHelper.getActive());
+        String currentUsername = SecurityUtils.getCurrentUsername();
 
-        OrderPersonTransfer saved = repository.save(entity);
-        return mapper.toResponse(saved);
+        for (OrderPersonTransfer entity : entities) {
+            if (Boolean.TRUE.equals(entity.getIsDeleted())) {
+                transferLogService.log(
+                        entity,
+                        LogAction.PATCH,
+                        currentUsername
+                );
+
+                entity.setIsDeleted(false);
+                entity.setDeletedAt(null);
+                entity.setDeletedBy(null);
+            }
+        }
+
+        repository.saveAll(entities);
     }
 
     @Override
     @Transactional
-    public OrderPersonTransferResponse deactivate(Integer id) {
-        OrderPersonTransfer entity = fetchTransfer(id);
+    public void activate(Order order) {
+        List<OrderPersonTransfer> entities = fetchTransfersByOrderId(order.getId());
 
-        transferLogService.log(
-                entity,
-                LogAction.PATCH,
-                SecurityUtils.getCurrentUsername()
-        );
+        String currentUsername = SecurityUtils.getCurrentUsername();
 
-        entity.setStatus(statusHelper.getInactive());
+        for (OrderPersonTransfer entity : entities) {
+            transferLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    currentUsername
+            );
 
-        OrderPersonTransfer saved = repository.save(entity);
-        return mapper.toResponse(saved);
+            entity.setStatus(statusHelper.getActive());
+        }
+
+        repository.saveAll(entities);
     }
 
+    @Override
+    @Transactional
+    public void deactivate(Order order) {
+        List<OrderPersonTransfer> entities = fetchTransfersByOrderId(order.getId());
+
+        String currentUsername = SecurityUtils.getCurrentUsername();
+
+        for (OrderPersonTransfer entity : entities) {
+            transferLogService.log(
+                    entity,
+                    LogAction.PATCH,
+                    currentUsername
+            );
+
+            entity.setStatus(statusHelper.getInactive());
+        }
+
+        repository.saveAll(entities);
+    }
 
     private OrderPersonTransfer fetchTransfer(Integer id) {
         return repository.findById(id)
                 .orElseGet(() -> {
                     repository.findByIdWithDeleted(id)
                             .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Transfer record is deleted."
-                                );
+                                throw new DeletedResourceException("Transfer record is deleted.");
                             });
-                    throw new ResourceNotFoundException(
-                            "Transfer not found."
-                    );
+                    throw new ResourceNotFoundException("Transfer not found.");
                 });
     }
 
-    private Order fetchOrder(Integer orderId) {
-        return orderRepository.findById(orderId)
-                .orElseGet(() -> {
-                    orderRepository.findByIdWithDeleted(orderId)
-                            .ifPresent(e -> {
-                                throw new DeletedResourceException("Order is deleted.");
-                            });
-                    throw new ResourceNotFoundException("Order not found with id: " + orderId);
-                });
+    private OrderPersonTransfer fetchTransferByOrderAndPerson(Integer orderId, Integer personId) {
+        return repository.findByOrderIdAndPersonId(orderId, personId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Transfer record not found for person ID " + personId + " under order ID " + orderId
+                ));
+    }
+
+    private List<OrderPersonTransfer> fetchTransfersByOrderId(Integer orderId) {
+        List<OrderPersonTransfer> entities = repository.findAllByOrderId(orderId);
+
+        if (entities.isEmpty()) {
+            List<OrderPersonTransfer> deletedEntities = repository.findAllByOrderIdWithDeleted(orderId);
+            if (!deletedEntities.isEmpty()) {
+                throw new DeletedResourceException(
+                        "Transfer records for order ID " + orderId + " are deleted."
+                );
+            }
+
+            throw new ResourceNotFoundException(
+                    "No transfer records found for order ID: " + orderId
+            );
+        }
+
+        return entities;
     }
 
     private Person fetchPerson(Integer personId) {
