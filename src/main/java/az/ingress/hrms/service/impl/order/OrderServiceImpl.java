@@ -314,34 +314,99 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderDetailResponse mapToDetailResponse(Order order) {
-        List<?> childItems = switch (order.getOrderType().getCode()) {
-            case "APT" -> appointmentService.getByOrderId(order.getId());
-            case "DIS" -> dismissalService.getByOrderId(order.getId());
-            case "LEV" -> leaveService.getByOrderId(order.getId());
-            case "PRO" -> promotionService.getByOrderId(order.getId());
-            case "SAL" -> salaryService.getByOrderId(order.getId());
-            case "TRF" -> transferService.getByOrderId(order.getId());
-            case "BNS" -> bonusService.getByOrderId(order.getId());
-            case "STF" -> staffingPlanService.getByOrderId(order.getId());
-            case "STR" -> structureService.getByOrderId(order.getId());
-            default -> List.of();
-        };
 
-        List<JsonNode> detailNodes = childItems.stream()
-                .map((Object item) -> (JsonNode) objectMapper.valueToTree(item))
-                .collect(Collectors.toList());
+        List<JsonNode> detailNodes = switch (order.getOrderType().getCode()) {
+
+            case "APT" ->
+                    toJsonNodes(
+                            appointmentService.getByOrderId(order.getId())
+                    );
+
+            case "DIS" ->
+                    toJsonNodes(
+                            dismissalService.getByOrderId(order.getId())
+                    );
+
+            case "LEV" ->
+                    toJsonNodes(
+                            leaveService.getByOrderId(order.getId())
+                    );
+
+            case "PRO" ->
+                    toJsonNodes(
+                            promotionService.getByOrderId(order.getId())
+                    );
+
+            case "SAL" ->
+                    toJsonNodes(
+                            salaryService.getByOrderId(order.getId())
+                    );
+
+            case "TRF" ->
+                    toJsonNodes(
+                            transferService.getByOrderId(order.getId())
+                    );
+
+            case "BNS" ->
+                    toJsonNodes(
+                            bonusService.getByOrderId(order.getId())
+                    );
+
+            case "STF" ->
+                    toJsonNodes(
+                            staffingPlanService.getByOrderId(order.getId())
+                    );
+
+            case "STR" ->
+                    toJsonNodes(
+                            structureService.getByOrderId(order.getId())
+                    );
+
+            default ->
+                    throw new BadRequestException(
+                            "Unsupported order type code: "
+                                    + order.getOrderType().getCode()
+                    );
+        };
 
         return OrderDetailResponse.builder()
                 .id(order.getId())
-                .orderTypeId(order.getOrderType() != null ? order.getOrderType().getId() : null)
-                .orderTypeName(order.getOrderType() != null ? order.getOrderType().getName() : null)
-                .orderTypeCode(order.getOrderType() != null ? order.getOrderType().getCode() : null)
+                .orderTypeId(
+                        order.getOrderType() != null
+                                ? order.getOrderType().getId()
+                                : null
+                )
+                .orderTypeName(
+                        order.getOrderType() != null
+                                ? order.getOrderType().getName()
+                                : null
+                )
+                .orderTypeCode(
+                        order.getOrderType() != null
+                                ? order.getOrderType().getCode()
+                                : null
+                )
                 .orderNumber(order.getOrderNumber())
                 .orderDate(order.getOrderDate())
-                .statusId(order.getStatus() != null ? order.getStatus().getId() : null)
-                .statusName(order.getStatus() != null ? order.getStatus().getName() : null)
+                .statusId(
+                        order.getStatus() != null
+                                ? order.getStatus().getId()
+                                : null
+                )
+                .statusName(
+                        order.getStatus() != null
+                                ? order.getStatus().getName()
+                                : null
+                )
                 .details(detailNodes)
                 .build();
+    }
+
+    private List<JsonNode> toJsonNodes(List<?> items) {
+
+        return items.stream()
+                .map(item -> objectMapper.<JsonNode>valueToTree(item))
+                .collect(Collectors.toList());
     }
 
 
@@ -628,4 +693,6 @@ public class OrderServiceImpl implements OrderService {
                     throw new ResourceNotFoundException("Order type not found.");
                 });
     }
+
+
 }
