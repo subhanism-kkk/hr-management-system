@@ -17,10 +17,6 @@ public class StructureRequest {
     @Size(max = 150)
     private String name;
 
-    @NotNull(message = "Order Id cannot be Null.")
-    @Positive(message = "Order Id must be positive.")
-    private Integer orderId;
-
     // could be null bc its optional.
     private Integer parentStructureId;
 
