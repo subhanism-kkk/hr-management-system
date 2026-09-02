@@ -10,9 +10,15 @@ import java.time.LocalDate;
 @Setter
 public class OrderSearchCriteria {
 
+    // Supports both 'search' and 'keyword'
     private String keyword;
-    private Long orderTypeId;
+    private String search;
+
+    private Integer orderTypeId;
+
     private String orderTypeCode;
+    private String type;
+
     private String orderNumber;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -22,4 +28,17 @@ public class OrderSearchCriteria {
     private LocalDate orderDateTo;
 
     private String statusCode;
+    private String status;
+
+    public String getEffectiveKeyword() {
+        return search != null && !search.isBlank() ? search : keyword;
+    }
+
+    public String getEffectiveOrderTypeCode() {
+        return type != null && !type.isBlank() ? type : orderTypeCode;
+    }
+
+    public String getEffectiveStatusCode() {
+        return status != null && !status.isBlank() ? status : statusCode;
+    }
 }

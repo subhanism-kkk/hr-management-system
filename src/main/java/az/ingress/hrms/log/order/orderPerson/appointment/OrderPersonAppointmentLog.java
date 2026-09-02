@@ -34,7 +34,7 @@ public class OrderPersonAppointmentLog {
     @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
     @Column(name = "is_closed")

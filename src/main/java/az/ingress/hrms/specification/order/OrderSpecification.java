@@ -19,11 +19,14 @@ public final class OrderSpecification {
 
         String pattern = "%" + keyword.trim().toLowerCase() + "%";
 
-        return (root, query, cb) ->
-                cb.like(cb.lower(root.get("orderNumber")), pattern);
+        return (root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("orderNumber")), pattern),
+                cb.like(cb.lower(root.get("orderType").get("code")), pattern),
+                cb.like(cb.lower(root.get("orderType").get("name")), pattern)
+        );
     }
 
-    public static Specification<Order> hasOrderTypeId(Long orderTypeId) {
+    public static Specification<Order> hasOrderTypeId(Integer orderTypeId) {
         if (orderTypeId == null) {
             return null;
         }
@@ -90,12 +93,39 @@ public final class OrderSpecification {
             return Specification.where(null);
         }
 
-        return Specification.where(search(criteria.getKeyword()))
-                .and(hasOrderNumber(criteria.getOrderNumber()))
-                .and(hasOrderTypeId(criteria.getOrderTypeId()))
-                .and(hasOrderTypeCode(criteria.getOrderTypeCode()))
-                .and(orderDateFrom(criteria.getOrderDateFrom()))
-                .and(orderDateTo(criteria.getOrderDateTo()))
-                .and(hasStatusCode(criteria.getStatusCode()));
+        Specification<Order> spec = Specification.where(null);
+
+        String keyword = criteria.getEffectiveKeyword();
+        if (StringUtils.hasText(keyword)) {
+            spec = spec.and(search(keyword));
+        }
+
+        if (StringUtils.hasText(criteria.getOrderNumber())) {
+            spec = spec.and(hasOrderNumber(criteria.getOrderNumber()));
+        }
+
+        if (criteria.getOrderTypeId() != null) {
+            spec = spec.and(hasOrderTypeId(criteria.getOrderTypeId()));
+        }
+
+        String typeCode = criteria.getEffectiveOrderTypeCode();
+        if (StringUtils.hasText(typeCode)) {
+            spec = spec.and(hasOrderTypeCode(typeCode));
+        }
+
+        if (criteria.getOrderDateFrom() != null) {
+            spec = spec.and(orderDateFrom(criteria.getOrderDateFrom()));
+        }
+
+        if (criteria.getOrderDateTo() != null) {
+            spec = spec.and(orderDateTo(criteria.getOrderDateTo()));
+        }
+
+        String statusCode = criteria.getEffectiveStatusCode();
+        if (StringUtils.hasText(statusCode)) {
+            spec = spec.and(hasStatusCode(statusCode));
+        }
+
+        return spec;
     }
 }

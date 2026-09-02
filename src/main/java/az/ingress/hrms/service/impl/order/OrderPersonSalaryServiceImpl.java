@@ -8,6 +8,7 @@ import az.ingress.hrms.dto.orderPersonSalary.OrderPersonSalaryUpdateRequest;
 import az.ingress.hrms.entity.order.Order;
 import az.ingress.hrms.entity.order.orderPerson.OrderPersonSalary;
 import az.ingress.hrms.entity.organization.StaffingPlan;
+import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
@@ -279,20 +280,21 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
 
     private StaffingPlan fetchStaffingPlan(Integer staffingPlanId) {
 
-        return staffingPlanRepository.findById(staffingPlanId)
+        StaffingPlan staffingPlan = staffingPlanRepository.findById(staffingPlanId)
                 .orElseGet(() -> {
-
                     staffingPlanRepository.findByIdWithDeleted(staffingPlanId)
                             .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Staffing plan is deleted."
-                                );
+                                throw new DeletedResourceException("Staffing plan is deleted.");
                             });
-
-                    throw new ResourceNotFoundException(
-                            "Staffing plan not found with id: " + staffingPlanId
-                    );
+                    throw new ResourceNotFoundException("Staffing plan not found with id: " + staffingPlanId);
                 });
+
+        // Enforce active status check
+        if (!statusHelper.getActive().equals(staffingPlan.getStatus())) {
+            throw new BadRequestException("Cannot create or modify salary order for an inactive staffing plan (ID: " + staffingPlanId + ").");
+        }
+
+        return staffingPlan;
     }
 
     private List<OrderPersonSalary> fetchSalariesByOrderId(Integer orderId) {

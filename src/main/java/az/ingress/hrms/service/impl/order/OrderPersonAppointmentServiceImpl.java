@@ -317,20 +317,21 @@ public class OrderPersonAppointmentServiceImpl
 
     private Person fetchPerson(Integer personId) {
 
-        return personRepository.findById(personId)
+        Person person = personRepository.findById(personId)
                 .orElseGet(() -> {
-
                     personRepository.findByIdWithDeleted(personId)
                             .ifPresent(e -> {
-                                throw new DeletedResourceException(
-                                        "Person is deleted."
-                                );
+                                throw new DeletedResourceException("Person is deleted.");
                             });
-
-                    throw new ResourceNotFoundException(
-                            "Person not found."
-                    );
+                    throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
+
+        // Enforce active status check
+        if (!statusHelper.getActive().equals(person.getStatus())) {
+            throw new BadRequestException("Cannot create or modify appointment order for an inactive person (ID: " + personId + ").");
+        }
+
+        return person;
     }
 
 

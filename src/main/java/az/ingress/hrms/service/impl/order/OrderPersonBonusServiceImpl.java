@@ -241,7 +241,7 @@ public class OrderPersonBonusServiceImpl implements OrderPersonBonusService {
     }
 
     private Person fetchPerson(Integer personId) {
-        return personRepository.findById(personId)
+        Person person = personRepository.findById(personId)
                 .orElseGet(() -> {
                     personRepository.findByIdWithDeleted(personId)
                             .ifPresent(e -> {
@@ -249,9 +249,16 @@ public class OrderPersonBonusServiceImpl implements OrderPersonBonusService {
                             });
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
+
+        // Enforce active status check
+        if (!statusHelper.getActive().equals(person.getStatus())) {
+            throw new BadRequestException("Cannot create or modify bonus order for an inactive person (ID: " + personId + ").");
+        }
+
+        return person;
     }
 
-    private BonusType fetchBonusType(Long bonusTypeId) {
+    private BonusType fetchBonusType(Integer bonusTypeId) {
         return bonusTypeRepository.findById(bonusTypeId)
                 .orElseGet(() -> {
                     bonusTypeRepository.findByIdWithDeleted(bonusTypeId)

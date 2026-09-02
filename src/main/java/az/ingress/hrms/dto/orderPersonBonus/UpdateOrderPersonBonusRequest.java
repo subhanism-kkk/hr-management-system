@@ -24,7 +24,7 @@ public class UpdateOrderPersonBonusRequest {
 
     @NotNull(message = "Bonus ID cannot be null.")
     @Positive(message = "Bonus ID must be positive.")
-    private Long bonusTypeId;
+    private Integer bonusTypeId;
 
     @NotNull
     private BonusCalculationType calculationType;

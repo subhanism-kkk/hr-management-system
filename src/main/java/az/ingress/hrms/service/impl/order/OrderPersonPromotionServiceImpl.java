@@ -260,7 +260,7 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
     }
 
     private Person fetchPerson(Integer personId) {
-        return personRepository.findById(personId)
+        Person person = personRepository.findById(personId)
                 .orElseGet(() -> {
                     personRepository.findByIdWithDeleted(personId)
                             .ifPresent(e -> {
@@ -268,6 +268,13 @@ public class OrderPersonPromotionServiceImpl implements OrderPersonPromotionServ
                             });
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
+
+        // Enforce active status check
+        if (!statusHelper.getActive().equals(person.getStatus())) {
+            throw new BadRequestException("Cannot create or modify promotion order for an inactive person (ID: " + personId + ").");
+        }
+
+        return person;
     }
 
     private Position fetchPosition(Integer positionId) {

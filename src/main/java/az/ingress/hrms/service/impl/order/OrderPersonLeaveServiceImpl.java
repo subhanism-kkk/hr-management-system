@@ -265,7 +265,7 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
     }
 
     private Person fetchPerson(Integer personId) {
-        return personRepository.findById(personId)
+        Person person = personRepository.findById(personId)
                 .orElseGet(() -> {
                     personRepository.findByIdWithDeleted(personId)
                             .ifPresent(e -> {
@@ -273,6 +273,13 @@ public class OrderPersonLeaveServiceImpl implements OrderPersonLeaveService {
                             });
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
+
+        // Enforce active status check
+        if (!statusHelper.getActive().equals(person.getStatus())) {
+            throw new BadRequestException("Cannot create or modify leave order for an inactive person (ID: " + personId + ").");
+        }
+
+        return person;
     }
 
     private LeaveType fetchLeaveType(Integer leaveTypeId) {
