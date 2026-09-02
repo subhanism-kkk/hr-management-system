@@ -5,13 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface BonusTypeRepository
-        extends JpaRepository<BonusType, Long>,
-        JpaSpecificationExecutor<BonusType> {
+@Repository
+public interface BonusTypeRepository extends JpaRepository<BonusType, Integer>, JpaSpecificationExecutor<BonusType> {
 
-    @Query(value = "SELECT * FROM bonus_types WHERE id = :id", nativeQuery = true)
-    Optional<BonusType> findByIdWithDeleted(@Param("id") Long id);
+    Optional<BonusType> findByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    // for restore method
+    @Query(value = "SELECT * FROM Bonus_Type WHERE id = :id", nativeQuery = true)
+    Optional<BonusType> findByIdWithDeleted(@Param("id") Integer id);
 }
