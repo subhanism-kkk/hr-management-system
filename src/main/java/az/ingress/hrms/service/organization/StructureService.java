@@ -23,6 +23,8 @@ public interface StructureService {
 
     List<StructureResponse> getByOrderId(Integer orderId);
 
+    StructureResponse getById(Integer Id);
+
     PageResponse<StructureResponse> getAll(StructureSearchCriteria criteria, Pageable pageable);
 
     void softDelete(Order order);

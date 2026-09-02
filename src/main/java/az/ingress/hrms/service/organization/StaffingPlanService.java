@@ -20,6 +20,8 @@ public interface StaffingPlanService {
 
     List<StaffingPlanResponse> getByOrderId(Integer orderId);
 
+    StaffingPlanResponse getById(Integer id);
+
     PageResponse<StaffingPlanResponse> getAll(StaffingPlanSearchCriteria criteria, Pageable pageable);
 
     void close(Integer id);

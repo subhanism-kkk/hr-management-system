@@ -126,6 +126,11 @@ public class StructureServiceImpl implements StructureService {
     }
 
     @Override
+    public StructureResponse getById(Integer id) {
+       return mapper.toResponse(fetchStructure(id));
+    }
+
+    @Override
     public PageResponse<StructureResponse> getAll(StructureSearchCriteria criteria, Pageable pageable) {
         Specification<Structure> specification = StructureSpecification.build(criteria);
         Page<Structure> page = repository.findAll(specification, pageable);

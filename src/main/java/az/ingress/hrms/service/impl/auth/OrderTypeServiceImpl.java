@@ -67,23 +67,20 @@ public class OrderTypeServiceImpl implements OrderTypeService {
 
         if (!orderType.getName().equalsIgnoreCase(request.getName())
                 && repository.existsByNameIgnoreCase(request.getName())) {
-
             throw new ResourceAlreadyExistsException(
                     "Order type with name '" + request.getName() + "' already exists."
             );
         }
 
+        mapper.updateEntity(orderType, request);
+        OrderType updatedOrderType = repository.save(orderType);
         orderTypeLogService.log(
-                orderType,
+                updatedOrderType,
                 LogAction.PUT,
                 SecurityUtils.getCurrentUsername()
         );
 
-        mapper.updateEntity(orderType, request);
-
-        repository.save(orderType);
-
-        return mapper.toResponse(orderType);
+        return mapper.toResponse(updatedOrderType);
     }
 
     @Override

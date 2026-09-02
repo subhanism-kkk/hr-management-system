@@ -216,6 +216,11 @@ public class StaffingPlanServiceImpl implements StaffingPlanService {
     }
 
     @Override
+    public StaffingPlanResponse getById(Integer id) {
+        return mapper.toResponse(fetchStaffingPlan(id));
+    }
+
+    @Override
     public PageResponse<StaffingPlanResponse> getAll(StaffingPlanSearchCriteria criteria, Pageable pageable) {
         Specification<StaffingPlan> specification = StaffingPlanSpecification.build(criteria);
         Page<StaffingPlan> page = repository.findAll(specification, pageable);
