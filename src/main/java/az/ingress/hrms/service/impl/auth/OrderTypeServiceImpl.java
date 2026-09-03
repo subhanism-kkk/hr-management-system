@@ -2,26 +2,24 @@ package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.dto.common.PageResponse;
 import az.ingress.hrms.dto.criteria.OrderTypeSearchCriteria;
+import az.ingress.hrms.dto.orderType.OrderTypeRequest;
+import az.ingress.hrms.dto.orderType.OrderTypeResponse;
 import az.ingress.hrms.entity.lookup.OrderType;
-import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.exception.ResourceAlreadyExistsException;
+import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.orderType.OrderTypeLogService;
 import az.ingress.hrms.mapper.OrderTypeMapper;
 import az.ingress.hrms.repository.OrderTypeRepository;
 import az.ingress.hrms.service.auth.OrderTypeService;
-import az.ingress.hrms.dto.orderType.OrderTypeRequest;
-import az.ingress.hrms.dto.orderType.OrderTypeResponse;
-import az.ingress.hrms.exception.ResourceAlreadyExistsException;
-import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.specification.OrderTypeSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +35,7 @@ public class OrderTypeServiceImpl implements OrderTypeService {
     private final OrderTypeRepository repository;
     private final OrderTypeMapper mapper;
     private final OrderTypeLogService orderTypeLogService;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -74,6 +73,7 @@ public class OrderTypeServiceImpl implements OrderTypeService {
 
         mapper.updateEntity(orderType, request);
         OrderType updatedOrderType = repository.save(orderType);
+
         orderTypeLogService.log(
                 updatedOrderType,
                 LogAction.PUT,
@@ -98,6 +98,14 @@ public class OrderTypeServiceImpl implements OrderTypeService {
     }
 
     @Override
+    public List<OrderTypeResponse> getActiveOptions() {
+        return repository.findAllActive()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void softDelete(Integer id) {
 
@@ -111,13 +119,10 @@ public class OrderTypeServiceImpl implements OrderTypeService {
 
         orderType.setIsDeleted(true);
         orderType.setDeletedAt(LocalDateTime.now());
-
         orderType.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(orderType);
-
     }
-
 
     @Override
     @Transactional
@@ -145,6 +150,37 @@ public class OrderTypeServiceImpl implements OrderTypeService {
         repository.save(orderType);
     }
 
+    @Override
+    @Transactional
+    public void activate(Integer id) {
+        OrderType orderType = fetchOrdertype(id);
+
+        orderTypeLogService.log(
+                orderType,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        orderType.setStatus(statusHelper.getActive());
+
+        repository.save(orderType);
+    }
+
+    @Override
+    @Transactional
+    public void deactivate(Integer id) {
+        OrderType orderType = fetchOrdertype(id);
+
+        orderTypeLogService.log(
+                orderType,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        orderType.setStatus(statusHelper.getInactive());
+
+        repository.save(orderType);
+    }
 
     private OrderType fetchOrdertype(Integer id) {
         return repository.findById(id)

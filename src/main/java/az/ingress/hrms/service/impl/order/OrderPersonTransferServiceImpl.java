@@ -326,7 +326,7 @@ public class OrderPersonTransferServiceImpl implements OrderPersonTransferServic
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
 
-        // Enforce active status check
+
         if (!statusHelper.getActive().equals(person.getStatus())) {
             throw new BadRequestException("Cannot create or modify transfer order for an inactive person (ID: " + personId + ").");
         }

@@ -260,7 +260,6 @@ public class OrderPersonDismissalServiceImpl implements OrderPersonDismissalServ
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
 
-        // Enforce active status check
         if (!statusHelper.getActive().equals(person.getStatus())) {
             throw new BadRequestException("Cannot create or modify dismissal order for an inactive person (ID: " + personId + ").");
         }

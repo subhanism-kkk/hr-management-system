@@ -10,6 +10,7 @@ import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.BadRequestException;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.leaveType.LeaveTypeLogService;
 import az.ingress.hrms.mapper.LeaveTypeMapper;
@@ -38,6 +39,7 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
     private final LeaveTypeRepository repository;
     private final LeaveTypeMapper mapper;
     private final LeaveTypeLogService leaveTypeLogService;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -173,6 +175,40 @@ public class LeaveTypeServiceImpl implements LeaveTypeService {
         repository.save(entity);
     }
 
+    @Override
+    @Transactional
+    public LeaveTypeResponse activate(Integer id) {
+        LeaveType entity = fetchLeaveType(id);
+
+
+        leaveTypeLogService.log(
+                entity,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        entity.setStatus(statusHelper.getActive());
+        LeaveType updatedEntity = repository.save(entity);
+
+        return mapper.toResponse(updatedEntity);
+    }
+
+    @Override
+    @Transactional
+    public LeaveTypeResponse deactivate(Integer id) {
+        LeaveType entity = fetchLeaveType(id);
+
+        leaveTypeLogService.log(
+                entity,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        entity.setStatus(statusHelper.getInactive());
+        LeaveType updatedEntity = repository.save(entity);
+
+        return mapper.toResponse(updatedEntity);
+    }
 
     private LeaveType fetchLeaveType(Integer id) {
         return repository.findById(id)

@@ -161,4 +161,42 @@ public class LeaveTypeController {
         service.restore(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/activate")
+    @Operation(
+            summary = "Activate leave type",
+            description = "Activates an inactive leave type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Leave type activated successfully"),
+            @ApiResponse(responseCode = "400", description = "Leave type is already active"),
+            @ApiResponse(responseCode = "404", description = "Leave type not found"),
+            @ApiResponse(responseCode = "410", description = "Leave type is deleted")
+    })
+    public ResponseEntity<LeaveTypeResponse> activate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        return ResponseEntity.ok(service.activate(id));
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @Operation(
+            summary = "Deactivate leave type",
+            description = "Deactivates an active leave type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Leave type deactivated successfully"),
+            @ApiResponse(responseCode = "400", description = "Leave type is already inactive"),
+            @ApiResponse(responseCode = "404", description = "Leave type not found"),
+            @ApiResponse(responseCode = "410", description = "Leave type is deleted")
+    })
+    public ResponseEntity<LeaveTypeResponse> deactivate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        return ResponseEntity.ok(service.deactivate(id));
+    }
 }

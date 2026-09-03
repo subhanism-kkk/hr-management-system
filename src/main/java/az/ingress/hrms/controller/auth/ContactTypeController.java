@@ -10,8 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/contact-types")
@@ -107,6 +106,54 @@ public class ContactTypeController {
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         return ResponseEntity.ok(service.getAll(criteria, pageable));
+    }
+
+    @GetMapping("/options")
+    @Operation(
+            summary = "Get active contact type options",
+            description = "Retrieves all non-deleted and active contact types for dropdown lists."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active contact types retrieved successfully")
+    })
+    public ResponseEntity<List<ContactTypeResponse>> getActiveOptions() {
+        return ResponseEntity.ok(service.getActiveOptions());
+    }
+
+    @PatchMapping("/{id}/activate")
+    @Operation(
+            summary = "Activate contact type",
+            description = "Activates an existing contact type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Contact type activated successfully"),
+            @ApiResponse(responseCode = "404", description = "Contact type not found")
+    })
+    public ResponseEntity<Void> activate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        service.activate(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @Operation(
+            summary = "Deactivate contact type",
+            description = "Deactivates an existing contact type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Contact type deactivated successfully"),
+            @ApiResponse(responseCode = "404", description = "Contact type not found")
+    })
+    public ResponseEntity<Void> deactivate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        service.deactivate(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

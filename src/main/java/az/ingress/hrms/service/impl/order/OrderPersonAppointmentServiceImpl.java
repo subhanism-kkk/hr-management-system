@@ -326,7 +326,6 @@ public class OrderPersonAppointmentServiceImpl
                     throw new ResourceNotFoundException("Person not found with id: " + personId);
                 });
 
-        // Enforce active status check
         if (!statusHelper.getActive().equals(person.getStatus())) {
             throw new BadRequestException("Cannot create or modify appointment order for an inactive person (ID: " + personId + ").");
         }

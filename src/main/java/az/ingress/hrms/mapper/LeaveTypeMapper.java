@@ -9,13 +9,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface LeaveTypeMapper {
 
+    @Mapping(source = "status.id", target = "statusId")
+    @Mapping(source = "status.name", target = "statusName")
     LeaveTypeResponse toResponse(LeaveType entity);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     LeaveType toEntity(LeaveTypeCreateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "code", ignore = true)
+    @Mapping(target = "status", ignore = true)
     void updateEntity(@MappingTarget LeaveType entity, LeaveTypeUpdateRequest request);
 }

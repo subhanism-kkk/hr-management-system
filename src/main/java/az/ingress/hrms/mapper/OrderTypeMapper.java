@@ -12,12 +12,16 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring")
 public interface OrderTypeMapper {
 
+    @Mapping(source = "status.id", target = "statusId")
+    @Mapping(source = "status.name", target = "statusName")
     OrderTypeResponse toResponse(OrderType orderType);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     OrderType toEntity(OrderTypeRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     void updateEntity(@MappingTarget OrderType orderType, OrderTypeRequest request);
 }

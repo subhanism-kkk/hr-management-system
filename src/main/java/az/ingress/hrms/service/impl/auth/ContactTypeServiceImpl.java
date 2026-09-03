@@ -1,27 +1,25 @@
 package az.ingress.hrms.service.impl.auth;
 
 import az.ingress.hrms.dto.common.PageResponse;
+import az.ingress.hrms.dto.contactType.ContactTypeRequest;
+import az.ingress.hrms.dto.contactType.ContactTypeResponse;
 import az.ingress.hrms.dto.criteria.ContactTypeSearchCriteria;
 import az.ingress.hrms.entity.lookup.ContactType;
-import az.ingress.hrms.entity.person.Person;
 import az.ingress.hrms.exception.DeletedResourceException;
+import az.ingress.hrms.exception.ResourceAlreadyExistsException;
+import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.contactType.ContactTypeLogService;
 import az.ingress.hrms.mapper.ContactTypeMapper;
 import az.ingress.hrms.repository.ContactTypeRepository;
 import az.ingress.hrms.service.auth.ContactTypeService;
-import az.ingress.hrms.dto.contactType.ContactTypeRequest;
-import az.ingress.hrms.dto.contactType.ContactTypeResponse;
-import az.ingress.hrms.exception.ResourceAlreadyExistsException;
-import az.ingress.hrms.exception.ResourceNotFoundException;
 import az.ingress.hrms.specification.ContactTypeSpecification;
 import az.ingress.hrms.util.PaginationUtils;
 import az.ingress.hrms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +35,7 @@ public class ContactTypeServiceImpl implements ContactTypeService {
     private final ContactTypeRepository repository;
     private final ContactTypeMapper mapper;
     private final ContactTypeLogService contactTypeLogService;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -61,7 +60,6 @@ public class ContactTypeServiceImpl implements ContactTypeService {
     @Override
     @Transactional
     public ContactTypeResponse update(Integer id, ContactTypeRequest request) {
-
         ContactType contactType = fetchContactType(id);
 
         if (!contactType.getName().equalsIgnoreCase(request.getName())
@@ -83,20 +81,16 @@ public class ContactTypeServiceImpl implements ContactTypeService {
         repository.save(contactType);
 
         return mapper.toResponse(contactType);
-
     }
 
     @Override
     public ContactTypeResponse getById(Integer id) {
-
         ContactType contactType = fetchContactType(id);
-
         return mapper.toResponse(contactType);
     }
 
     @Override
     public PageResponse<ContactTypeResponse> getAll(ContactTypeSearchCriteria criteria, Pageable pageable) {
-
         Specification<ContactType> specification = ContactTypeSpecification.build(criteria);
         Page<ContactType> page = repository.findAll(specification, pageable);
 
@@ -104,9 +98,45 @@ public class ContactTypeServiceImpl implements ContactTypeService {
     }
 
     @Override
+    public List<ContactTypeResponse> getActiveOptions() {
+        return repository.findAllActive().stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void activate(Integer id) {
+        ContactType contactType = fetchContactType(id);
+
+        contactTypeLogService.log(
+                contactType,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        contactType.setStatus(statusHelper.getActive());
+        repository.save(contactType);
+    }
+
+    @Override
+    @Transactional
+    public void deactivate(Integer id) {
+        ContactType contactType = fetchContactType(id);
+
+        contactTypeLogService.log(
+                contactType,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        contactType.setStatus(statusHelper.getInactive());
+        repository.save(contactType);
+    }
+
+    @Override
     @Transactional
     public void softDelete(Integer id) {
-
         ContactType contactType = fetchContactType(id);
 
         contactTypeLogService.log(
@@ -114,19 +144,16 @@ public class ContactTypeServiceImpl implements ContactTypeService {
                 LogAction.DELETE,
                 SecurityUtils.getCurrentUsername());
 
-
         contactType.setIsDeleted(true);
         contactType.setDeletedAt(LocalDateTime.now());
         contactType.setDeletedBy(SecurityUtils.getCurrentUsername());
 
         repository.save(contactType);
-
     }
 
     @Override
     @Transactional
     public void restore(Integer id) {
-
         ContactType contactType = repository.findByIdWithDeleted(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contact type not found."));
 
@@ -139,14 +166,12 @@ public class ContactTypeServiceImpl implements ContactTypeService {
                 LogAction.PATCH,
                 SecurityUtils.getCurrentUsername());
 
-
         contactType.setIsDeleted(false);
         contactType.setDeletedAt(null);
         contactType.setDeletedBy(null);
 
         repository.save(contactType);
     }
-
 
     private ContactType fetchContactType(Integer id) {
         return repository.findById(id)

@@ -10,11 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -75,6 +72,18 @@ public class OrderTypeController {
             @Valid @RequestBody OrderTypeRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    @GetMapping("/options")
+    @Operation(
+            summary = "Get active order type options",
+            description = "Retrieves active, non-deleted order types as a list for select dropdowns."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active options retrieved successfully")
+    })
+    public ResponseEntity<List<OrderTypeResponse>> getActiveOptions() {
+        return ResponseEntity.ok(service.getActiveOptions());
     }
 
     @GetMapping("/{id}")
@@ -146,6 +155,42 @@ public class OrderTypeController {
             Integer id
     ) {
         service.restore(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/activate")
+    @Operation(
+            summary = "Activate order type",
+            description = "Activates an existing order type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Order type activated successfully"),
+            @ApiResponse(responseCode = "404", description = "Order type not found")
+    })
+    public ResponseEntity<Void> activate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        service.activate(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @Operation(
+            summary = "Deactivate order type",
+            description = "Deactivates an existing order type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Order type deactivated successfully"),
+            @ApiResponse(responseCode = "404", description = "Order type not found")
+    })
+    public ResponseEntity<Void> deactivate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        service.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

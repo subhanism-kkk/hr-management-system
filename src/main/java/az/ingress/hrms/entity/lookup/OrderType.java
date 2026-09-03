@@ -1,6 +1,7 @@
 package az.ingress.hrms.entity.lookup;
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -19,7 +20,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class OrderType extends SoftDeleteEntity {
+public class OrderType extends WorkflowEntity {
 
     @Column(nullable = false)
     private String name;

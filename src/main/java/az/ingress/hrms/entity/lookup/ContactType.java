@@ -2,6 +2,7 @@ package az.ingress.hrms.entity.lookup;
 
 
 import az.ingress.hrms.entity.base.SoftDeleteEntity;
+import az.ingress.hrms.entity.base.WorkflowEntity;
 import az.ingress.hrms.entity.person.PersonContactInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @SQLRestriction("is_deleted = false")
-public class ContactType extends SoftDeleteEntity {
+public class ContactType extends WorkflowEntity {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;

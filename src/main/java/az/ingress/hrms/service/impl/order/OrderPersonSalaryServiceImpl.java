@@ -289,7 +289,6 @@ public class OrderPersonSalaryServiceImpl implements OrderPersonSalaryService {
                     throw new ResourceNotFoundException("Staffing plan not found with id: " + staffingPlanId);
                 });
 
-        // Enforce active status check
         if (!statusHelper.getActive().equals(staffingPlan.getStatus())) {
             throw new BadRequestException("Cannot create or modify salary order for an inactive staffing plan (ID: " + staffingPlanId + ").");
         }

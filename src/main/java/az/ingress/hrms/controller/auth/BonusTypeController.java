@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/bonus-types")
 @RequiredArgsConstructor
@@ -70,6 +72,18 @@ public class BonusTypeController {
             @Valid @RequestBody BonusTypeRequest request
     ) {
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    @GetMapping("/options")
+    @Operation(
+            summary = "Get active bonus type options",
+            description = "Retrieves active, non-deleted bonus types as a list for select dropdowns."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active options retrieved successfully")
+    })
+    public ResponseEntity<List<BonusTypeResponse>> getActiveOptions() {
+        return ResponseEntity.ok(service.getActiveOptions());
     }
 
     @GetMapping("/{id}")
@@ -143,4 +157,40 @@ public class BonusTypeController {
         service.restore(id);
         return ResponseEntity.noContent().build();
     }
+    @PatchMapping("/{id}/activate")
+    @Operation(
+            summary = "Activate bonus type",
+            description = "Activates an existing bonus type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Bonus type activated successfully"),
+            @ApiResponse(responseCode = "404", description = "Bonus type not found")
+    })
+    public ResponseEntity<Void> activate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        service.activate(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @Operation(
+            summary = "Deactivate bonus type",
+            description = "Deactivates an existing bonus type."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Bonus type deactivated successfully"),
+            @ApiResponse(responseCode = "404", description = "Bonus type not found")
+    })
+    public ResponseEntity<Void> deactivate(
+            @PathVariable
+            @Positive(message = "ID must be a positive number")
+            Integer id
+    ) {
+        service.deactivate(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

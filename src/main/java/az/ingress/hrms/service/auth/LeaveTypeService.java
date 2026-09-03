@@ -5,10 +5,7 @@ import az.ingress.hrms.dto.criteria.LeaveTypeSearchCriteria;
 import az.ingress.hrms.dto.leaveType.LeaveTypeCreateRequest;
 import az.ingress.hrms.dto.leaveType.LeaveTypeResponse;
 import az.ingress.hrms.dto.leaveType.LeaveTypeUpdateRequest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface LeaveTypeService {
 
@@ -25,4 +22,8 @@ public interface LeaveTypeService {
     void softDelete(Integer id);
 
     void restore(Integer id);
+
+    LeaveTypeResponse activate(Integer id);
+
+    LeaveTypeResponse deactivate(Integer id);
 }

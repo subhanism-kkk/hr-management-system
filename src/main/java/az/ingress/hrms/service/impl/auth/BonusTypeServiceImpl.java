@@ -8,6 +8,7 @@ import az.ingress.hrms.entity.lookup.BonusType;
 import az.ingress.hrms.exception.DeletedResourceException;
 import az.ingress.hrms.exception.ResourceAlreadyExistsException;
 import az.ingress.hrms.exception.ResourceNotFoundException;
+import az.ingress.hrms.helper.StatusHelper;
 import az.ingress.hrms.log.LogAction;
 import az.ingress.hrms.log.lookup.bonusType.BonusTypeLogService;
 import az.ingress.hrms.mapper.BonusTypeMapper;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     private final BonusTypeRepository repository;
     private final BonusTypeMapper mapper;
     private final BonusTypeLogService bonusTypeLogService;
+    private final StatusHelper statusHelper;
 
     @Override
     @Transactional
@@ -95,6 +98,14 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     }
 
     @Override
+    public List<BonusTypeResponse> getActiveOptions() {
+        return repository.findAllActive()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void softDelete(Integer id) {
 
@@ -135,6 +146,38 @@ public class BonusTypeServiceImpl implements BonusTypeService {
         bonusType.setIsDeleted(false);
         bonusType.setDeletedAt(null);
         bonusType.setDeletedBy(null);
+
+        repository.save(bonusType);
+    }
+
+    @Override
+    @Transactional
+    public void activate(Integer id) {
+        BonusType bonusType = fetchBonusType(id);
+
+        bonusTypeLogService.log(
+                bonusType,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        bonusType.setStatus(statusHelper.getActive());
+
+        repository.save(bonusType);
+    }
+
+    @Override
+    @Transactional
+    public void deactivate(Integer id) {
+        BonusType bonusType = fetchBonusType(id);
+
+        bonusTypeLogService.log(
+                bonusType,
+                LogAction.PATCH,
+                SecurityUtils.getCurrentUsername()
+        );
+
+        bonusType.setStatus(statusHelper.getInactive());
 
         repository.save(bonusType);
     }

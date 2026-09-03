@@ -15,6 +15,10 @@ public class BonusTypeResponse {
 
     private String name;
 
+    private String statusName;
+
+    private Integer statusId;
+
     private String description;
 
     private LocalDateTime createdAt;
